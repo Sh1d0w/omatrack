@@ -79,7 +79,7 @@ Item {
               var bits = []
               if (s.paused) bits.push("paused")
               if (s.active.description !== "") bits.push(s.active.description)
-              bits.push("started " + s.localTimeStr(s.active.start))
+              bits.push("started " + s.localTimeStr(new Date(s.active.start)))
               bits.push(s.active.billable ? "billable" : "non-billable")
               return bits.join(" · ")
             }

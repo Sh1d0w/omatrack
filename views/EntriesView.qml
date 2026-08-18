@@ -102,7 +102,7 @@ Item {
     if (!s) return
     // Pre-fill from the entry's local start + duration.
     editForm.dateStr = s.localDateStr(new Date(entry.start))
-    editForm.timeStr = s.localTimeStr(entry.start)
+    editForm.timeStr = s.localTimeStr(new Date(entry.start))
     editForm.minutes = Math.max(1, Math.round(entry.seconds / 60))
     editForm.clientId = entry.clientId
     editForm.projectId = entry.projectId
