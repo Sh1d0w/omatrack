@@ -36,13 +36,8 @@ Item {
     })
   })
 
-  // Page size of every table view (settings.pageSize; default 50, clamped
-  // 1-500 so a corrupt state file cannot break the UI).
-  readonly property int pageSize: {
-    var v = parseInt(root.settings && root.settings.pageSize, 10)
-    if (isNaN(v)) return 50
-    return Math.min(500, Math.max(1, v))
-  }
+  // Page size of every table view (fixed at 15).
+  readonly property int pageSize: 15
   property var clients: []
   property var projects: []
   property var active: null

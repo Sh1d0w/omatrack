@@ -15,9 +15,9 @@ Item {
   // stay null forever.
   readonly property var service: root.dashboard ? root.dashboard.service : null
   property int focusCount: 0
-  readonly property bool inputActive: focusCount > 0 || pageBar.pageSizePopupOpen
+  readonly property bool inputActive: focusCount > 0
   property int offset: 0
-  readonly property int limit: root.service ? root.service.pageSize : 50
+  readonly property int limit: root.service ? root.service.pageSize : 15
 
   function projectsFor(clientId) {
     var n = 0
@@ -164,22 +164,11 @@ Item {
       right: parent.right
       bottom: parent.bottom
     }
-    service: root.service
     total: root.totalCount
     offset: root.offset
     limit: root.limit
     emptyText: "No clients"
     onPrevRequested: root.prevPage()
     onNextRequested: root.nextPage()
-  }
-
-  // Page-size changes keep the same client at the top of the page.
-  Connections {
-    target: root
-    function onLimitChanged(l) {
-      if (l <= 0 || root.totalCount === 0) return
-      var page = Math.floor(root.offset / l)
-      root.offset = Math.min(page * l, Math.max(0, root.totalCount - l))
-    }
   }
 }

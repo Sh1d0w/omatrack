@@ -2,9 +2,9 @@
 
 `views/ClientsView.qml` and `views/ProjectsView.qml` - CRUD for the two
 reference tables. Both are paginated at the bottom by the shared
-`PaginationBar` (`components/PaginationBar.qml`) with the global page-size
-selector; pagination is **QML-side slicing** (`service.clients.slice(…)`),
-because the dropdowns need the full arrays in the service anyway.
+`PaginationBar` (`components/PaginationBar.qml`); pagination is **QML-side
+slicing** (`service.clients.slice(…)`), because the dropdowns need the full
+arrays in the service anyway.
 
 ## Clients
 
@@ -21,12 +21,10 @@ because the dropdowns need the full arrays in the service anyway.
   helper **refuses** when the client is still referenced; the red
   `lastError` line shows the count.
 - The bottom pager page-navigates the client list (`prevPage`/`nextPage`
-  step by one page of the global page size); a page-size change keeps the
-  same client at the top of the page.
-- While a name field is focused or the page-size popup is open, the view
-  reports `inputActive` so the window's Esc goes to the control, not the
-  window. The dialog needs no view-side plumbing: the dashboard owns it
-  and knows when it is open.
+  step by one fixed page of 15).
+- While a name field is focused, the view reports `inputActive` so the
+  window's Esc goes to the control, not the window. The dialog needs no
+  view-side plumbing: the dashboard owns it and knows when it is open.
 
 ## Projects
 

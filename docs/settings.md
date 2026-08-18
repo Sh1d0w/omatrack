@@ -15,7 +15,6 @@ validates locally, then pushes one patch via
 |--------------|------------------|-------|
 | Currency     | — (helper: non-empty, ≤ 8 chars, trimmed) | empty field saves `EUR` |
 | Hourly rate  | finite, ≥ 0      | number |
-| Page size    | integer 1–100    | `10/25/50/100` dropdown; the page size of every table view (Entries, Reports, Clients, Projects); helper: integer 1–500; default 50 |
 | Company      | —                | invoice block |
 | Address      | —                | invoice block |
 | Tax rate %   | finite, 0–100    | helper accepts ≥ 0; the UI caps at 100 |

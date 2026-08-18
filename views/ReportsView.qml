@@ -24,9 +24,9 @@ Item {
   property int totalSeconds: 0
   property int billableSeconds: 0
   property int offset: 0
-  readonly property int limit: root.service ? root.service.pageSize : 50
+  readonly property int limit: root.service ? root.service.pageSize : 15
 
-  readonly property bool inputActive: rangeBar.fieldActive || pageBar.pageSizePopupOpen
+  readonly property bool inputActive: rangeBar.fieldActive
 
   function load() {
     if (!root.service) return
@@ -242,7 +242,6 @@ Item {
 
     PaginationBar {
       id: pageBar
-      service: root.service
       total: root.total
       offset: root.offset
       limit: root.limit
@@ -293,20 +292,5 @@ Item {
     repeat: false
     running: root.service !== null
     onTriggered: root.load()
-  }
-
-  // Page-size changes re-query the first page (server-side pagination).
-  Connections {
-    target: root
-    function onLimitChanged(l) {
-      if (l <= 0 || !root.service) return
-      if (root.offset === 0) {
-        root.load()
-      } else {
-        var page = Math.floor(root.offset / l)
-        root.offset = Math.min(page * l, Math.max(0, root.total - l))
-        root.load()
-      }
-    }
   }
 }

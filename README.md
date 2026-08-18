@@ -26,7 +26,7 @@ settings). Data lives in one JSON file managed by a single-writer
     invoice at the configured hourly rate.
   - *Settings* — currency, hourly rate, invoice identity + numbering.
 - **Performant by design** — the only per-second work is one `SystemClock`
-  tick in QML while a timer runs; entries are paginated (50/page); reports
+  tick in QML while a timer runs; entries are paginated (15/page); reports
   are computed in the helper, not in QML; exports are files opened with the
   system handler (no QtWebEngine — unavailable in this runtime).
 

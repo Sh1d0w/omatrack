@@ -3,9 +3,9 @@ import qs.Commons
 import qs.Ui
 import "../components"
 
-// Entries tab: date presets + filters, a paginated entry list (page size
-// is the pageSize setting — the full array never enters QML), manual
-// entry add, and edit/delete, all through centered card overlays.
+// Entries tab: date presets + filters, a paginated entry list (fixed page
+// size — the full array never enters QML), manual entry add, and
+// edit/delete, all through centered card overlays.
 Item {
   id: root
 
@@ -16,13 +16,12 @@ Item {
   readonly property var service: root.dashboard ? root.dashboard.service : null
   property string flash: ""
 
-  // The window keyCatcher blocks while a filter control, a form field, a
-  // card overlay, or the pager's page-size popup owns the keyboard.
+  // The window keyCatcher blocks while a filter control, a form field, or
+  // a card overlay owns the keyboard.
   readonly property bool inputActive: clientDrop.popupOpen || projectDrop.popupOpen
     || billableDrop.popupOpen || searchField.activeFocus || rangeBar.fieldActive
     || editForm.keyActiveItem !== null || root.editEntry !== null
     || entryForm.keyActiveItem !== null || root.entryModalOpen
-    || pageBar.pageSizePopupOpen
 
   // ---- state -----------------------------------------------------------------
   property var entries: []
@@ -30,7 +29,7 @@ Item {
   property int totalSeconds: 0
   property int billableSeconds: 0
   property int offset: 0
-  readonly property int limit: root.service ? root.service.pageSize : 50
+  readonly property int limit: root.service ? root.service.pageSize : 15
 
   property string from: ""
   property string to: ""
@@ -290,8 +289,7 @@ Item {
 
   // ---- pager + status -----------------------------------------------------------
   // Pinned to the bottom of the table: the shared PaginationBar (page
-  // navigation + the global page-size selector) with the flash/error
-  // status texts to its right.
+  // navigation) with the flash/error status texts to its right.
   Row {
     id: pagerBar
     anchors {
@@ -304,7 +302,6 @@ Item {
 
     PaginationBar {
       id: pageBar
-      service: root.service
       total: root.total
       offset: root.offset
       limit: root.limit
@@ -492,18 +489,6 @@ Item {
         focusable: true
         onClicked: root.closeEntryModal()
       }
-    }
-  }
-
-  // Page-size changes re-paginate in place: keep the current entry (the
-  // offset's first row) as the new page's first row.
-  Connections {
-    target: root
-    function onLimitChanged(l) {
-      if (l <= 0 || !root.service || root.entries.length === 0) return
-      var page = Math.floor(root.offset / l)
-      root.offset = Math.min(page * l, Math.max(0, root.total - l))
-      root.refreshCurrentPage()
     }
   }
 

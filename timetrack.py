@@ -51,7 +51,6 @@ def default_state():
         "settings": {
             "currency": "EUR",
             "hourlyRate": 0,
-            "pageSize": 50,
             "invoice": {
                 "companyName": "",
                 "companyAddress": "",
@@ -709,7 +708,7 @@ def cmd_entry_delete(args):
 # ---------------------------------------------------------------------------
 
 INVOICE_KEYS = ("companyName", "companyAddress", "taxRate", "numberPrefix", "nextNumber", "footer")
-TOP_KEYS = ("currency", "hourlyRate", "pageSize", "invoice")
+TOP_KEYS = ("currency", "hourlyRate", "invoice")
 
 
 def _validate_setting(key, value):
@@ -724,10 +723,6 @@ def _validate_setting(key, value):
             raise CmdError(f"invalid {key}: number >= 0 required")
         if key == "nextNumber" and not isinstance(value, int):
             raise CmdError("invalid nextNumber: integer >= 0 required")
-        return value
-    if key == "pageSize":
-        if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= 500:
-            raise CmdError(f"invalid {key}: integer 1-500 required")
         return value
     if key in ("numberPrefix", "companyName", "companyAddress", "footer"):
         if not isinstance(value, str):

@@ -33,10 +33,10 @@ A list of rows, each:
 
 with `HH:MM` total and a muted `billable HH:MM` per row.
 
-Rows are paginated **server-side** at the global page size (the
-`pageSize` setting, default 50 — see [settings.md](settings.md)). A
-shared `PaginationBar` (`components/PaginationBar.qml`) is pinned to the
-bottom of the list with the flash/error status texts to its right.
+Rows are paginated **server-side** at the fixed page size (15 —
+`service.pageSize`). A shared `PaginationBar`
+(`components/PaginationBar.qml`) is pinned to the bottom of the list with
+the flash/error status texts to its right.
 
 Row shape from the helper: `{ key, label, seconds, billableSeconds }` +
 response `total`, `totalSeconds`, `billableSeconds`, `offset`, `limit`.

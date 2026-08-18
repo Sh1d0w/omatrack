@@ -74,7 +74,7 @@ feature, add or update its doc in the same change.**
 - No polling in QML. One 1s C++ tick (`SystemClock`) and only while a timer
   runs; the helper process exists only during an action.
 - No symlinks anywhere under the plugin folder. No `omarchy.*` plugin id.
-- Entries are paginated in the UI (limit 50); the full entries array never
+- Entries are paginated in the UI (limit 15); the full entries array never
   enters QML (mutation responses carry a compact "view" instead).
 - This runtime has **no QtSql, QtGraphicalEffects, or QtWebEngine** — exports
   and invoices are HTML/CSV files opened with `xdg-open`.

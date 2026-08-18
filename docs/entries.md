@@ -34,10 +34,10 @@ Any filter change resets to page 1 (`applyFilters` → `queryAt(0)`).
 
 ## The list
 
-- Paginated server-side at the global **page size** (the `pageSize`
-  setting, default 50 — see [settings.md](settings.md)); the full entries
-  array never enters QML (see [architecture.md](architecture.md)). After a
-  delete that empties the page, the current page is re-fetched.
+- Paginated server-side at the fixed page size (15 — `service.pageSize`);
+  the full entries array never enters QML (see
+  [architecture.md](architecture.md)). After a delete that empties the
+  page, the current page is re-fetched.
 - Each row is an `EntryRow` (`components/EntryRow.qml`): local
   `d MMM HH:mm` + `Client — Project` (bold), description (or `-`), a red
   `billable` mark when set, duration `HH:MM:SS` (bold). Clicking the row
@@ -48,11 +48,8 @@ Any filter change resets to page 1 (`applyFilters` → `queryAt(0)`).
 
 Pinned to the bottom of the table, above the totals bar: the shared
 `PaginationBar` (`components/PaginationBar.qml`) with `←` / `→` around
-`Showing X–Y of Z`, plus the global page-size selector
-(`10/25/50/100 / page`, writes `settings.pageSize`), and to its right the
-flash text (accent, 2 s) and the service's `lastError` (red). Changing the
-page size keeps the same entry at the top of the page (the offset is
-re-mapped to the same page index, clamped to the last page).
+`Showing X–Y of Z`, and to its right the flash text (accent, 2 s) and the
+service's `lastError` (red).
 
 ## Totals bar
 
