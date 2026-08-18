@@ -10,10 +10,8 @@ Item {
 
   property var service: null
   property var dashboard: null
-  property bool dialogOpen: deleteConfirm.opened
-  property string deleteProjectId: ""
   property int focusCount: 0
-  readonly property bool inputActive: focusCount > 0 || root.dialogOpen
+  readonly property bool inputActive: focusCount > 0
 
   function projectsFor(clientId) {
     var out = []
@@ -113,25 +111,17 @@ Item {
             focusable: true
             anchors.verticalCenter: parent.verticalCenter
             onClicked: {
-              root.deleteProjectId = modelData.id
-              deleteConfirm.opened = true
+              var id = modelData.id
+              root.dashboard.confirmAction("Delete this project? Entries that reference it must already be gone.", function() {
+                if (!root.service) return
+                root.service.deleteProject(id, function(resp) {
+                  if (!resp.ok)
+                    root.service.lastError = resp.error || "Delete failed"
+                })
+              })
             }
           }
         }
-      }
-    }
-  }
-
-  ConfirmDialog {
-    id: deleteConfirm
-    message: "Delete this project? Entries that reference it must already be gone."
-    onConfirmed: {
-      if (root.service && root.deleteProjectId !== "") {
-        var id = root.deleteProjectId
-        root.service.deleteProject(id, function(resp) {
-          if (!resp.ok)
-            root.service.lastError = resp.error || "Delete failed"
-        })
       }
     }
   }

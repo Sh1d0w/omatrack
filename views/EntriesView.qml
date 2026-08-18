@@ -11,14 +11,13 @@ Item {
 
   property var service: null
   property var dashboard: null
-  property bool dialogOpen: false
   property string flash: ""
 
-  // The window keyCatcher blocks while a filter control or the edit form
-  // owns the keyboard.
+  // The window keyCatcher blocks while a filter control, the edit form, or
+  // the edit overlay itself owns the keyboard.
   readonly property bool inputActive: clientDrop.popupOpen || projectDrop.popupOpen
     || billableDrop.popupOpen || searchField.activeFocus || rangeBar.fieldActive
-    || (root.editEntry !== null && editForm.keyActiveItem !== null)
+    || root.editEntry !== null
 
   // ---- state -----------------------------------------------------------------
   property var entries: []
@@ -36,7 +35,6 @@ Item {
   property string search: ""
   property string currentPreset: "all"
   property var editEntry: null
-  property string deleteId: ""
 
   Timer {
     id: flashTimer
@@ -113,9 +111,33 @@ Item {
     root.editEntry = null
   }
 
-  function confirmDelete(entry) {
-    root.deleteId = entry.id
-    deleteConfirm.opened = true
+  function requestDelete(entry) {
+    if (!entry || !root.dashboard) return
+    var id = entry.id
+    root.dashboard.confirmAction("Delete this time entry?", function() {
+      if (!root.service) return
+      root.service.deleteEntry(id, function(resp) {
+        if (resp.ok) {
+          root.closeEdit()
+          root.flash = "Entry deleted"
+          flashTimer.restart()
+          root.refreshCurrentPage()
+        } else {
+          root.service.lastError = resp.error || "Delete failed"
+        }
+      })
+    })
+  }
+
+  // Window-level key gate: the dashboard forwards keys to views that define
+  // handleKey. Esc closes the edit overlay (same dismissal as clicking the
+  // scrim).
+  function handleKey(event) {
+    if (root.editEntry !== null && event.key === Qt.Key_Esc) {
+      root.closeEdit()
+      return true
+    }
+    return false
   }
 
   Column {
@@ -279,7 +301,7 @@ Item {
       width: listView.width
       service: root.service
       onEditRequested: root.openEdit(modelData)
-      onDeleteRequested: root.confirmDelete(modelData)
+      onDeleteRequested: root.requestDelete(modelData)
     }
   }
 
@@ -304,27 +326,44 @@ Item {
   }
 
   // ---- edit card overlay ------------------------------------------------------------
+  // Same visual language as the window-level confirm dialog: Util.alpha
+  // scrim, accent-bordered BorderSurface card, centered. Scrim click or Esc
+  // discards.
   Rectangle {
     id: editOverlay
     anchors.fill: parent
     visible: root.editEntry !== null
-    color: Qt.rgba(0, 0, 0, 0.4)
+    color: Util.alpha(Color.background, 0.7)
     z: 10
 
-    Rectangle {
+    MouseArea {
+      anchors.fill: parent
+      onClicked: root.closeEdit()
+    }
+
+    BorderSurface {
       id: editCard
       width: Style.space(420)
-      height: editColumn.implicitHeight + Style.space(32)
+      height: editColumn.implicitHeight + editCard.contentTopInset + editCard.contentBottomInset
       radius: Style.cornerRadius
       color: Color.background
-      border.width: 1
-      border.color: Qt.darker(Color.foreground, 2.2)
+      borderSpec: Border.flat(Color.accent, Style.normalBorderWidth)
+      padding: Style.space(18)
       anchors.centerIn: parent
+
+      // Swallows clicks on the card so they never reach the scrim.
+      MouseArea { anchors.fill: parent }
 
       Column {
         id: editColumn
-        anchors.centerIn: parent
-        width: parent.width - Style.space(32)
+        anchors {
+          top: parent.top
+          left: parent.left
+          right: parent.right
+        }
+        anchors.topMargin: editCard.contentTopInset
+        anchors.leftMargin: editCard.contentLeftInset
+        anchors.rightMargin: editCard.contentRightInset
         spacing: Style.space(10)
 
         Text {
@@ -379,7 +418,7 @@ Item {
             text: "Delete"
             leftAlign: true
             focusable: true
-            onClicked: root.confirmDelete(root.editEntry)
+            onClicked: root.requestDelete(root.editEntry)
           }
 
           Button {
@@ -389,26 +428,6 @@ Item {
             onClicked: root.closeEdit()
           }
         }
-      }
-    }
-  }
-
-  ConfirmDialog {
-    id: deleteConfirm
-    message: "Delete this time entry?"
-    onConfirmed: {
-      if (root.service && root.deleteId !== "") {
-        var id = root.deleteId
-        root.service.deleteEntry(id, function(resp) {
-          if (resp.ok) {
-            root.closeEdit()
-            root.flash = "Entry deleted"
-            flashTimer.restart()
-            root.refreshCurrentPage()
-          } else {
-            root.service.lastError = resp.error || "Delete failed"
-          }
-        })
       }
     }
   }

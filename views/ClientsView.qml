@@ -10,10 +10,8 @@ Item {
 
   property var service: null
   property var dashboard: null
-  property bool dialogOpen: deleteConfirm.opened
-  property string deleteClientId: ""
   property int focusCount: 0
-  readonly property bool inputActive: focusCount > 0 || root.dialogOpen
+  readonly property bool inputActive: focusCount > 0
 
   function projectsFor(clientId) {
     var n = 0
@@ -120,23 +118,15 @@ Item {
         focusable: true
         anchors.verticalCenter: parent.verticalCenter
         onClicked: {
-          root.deleteClientId = modelData.id
-          deleteConfirm.opened = true
+          var id = modelData.id
+          root.dashboard.confirmAction("Delete this client? Its projects and entries must already be gone.", function() {
+            if (!root.service) return
+            root.service.deleteClient(id, function(resp) {
+              if (!resp.ok)
+                root.service.lastError = resp.error || "Delete failed"
+            })
+          })
         }
-      }
-    }
-  }
-
-  ConfirmDialog {
-    id: deleteConfirm
-    message: "Delete this client? Its projects and entries must already be gone."
-    onConfirmed: {
-      if (root.service && root.deleteClientId !== "") {
-        var id = root.deleteClientId
-        root.service.deleteClient(id, function(resp) {
-          if (!resp.ok)
-            root.service.lastError = resp.error || "Delete failed"
-        })
       }
     }
   }

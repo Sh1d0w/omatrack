@@ -10,7 +10,6 @@ Item {
 
   property var service: null
   property var dashboard: null
-  property bool dialogOpen: false
 
   property string from: ""
   property string to: ""

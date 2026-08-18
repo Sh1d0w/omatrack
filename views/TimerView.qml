@@ -11,7 +11,6 @@ Item {
   property var service: null
   property var dashboard: null
   property bool inputActive: taskForm.keyActiveItem !== null || entryForm.keyActiveItem !== null
-  property bool dialogOpen: false
   property string flash: ""
 
   function heroTaskName() {

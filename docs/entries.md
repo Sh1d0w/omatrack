@@ -50,7 +50,11 @@ project). Saving with no entry selected adds; with one selected, updates.
 
 ## Edit card (overlay)
 
-Centered 420px card on a 40% dim (`z: 10`) while `editEntry !== null`.
+Centered 420px `BorderSurface` card (accent border, `Style.cornerRadius`)
+on a `Util.alpha(Color.background, 0.7)` scrim (`z: 10`) while
+`editEntry !== null` — the same visual language and dismissal semantics
+as the window-level confirm dialog: **scrim click or Esc discards**
+(Esc via the view's `handleKey`, routed by the dashboard's key gate).
 Contains an `EntryForm`:
 
 - **date** `YYYY-MM-DD`, **time** `HH:MM` (local), **minutes** 1–1440
@@ -68,8 +72,10 @@ Contains an `EntryForm`:
 
 ## Delete
 
-`Del` (row or card) → `deleteId` + `ConfirmDialog`
-("Delete this time entry?") → `service.deleteEntry(id)`. Delete is
+`Del` (row or card) → the window-level confirm dialog (see
+[dashboard.md](dashboard.md)) with "Delete this time entry?" →
+`service.deleteEntry(id)`. On success the edit overlay (if open) closes,
+`Entry deleted` flashes, and the current page re-fetches. Delete is
 unconditional at the data layer (no referential children on an entry).
 Failures surface in the red error line.
 

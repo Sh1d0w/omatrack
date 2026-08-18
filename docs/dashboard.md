@@ -57,16 +57,42 @@ The loader sets `item.service = root.service` and `item.dashboard = root` on
 load, so views reach the engine and can call `dashboard.requestClose()` /
 `dashboard.activeTab = ...`.
 
+## Confirm dialog (window-level)
+
+Destructive actions confirm through a **single window-level
+`ConfirmDialog`** owned by the dashboard. It fills the window
+(`anchors.fill: parent`, the shell-kit pattern used by the Menu and
+Clipboard panels), so the card is always centered over the whole window
+and the scrim covers sidebar and header alike. Views request it:
+
+```qml
+dashboard.confirmAction(message, onConfirm)
+```
+
+`onConfirm` runs after the dialog closes (scrim click, **Cancel**, or Esc).
+The dialog resets on tab switch and on `open()`, so a pending confirmation
+never fires for a view that is no longer loaded.
+
 ## Keyboard
 
-A window-level `PanelKeyCatcher` owns the `FocusScope`:
+The window `FocusScope` installs a `Keys.BeforeItem` key gate that sees
+every key before any other handler (focused control included):
 
-- `Esc` closes the window **only when** the active view does not own the
-  keys. Views expose `inputActive` (a field/dropdown is focused) and
-  `dialogOpen` (a confirm dialog or form overlay is up); while either is
-  true, `blocked` is set and the control/dialog handles Esc itself.
-- `Tab` does nothing special at window level (no popout siblings); focus
-  cycles within the view.
+1. confirm dialog open → its `handleKey` owns Esc / ← → / Tab / Enter
+   (cancel / confirm, with `selectedIndex` driving the highlight);
+2. otherwise the active view's `handleKey`, if it defines one (the
+   Entries edit overlay closes on Esc);
+3. otherwise fall through — a window-level `PanelKeyCatcher` handles
+   `Esc` (closes the window), focused controls keep their keys.
+
+The key catcher's `blocked` is set while the confirm dialog is open or the
+active view reports `inputActive` (a field/dropdown/form owns the
+keyboard). Views expose only `inputActive` — there is no `dialogOpen`
+contract: the dashboard knows its own dialog, and view-level overlays
+report themselves through `inputActive`.
+
+`Tab` does nothing special at window level (no popout siblings); focus
+cycles within the view.
 
 ## Summon
 

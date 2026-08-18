@@ -17,14 +17,15 @@ Item {
   property bool closingFromHost: false
   property var shell: null
   property var service: null
+  property var confirmPending: null
 
   readonly property string pluginId: "io.github.sh1d0w.timetrack"
   property string activeTab: "timer"
 
   function open(payloadJson) {
     closingFromHost = false
+    closeConfirm()
     window.visible = true
-
     // Optional {"tab": "<id>"} in the payload opens a specific tab. Unknown
     // ids are ignored — the dashboard opens on the timer tab.
     var requested = ""
@@ -54,6 +55,25 @@ Item {
       window.visible = false
   }
 
+  // Window-level confirmation for destructive actions. The dialog fills the
+  // window, so its card centers over the whole window and the scrim covers
+  // sidebar and header alike. Views call confirmAction; onConfirm runs after
+  // the dialog closes.
+  function confirmAction(message, onConfirm) {
+    confirmDialog.message = message
+    confirmDialog.selectedIndex = 1
+    confirmPending = onConfirm
+    confirmDialog.opened = true
+  }
+
+  function closeConfirm() {
+    confirmDialog.opened = false
+    confirmPending = null
+  }
+
+  // A pending confirmation belongs to the view that asked for it; never let
+  // it survive a tab switch or a re-summon.
+  onActiveTabChanged: root.closeConfirm()
   readonly property var tabs: [
     { id: "timer",    label: "Timer",    file: "views/TimerView.qml" },
     { id: "entries",  label: "Entries",  file: "views/EntriesView.qml" },
@@ -81,13 +101,31 @@ Item {
       id: focusScope
       anchors.fill: parent
       focus: true
+      // Window-level key gate: a Keys.BeforeItem handler on this ancestor
+      // sees every key in the window before any other handler (focused
+      // control included). Order:
+      //   1. confirm dialog open → its handleKey owns Esc/arrows/Tab/Enter
+      //   2. else the active view's handleKey, if it defines one (the
+      //      Entries edit overlay closes on Esc)
+      //   3. else fall through to the key catcher / focused control
+      Keys.priority: Keys.BeforeItem
+      Keys.onPressed: function(event) {
+        if (confirmDialog.opened) {
+          if (confirmDialog.handleKey(event)) event.accepted = true
+          return
+        }
+        var view = viewLoader.item
+        if (view && typeof view.handleKey === "function" && view.handleKey(event))
+          event.accepted = true
+      }
 
-      // Esc closes the window only when no view field or dialog owns the
-      // keys; otherwise the focused control handles it.
+      // Esc closes the window only while no dialog and no view input own the
+      // keyboard.
       PanelKeyCatcher {
         id: keyCatcher
         anchors.fill: parent
-        blocked: viewLoader.item ? (viewLoader.item.inputActive === true || viewLoader.item.dialogOpen === true) : false
+        blocked: confirmDialog.opened
+          || (viewLoader.item ? viewLoader.item.inputActive === true : false)
         onCloseRequested: root.requestClose()
       }
 
@@ -233,6 +271,21 @@ Item {
             }
           }
         }
+      }
+
+      // Declared last so it draws above sidebar + view. Fills the window so
+      // the card centers over the whole window (shell-kit pattern: see
+      // Menu/Clipboard panels).
+      ConfirmDialog {
+        id: confirmDialog
+        anchors.fill: parent
+
+        onConfirmed: {
+          var pending = root.confirmPending
+          root.closeConfirm()
+          if (pending) pending()
+        }
+        onCanceled: root.closeConfirm()
       }
     }
   }

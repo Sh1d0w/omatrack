@@ -9,7 +9,6 @@ Item {
 
   property var service: null
   property var dashboard: null
-  property bool dialogOpen: false
   property int focusCount: 0
   property bool dirty: false
   readonly property bool inputActive: focusCount > 0

@@ -11,13 +11,14 @@ expected to stay small) backed by the in-service view state.
 - **Rename** — each row's name is a `TextField`; **Enter commits** (only
   when non-empty and actually changed) → `service.updateClient(id, name)`.
 - **Row meta** — `N projects · added YYYY-MM-DD`.
-- **Delete** — **Del** → `ConfirmDialog` ("Delete this client? Its projects
-  and entries must already be gone.") → `service.deleteClient(id)`. The
+- **Delete** — **Del** → the window-level confirm dialog (see
+  [dashboard.md](dashboard.md)) with "Delete this client? Its projects
+  and entries must already be gone." → `service.deleteClient(id)`. The
   helper **refuses** when the client is still referenced; the red
   `lastError` line shows the count.
-- While any name field is focused, or the dialog is open, the view reports
-  `inputActive`/`dialogOpen` so the window's Esc goes to the control, not
-  the window.
+- While any name field is focused, the view reports `inputActive` so the
+  window's Esc goes to the control, not the window. The dialog needs no
+  view-side plumbing: the dashboard owns it and knows when it is open.
 
 ## Projects
 
@@ -33,8 +34,9 @@ project list.
   join a client where no same-named project exists). The UI's rename keeps
   the section's client; moving is available from the CLI
   (`project-update --id p_… --client-id c_…`).
-- **Delete** — **Del** → `ConfirmDialog` ("Delete this project? Entries that
-  reference it must already be gone.") → `service.deleteProject(id)`;
+- **Delete** — **Del** → the window-level confirm dialog (see
+  [dashboard.md](dashboard.md)) with "Delete this project? Entries that
+  reference it must already be gone." → `service.deleteProject(id)`;
   refused by the helper while entries reference it.
 
 ## Data rules (helper side)
