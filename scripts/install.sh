@@ -32,9 +32,9 @@ cat <<EOF
 
 Installed. Enable it (idempotent):
 
-  omarchy plugin enable $PLUGIN_ID --section right
+  omarchy plugin enable $PLUGIN_ID
 
-The bar widget appears in the right section of the bar. The dashboard
+The bar widget appears in the center section of the bar. The dashboard
 window opens with:
 
   omarchy-shell shell toggle $PLUGIN_ID '{"tab":"timer"}'

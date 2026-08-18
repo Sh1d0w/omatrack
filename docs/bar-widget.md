@@ -1,8 +1,8 @@
 # Bar widget
 
-`BarWidget.qml` — the `bar-widget` kind, installed in the **right** section
-(`defaultSection: "right"`, enabled with
-`omarchy plugin enable io.github.sh1d0w.timetrack --section right`). It is
+`BarWidget.qml` — the `bar-widget` kind, installed in the **center** section
+(`defaultSection: "center"`, enabled with
+`omarchy plugin enable io.github.sh1d0w.timetrack`). It is
 the live label for the current task and the host for the quick-start popup.
 
 ## Display

@@ -13,7 +13,7 @@ One plugin, three kinds (declared in `manifest.json`):
 
 | Kind         | File            | What it is                                             |
 |--------------|-----------------|--------------------------------------------------------|
-| `bar-widget` | `BarWidget.qml` | Right-section label: current task + elapsed, or ▶ idle |
+| `bar-widget` | `BarWidget.qml` | Center-section label: current task + elapsed, or ▶ idle |
 | `service`    | `Service.qml`   | Headless singleton: state, helper channel, IPC         |
 | `panel`      | `Dashboard.qml` | Toplevel dashboard window (7 tabs)                     |
 
@@ -26,7 +26,7 @@ clicking the bar widget.
 ## File map
 
 ```
-manifest.json        kinds, category, defaultSection: right
+manifest.json        kinds, category, defaultSection: center
 Service.qml          headless engine (see architecture.md)
 BarWidget.qml        bar label + popup host          (bar-widget.md)
 Popup.qml            anchored quick-start popup      (popup.md)
@@ -42,12 +42,12 @@ views/               TimerView, EntriesView, ClientsView, ProjectsView,
 ```sh
 # from this repo
 bash scripts/install.sh
-omarchy plugin enable io.github.sh1d0w.timetrack --section right
+omarchy plugin enable io.github.sh1d0w.timetrack
 ```
 
 Then:
 
-- Click the ▶ in the right bar section → quick-start popup.
+- Click the ▶ in the center bar section → quick-start popup.
 - Start a client + project first (via the popup's form after creating them in
   the dashboard, or via the CLI):
 
@@ -64,7 +64,7 @@ Then:
 | Feature                                   | Doc                       |
 |-------------------------------------------|---------------------------|
 | Architecture, state, performance budget   | [architecture.md](architecture.md) |
-| Bar widget (right section)                | [bar-widget.md](bar-widget.md)     |
+| Bar widget (center section)               | [bar-widget.md](bar-widget.md)     |
 | Quick-start popup                         | [popup.md](popup.md)               |
 | Dashboard window (tabs, keyboard)         | [dashboard.md](dashboard.md)       |
 | Entries (filters, add/edit/delete)        | [entries.md](entries.md)           |

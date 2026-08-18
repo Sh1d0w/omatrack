@@ -17,6 +17,6 @@
     "description": "Live timer for the current client/task with quick start/stop and a full management dashboard.",
     "category": "Productivity",
     "allowMultiple": false,
-    "defaultSection": "right"
+    "defaultSection": "center"
   }
 }
