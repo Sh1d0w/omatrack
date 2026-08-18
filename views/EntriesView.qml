@@ -9,8 +9,11 @@ import "../components"
 Item {
   id: root
 
-  property var service: null
   property var dashboard: null
+  // Bound, not assigned: the panel loader injects the dashboard's service
+  // after this view may already be loaded, so a one-shot assignment could
+  // stay null forever.
+  readonly property var service: root.dashboard ? root.dashboard.service : null
   property string flash: ""
 
   // The window keyCatcher blocks while a filter control, the edit form, or

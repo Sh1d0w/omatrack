@@ -266,10 +266,7 @@ Item {
               return ""
             }
             onLoaded: {
-              if (item) {
-                item.service = root.service
-                item.dashboard = root
-              }
+              if (item) item.dashboard = root
             }
           }
         }

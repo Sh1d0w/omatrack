@@ -10,12 +10,12 @@ Item {
   implicitHeight: Style.space(52)
 
   required property var service
-  property var modelData: ({})
+  required property var modelData
 
   signal editRequested()
   signal deleteRequested()
 
-  readonly property var e: root.modelData || ({})
+  readonly property var e: modelData
 
   // Row-wide hover + click first (lowest), so the buttons above it still
   // receive their own clicks.
