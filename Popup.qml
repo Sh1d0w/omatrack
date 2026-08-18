@@ -5,9 +5,14 @@ import qs.Commons
 import qs.Ui
 import "components"
 
-// Quick-start popup anchored to the bar widget: live status,
-// start/pause/resume/stop, the new-task form (client/project/description,
-// last-used values pre-selected by default) and a shortcut to the dashboard.
+// Quick-start popup anchored to the bar widget: live status, the new-task
+// form (client/project/description, last-used values pre-selected by
+// default) with Start below it, pause/resume/stop, and a shortcut to the
+// dashboard.
+//
+// The new-task section (header, form, Start) is idle-only: while a task
+// runs — paused included — the popup shrinks to status + controls and
+// returns to the full layout when the task stops.
 //
 // Shape contract for the bar (Bar.findPanelWidget): `opened`/`open()`/
 // `close()`/`toggle()` come from the Panel base; `popoutSwitchClosing` and
@@ -116,10 +121,22 @@ Panel {
         }
       }
 
-      // 2. Primary action --------------------------------------------------
-      // Idle: single Start (gated by form validity). Running: Pause + Stop.
-      // Paused: Resume + Stop. (The old single "Pause" button actually
-      // *stopped* the task; its mislabel is gone.)
+      // 2. New-task section ---------------------------------------------------
+      // Header + form + Start are idle-only: while a task runs (paused
+      // included) there is no next task to line up; all of it returns when
+      // the task stops.
+      PanelSectionHeader {
+        text: "New task"
+        visible: !(root.service && root.service.running)
+      }
+
+      TaskForm {
+        id: taskForm
+        width: parent.width
+        service: root.service
+        visible: !(root.service && root.service.running)
+      }
+
       Button {
         id: startButton
         width: parent.width
@@ -131,6 +148,9 @@ Panel {
         onClicked: root.startFromForm()
       }
 
+      // 3. Primary action ----------------------------------------------------
+      // Running: Pause + Stop. Paused: Resume + Stop. (The old single
+      // "Pause" button actually *stopped* the task; its mislabel is gone.)
       Row {
         width: parent.width
         spacing: Style.space(8)
@@ -155,19 +175,6 @@ Panel {
           bordered: true
           onClicked: root.service.stopTask()
         }
-      }
-
-      PanelSeparator {}
-
-      PanelSectionHeader {
-        text: "New task"
-      }
-
-      // 3. New-task form ----------------------------------------------------
-      TaskForm {
-        id: taskForm
-        width: parent.width
-        service: root.service
       }
 
       PanelSeparator {}

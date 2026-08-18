@@ -46,7 +46,7 @@ re-evaluates on its 1s tick (frozen while paused).
 
 | id         | view                    | Doc |
 |------------|-------------------------|-----|
-| `timer`    | `views/TimerView.qml`   | [popup.md](popup.md) (shares `TaskForm`) |
+| `timer`    | `views/TimerView.qml`   | [timer.md](timer.md) |
 | `entries`  | `views/EntriesView.qml` | [entries.md](entries.md) |
 | `clients`  | `views/ClientsView.qml` | [clients-projects.md](clients-projects.md) |
 | `projects` | `views/ProjectsView.qml` | [clients-projects.md](clients-projects.md) |
@@ -82,7 +82,7 @@ every key before any other handler (focused control included):
 1. confirm dialog open → its `handleKey` owns Esc / ← → / Tab / Enter
    (cancel / confirm, with `selectedIndex` driving the highlight);
 2. otherwise the active view's `handleKey`, if it defines one (the
-   Entries edit overlay closes on Esc);
+   Entries edit card and the Timer manual-entry modal close on Esc);
 3. otherwise fall through — a window-level `PanelKeyCatcher` handles
    `Esc` (closes the window), focused controls keep their keys.
 

@@ -329,108 +329,77 @@ Item {
   }
 
   // ---- edit card overlay ------------------------------------------------------------
-  // Same visual language as the window-level confirm dialog: Util.alpha
-  // scrim, accent-bordered BorderSurface card, centered. Scrim click or Esc
-  // discards.
-  Rectangle {
+  // Shared card-on-scrim modal (CardOverlay, also the Timer's manual-entry
+  // modal): same visual language and dismissal semantics as the
+  // window-level confirm dialog — scrim click or Esc discards (Esc via the
+  // view's handleKey, routed by the dashboard's key gate).
+  CardOverlay {
     id: editOverlay
     anchors.fill: parent
     visible: root.editEntry !== null
-    color: Util.alpha(Color.background, 0.7)
-    z: 10
+    cardWidth: Style.space(420)
+    onScrimClicked: root.closeEdit()
 
-    MouseArea {
-      anchors.fill: parent
-      onClicked: root.closeEdit()
+    Text {
+      text: "Edit entry"
+      color: Color.foreground
+      font.pixelSize: Style.font.title
+      font.bold: true
     }
 
-    BorderSurface {
-      id: editCard
-      width: Style.space(420)
-      height: editColumn.implicitHeight + editCard.contentTopInset + editCard.contentBottomInset
-      radius: Style.cornerRadius
-      color: Color.background
-      borderSpec: Border.flat(Color.accent, Style.normalBorderWidth)
-      padding: Style.space(18)
-      anchors.centerIn: parent
+    EntryForm {
+      id: editForm
+      service: root.service
+      width: parent.width
+    }
 
-      // Swallows clicks on the card so they never reach the scrim.
-      MouseArea { anchors.fill: parent }
+    Row {
+      spacing: Style.space(8)
 
-      Column {
-        id: editColumn
-        anchors {
-          top: parent.top
-          left: parent.left
-          right: parent.right
-        }
-        anchors.topMargin: editCard.contentTopInset
-        anchors.leftMargin: editCard.contentLeftInset
-        anchors.rightMargin: editCard.contentRightInset
-        spacing: Style.space(10)
-
-        Text {
-          text: "Edit entry"
-          color: Color.foreground
-          font.pixelSize: Style.font.title
-          font.bold: true
-        }
-
-        EntryForm {
-          id: editForm
-          service: root.service
-          width: parent.width
-        }
-
-        Row {
-          spacing: Style.space(8)
-
-          Button {
-            text: "Save"
-            leftAlign: true
-            focusable: true
-            onClicked: {
-              var s = root.service
-              if (!s) return
-              if (!editForm.valid) {
-                s.lastError = "Fill in a valid entry"
-                return
-              }
-              s.updateEntry(root.editEntry.id, {
-                date: editForm.dateStr,
-                time: editForm.timeStr,
-                minutes: editForm.minutes,
-                clientId: editForm.clientId,
-                projectId: editForm.projectId,
-                description: editForm.description,
-                billable: editForm.billable
-              }, function(resp) {
-                if (resp.ok) {
-                  root.closeEdit()
-                  root.flash = "Entry saved"
-                  flashTimer.restart()
-                  root.refreshCurrentPage()
-                } else {
-                  s.lastError = resp.error || "Update failed"
-                }
-              })
+      Button {
+        text: "Save"
+        leftAlign: true
+        focusable: true
+        onClicked: {
+          var s = root.service
+          if (!s) return
+          if (!editForm.valid) {
+            s.lastError = "Fill in a valid entry"
+            return
+          }
+          s.updateEntry(root.editEntry.id, {
+            date: editForm.dateStr,
+            time: editForm.timeStr,
+            minutes: editForm.minutes,
+            clientId: editForm.clientId,
+            projectId: editForm.projectId,
+            description: editForm.description,
+            billable: editForm.billable
+          }, function(resp) {
+            if (resp.ok) {
+              root.closeEdit()
+              root.flash = "Entry saved"
+              flashTimer.restart()
+              root.refreshCurrentPage()
+            } else {
+              s.lastError = resp.error || "Update failed"
             }
-          }
-
-          Button {
-            text: "Delete"
-            leftAlign: true
-            focusable: true
-            onClicked: root.requestDelete(root.editEntry)
-          }
-
-          Button {
-            text: "Close"
-            leftAlign: true
-            focusable: true
-            onClicked: root.closeEdit()
-          }
+          })
         }
+      }
+
+      Button {
+        text: "Delete"
+        leftAlign: true
+        focusable: true
+        onClicked: root.requestDelete(root.editEntry)
+      }
+
+      Button {
+        text: "Close"
+        leftAlign: true
+        focusable: true
+        onClicked: root.closeEdit()
       }
     }
   }

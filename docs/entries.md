@@ -1,7 +1,7 @@
 # Entries
 
 `views/EntriesView.qml` — the dashboard's **Entries** tab: filterable,
-paginated list of all time entries with manual add/edit/delete.
+paginated list of all time entries, with edit/delete (manual add lives on the Timer tab).
 
 ## Filtering
 
@@ -43,19 +43,21 @@ Any filter change resets to page 1 (`applyFilters` → `queryAt(0)`).
 
 ## Add entry
 
-The header's **Add entry** button opens the edit card (same overlay) with an
-empty `EntryForm` pre-filled by `defaultsToToday()`: today's date, current
-local time, 60 minutes, and `taskForm.applyDefaults()` (last client +
-project). Saving with no entry selected adds; with one selected, updates.
+Manual entries are added from the **Timer** tab's manual-entry modal
+([timer.md](timer.md)) — the same `EntryForm`, pre-filled by
+`defaultsToToday()` (today's date, current local time, 60 minutes, last
+client + project). The Entries tab is edit/delete only: the edit card
+opens pre-filled from an existing entry and saves through `updateEntry`.
 
 ## Edit card (overlay)
 
-Centered 420px `BorderSurface` card (accent border, `Style.cornerRadius`)
-on a `Util.alpha(Color.background, 0.7)` scrim (`z: 10`) while
-`editEntry !== null` — the same visual language and dismissal semantics
-as the window-level confirm dialog: **scrim click or Esc discards**
-(Esc via the view's `handleKey`, routed by the dashboard's key gate).
-Contains an `EntryForm`:
+`CardOverlay` (`components/CardOverlay.qml`, shared with the Timer tab's
+manual-entry modal) while `editEntry !== null`: a centered 420px
+`BorderSurface` card (accent border, `Style.cornerRadius`) on a
+`Util.alpha(Color.background, 0.7)` scrim (`z: 10`) — the same visual
+language and dismissal semantics as the window-level confirm dialog:
+**scrim click or Esc discards** (Esc via the view's `handleKey`, routed
+by the dashboard's key gate). Contains an `EntryForm`:
 
 - **date** `YYYY-MM-DD`, **time** `HH:MM` (local), **minutes** 1–1440
   (`NumberField`), then the shared `TaskForm` (client, project, description,

@@ -11,13 +11,16 @@ start/pause/resume/stop, the new-task form, and a dashboard shortcut.
    alone, or the client alone, or `-`; `No active timer` when idle) and the
    caption (`01:02:03 · billable` while running; `01:02:03 · paused ·
    billable` while paused; `Today 04:12` or `Start a task below` when idle).
-2. **Primary action** — idle: one full-width `Start`, active only when
-   `formReady` (client, project and a non-blank description). Running:
-   `Pause` (→ `service.pauseTask()`) beside a bordered `Stop` (→
-   `service.stopTask()`). Paused: `Resume` (→ `service.resumeTask()`) +
-   `Stop`.
-3. **`New task` section** — a `TaskForm` (client/project/description/
-   billable, see below).
+2. **`New task` section** — a `New task` header, a `TaskForm`
+   (client/project/description/billable, see below), and a full-width
+   `Start` **below the form**, active only when `formReady` (client,
+   project and a non-blank description). The whole section is
+   **idle-only**: it disappears while a task runs — paused included — and
+   returns when the task stops.
+3. **Primary action** — running: `Pause` (→ `service.pauseTask()`) beside
+   a bordered `Stop` (→ `service.stopTask()`). Paused: `Resume` (→
+   `service.resumeTask()`) + `Stop`. Nothing here when idle (Start lives
+   below the form, item 2).
 4. **Footer** — `Today HH:MM` on the left, `Dashboard…` button on the right.
 5. **Error line** — the service's `lastError`, red, word-wrapped (e.g. a
    failed start).
