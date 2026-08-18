@@ -21,9 +21,9 @@ expected to stay small) backed by the in-service view state.
 
 ## Projects
 
-Grouped by client: one section per client (client name as header), each
-section listing its projects and carrying its own `New project for <client>…`
-add row.
+Grouped by client: one section per client (client name as header). Each
+section carries its own `New project for <client>…` add row **above** the
+project list.
 
 - **Add** — per client section; the client is fixed by the section.
 - **Rename** — inline `TextField`, Enter commits →

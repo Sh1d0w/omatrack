@@ -25,6 +25,15 @@ Item {
     return out
   }
 
+  function addProject(clientId, name, done) {
+    if (!name || !root.service) return
+    root.service.addProject(clientId, name, function(resp) {
+      if (!resp.ok)
+        root.service.lastError = resp.error || "Add failed"
+      if (done) done(resp)
+    })
+  }
+
   ListView {
     id: listView
     anchors {
@@ -39,18 +48,39 @@ Item {
 
     delegate: Column {
       id: clientSection
+      property var client: modelData
       width: ListView.view.width
       spacing: Style.space(6)
 
       Text {
-        text: modelData.name
+        text: clientSection.client.name
         color: Color.foreground
         font.pixelSize: Style.font.heading
         font.bold: true
       }
 
+      Row {
+        width: clientSection.width
+        spacing: Style.space(8)
+
+        TextField {
+          id: addField
+          placeholderText: "New project for " + clientSection.client.name + "…"
+          width: clientSection.width - Style.space(100)
+          onActiveFocusChanged: root.focusCount = Math.max(0, root.focusCount + (activeFocus ? 1 : -1))
+          onAccepted: root.addProject(clientSection.client.id, addField.text.trim(), function(resp) { if (resp.ok) addField.text = "" })
+        }
+
+        Button {
+          text: "Add"
+          leftAlign: true
+          focusable: true
+          onClicked: root.addProject(clientSection.client.id, addField.text.trim(), function(resp) { if (resp.ok) addField.text = "" })
+        }
+      }
+
       Repeater {
-        model: root.projectsFor(clientSection.modelData.id)
+        model: root.projectsFor(clientSection.client.id)
 
         delegate: Row {
           width: clientSection.width
@@ -71,7 +101,7 @@ Item {
           }
 
           Text {
-            text: clientSection.modelData.name
+            text: clientSection.client.name
             color: Color.muted
             font.pixelSize: Style.font.caption
             anchors.verticalCenter: parent.verticalCenter
@@ -87,37 +117,6 @@ Item {
               deleteConfirm.opened = true
             }
           }
-        }
-      }
-
-      Row {
-        width: clientSection.width
-        spacing: Style.space(8)
-
-        TextField {
-          id: addField
-          placeholderText: "New project for " + clientSection.modelData.name + "…"
-          width: clientSection.width - Style.space(100)
-          onActiveFocusChanged: root.focusCount = Math.max(0, root.focusCount + (activeFocus ? 1 : -1))
-          onAccepted: addProject()
-        }
-
-        Button {
-          text: "Add"
-          leftAlign: true
-          focusable: true
-          onClicked: addProject()
-        }
-
-        function addProject() {
-          var name = addField.text.trim()
-          if (!name || !root.service) return
-          root.service.addProject(clientSection.modelData.id, name, function(resp) {
-            if (resp.ok)
-              addField.text = ""
-            else
-              root.service.lastError = resp.error || "Add failed"
-          })
         }
       }
     }
