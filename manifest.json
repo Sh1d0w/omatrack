@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.sh1d0w.timetrack",
+  "name": "Quattro Time Tracker",
+  "version": "1.0.0",
+  "author": "sh1d0w",
+  "license": "MIT",
+  "description": "Time tracking: bar widget with live client/task timer, quick-start popup, and a dashboard window for entries, clients, projects, reports, exports, and invoices.",
+  "kinds": ["bar-widget", "service", "panel"],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml",
+    "service": "Service.qml",
+    "panel": "Dashboard.qml"
+  },
+  "barWidget": {
+    "displayName": "Quattro Time Tracker",
+    "description": "Live timer for the current client/task with quick start/stop and a full management dashboard.",
+    "category": "Productivity",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
