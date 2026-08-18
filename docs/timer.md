@@ -15,9 +15,10 @@ controls, the next-task form, and the manual-entry modal. Shares
    `Resume` + `Stop`. Nothing here when idle (Start lives below the
    form, step 5).
 3. **`Next task` header row** — the section label and, on the opposite
-   side, a `+` button (tooltip "Manual entry") that opens the manual-entry
-   modal. Stays visible in every state: manual entries are independent of
-   the timer, so they can be logged while a task runs.
+   side (far right, same line — a stretching spacer pins the button to
+   the row's right edge), an `Add manual entry` button that opens the
+   manual-entry modal. Stays visible in every state: manual entries are
+   independent of the timer, so they can be logged while a task runs.
 4. **Next-task form** — `TaskForm` (client, project, description,
    billable; last-used values pre-selected, description required).
    **Idle-only:** hidden while a task runs — paused included — and
@@ -30,7 +31,7 @@ controls, the next-task form, and the manual-entry modal. Shares
 
 ## Manual-entry modal
 
-The `+` opens a centered modal on a scrim — `CardOverlay`
+`Add manual entry` opens a centered modal on a scrim — `CardOverlay`
 (`components/CardOverlay.qml`, shared with the Entries edit card): title,
 `EntryForm` (date, time, minutes, then the shared `TaskForm`), `Add
 entry` and `Close`.

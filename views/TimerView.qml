@@ -9,8 +9,8 @@ import "../components"
 //
 // While a task runs — paused included — the next-task form and Start are
 // hidden; they come back only once the task stops. The "Next task" header
-// row stays, with the manual-entry "+" on its opposite side, because
-// manual entries work in every state.
+// row stays, with the "Add manual entry" button on its opposite side,
+// because manual entries work in every state.
 Item {
   id: root
 
@@ -143,23 +143,30 @@ Item {
     PanelSeparator {}
 
     // ---- next task ----------------------------------------------------------
-    // The "+" on the opposite side of the header opens the manual-entry
-    // modal; it stays available while a task runs, because manual entries
-    // are independent of the timer.
+    // "Add manual entry", pinned to the row's far right, opens the
+    // manual-entry modal; it stays available while a task runs, because
+    // manual entries are independent of the timer. The spacer stretches to
+    // keep the button on the header's line, at the opposite edge.
     Row {
       width: parent.width
       spacing: Style.space(8)
 
       PanelSectionHeader {
+        id: nextTaskHeader
         text: "Next task"
+        anchors.verticalCenter: parent.verticalCenter
       }
 
-      Item { width: 1 }
+      Item {
+        width: Math.max(0, parent.width - nextTaskHeader.width
+          - addManualEntryButton.width - 2 * Style.space(8))
+      }
 
       Button {
-        text: "+"
+        id: addManualEntryButton
+        text: "Add manual entry"
         focusable: true
-        tooltipText: "Manual entry"
+        anchors.verticalCenter: parent.verticalCenter
         onClicked: root.entryModalOpen = true
       }
     }
