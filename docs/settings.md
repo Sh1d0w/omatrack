@@ -15,6 +15,7 @@ validates locally, then pushes one patch via
 |--------------|------------------|-------|
 | Currency     | — (helper: non-empty, ≤ 8 chars, trimmed) | empty field saves `EUR` |
 | Hourly rate  | finite, ≥ 0      | number |
+| Page size    | integer 1–100    | `10/25/50/100` dropdown; the page size of every table view (Entries, Reports, Clients, Projects); helper: integer 1–500; default 50 |
 | Company      | —                | invoice block |
 | Address      | —                | invoice block |
 | Tax rate %   | finite, 0–100    | helper accepts ≥ 0; the UI caps at 100 |
@@ -44,7 +45,7 @@ mutation commands return the compact view (state minus entries +
 | `pause` | — | freezes `active`: `paused: true`, `pauseStart` = now; rejects `no timer running` / `timer is already paused` |
 | `resume` | — | banks the pause segment into `pausedSeconds` and clears the flags; rejects `no timer running` / `timer is not paused` |
 | `entries` | `[--from --to] [--client-id] [--project-id] [--billable 0\|1] [--search] [--offset N] [--limit N]` | start-DESC list; limit clamped 1..500 (default 50); plus `total`, `totalSeconds`, `billableSeconds`, `nextOffset` (null on last page) |
-| `report` | `--group-by day\|client\|project [--from --to] [--client-id] [--project-id]` | aggregated rows; billable/search are **not accepted** (all matched entries count) |
+| `report` | `--group-by day\|client\|project [--from --to] [--client-id] [--project-id] [--offset N] [--limit N]` | aggregated rows, paginated (limit clamped 1..500, default 50); billable/search are **not accepted** (all matched entries count); `totalSeconds`/`billableSeconds` cover the **whole** matched set, not just the page |
 | `client-add` | `--name` | case-insensitive duplicate rejected |
 | `client-update` | `--id --name` | same duplicate check |
 | `client-delete` | `--id` | blocked while referenced by projects/entries |

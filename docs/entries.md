@@ -1,7 +1,8 @@
 # Entries
 
 `views/EntriesView.qml` — the dashboard's **Entries** tab: filterable,
-paginated list of all time entries, with edit/delete (manual add lives on the Timer tab).
+paginated list of all time entries, with manual add, edit, and delete —
+all through the filter row and centered card overlays.
 
 ## Filtering
 
@@ -15,8 +16,12 @@ preset to manual (`preset ""`). Date-only ranges match entries whose
 **start** is in the inclusive local-day range (the helper resolves
 `from`/`to` to local `00:00:00` / `23:59:59`).
 
-**Field filters** — each change re-queries immediately (search is debounced
-300 ms):
+**Field filters + add** — the filter row holds the dropdowns, the search
+field, and the **`Add manual entry`** button pinned to the row's far
+right, bottom-aligned with the dropdown fields (anchored to the row's
+right/bottom edges, not a stretch spacer, so it holds its position at any
+window width). Each filter change re-queries immediately (search is
+debounced 300 ms):
 
 | Filter     | Options                                        |
 |------------|------------------------------------------------|
@@ -29,35 +34,62 @@ Any filter change resets to page 1 (`applyFilters` → `queryAt(0)`).
 
 ## The list
 
-- Paginated: `limit 50` fixed; the full entries array never enters QML
-  (see [architecture.md](architecture.md)). Pager row shows
-  `Showing 1–50 of 132` with `←`/`→` buttons enabled by position; after a
+- Paginated server-side at the global **page size** (the `pageSize`
+  setting, default 50 — see [settings.md](settings.md)); the full entries
+  array never enters QML (see [architecture.md](architecture.md)). After a
   delete that empties the page, the current page is re-fetched.
 - Each row is an `EntryRow` (`components/EntryRow.qml`): local
   `d MMM HH:mm` + `Client — Project` (bold), description (or `-`), a red
   `billable` mark when set, duration `HH:MM:SS` (bold). Clicking the row
   (or **Edit**) opens the edit card; **Del** asks for confirmation.
-- Totals bar under the list: `Total HH:MM · billable HH:MM · N entries` —
-  computed by the helper over the **whole filtered set**, not just the page.
 - Initial load fires once the service is injected (0 ms one-shot `Timer`).
+
+## Pager + status
+
+Pinned to the bottom of the table, above the totals bar: the shared
+`PaginationBar` (`components/PaginationBar.qml`) with `←` / `→` around
+`Showing X–Y of Z`, plus the global page-size selector
+(`10/25/50/100 / page`, writes `settings.pageSize`), and to its right the
+flash text (accent, 2 s) and the service's `lastError` (red). Changing the
+page size keeps the same entry at the top of the page (the offset is
+re-mapped to the same page index, clamped to the last page).
+
+## Totals bar
+
+`Total HH:MM · billable HH:MM · N entries` — computed by the helper over
+the **whole filtered set**, not just the page.
 
 ## Add entry
 
-Manual entries are added from the **Timer** tab's manual-entry modal
-([timer.md](timer.md)) — the same `EntryForm`, pre-filled by
-`defaultsToToday()` (today's date, current local time, 60 minutes, last
-client + project). The Entries tab is edit/delete only: the edit card
-opens pre-filled from an existing entry and saves through `updateEntry`.
+`Add manual entry` (filter row, far right) opens a centered modal on a
+scrim — `CardOverlay` (`components/CardOverlay.qml`, shared with the edit
+card below): title, `EntryForm` (date, time, minutes, then the shared
+`TaskForm`), `Add entry` and `Close`.
+
+- `EntryForm` pre-fills once, when the service is injected
+  (`defaultsToToday()`: today, current local time, 60 minutes, last-used
+  client/project via `applyDefaults()`). A half-filled form survives
+  close/reopen.
+- `Add entry` is gated on `entryForm.valid` (well-formed date/time,
+  minutes ≥ 1, client + project set); an invalid submit sets
+  `lastError = "Fill in a valid manual entry"`.
+- A successful add closes the modal, flashes `Entry added`, and
+  re-queries the current page.
+- **Scrim click or Esc dismisses** — the same semantics as the edit card
+  and the window-level confirm dialog. Esc routes through the view's
+  `handleKey` (the dashboard's key gate forwards it); while a card is open
+  the view reports `inputActive`, so the window key catcher does not
+  swallow the keys or close the window.
 
 ## Edit card (overlay)
 
-`CardOverlay` (`components/CardOverlay.qml`, shared with the Timer tab's
-manual-entry modal) while `editEntry !== null`: a centered 420px
-`BorderSurface` card (accent border, `Style.cornerRadius`) on a
-`Util.alpha(Color.background, 0.7)` scrim (`z: 10`) — the same visual
-language and dismissal semantics as the window-level confirm dialog:
-**scrim click or Esc discards** (Esc via the view's `handleKey`, routed
-by the dashboard's key gate). Contains an `EntryForm`:
+`CardOverlay` (shared with the manual-entry modal above) while
+`editEntry !== null`: a centered 420px `BorderSurface` card (accent border,
+`Style.cornerRadius`) on a `Util.alpha(Color.background, 0.7)` scrim
+(`z: 10`) — the same visual language and dismissal semantics as the
+window-level confirm dialog: **scrim click or Esc discards** (Esc via the
+view's `handleKey`, routed by the dashboard's key gate). Contains an
+`EntryForm`:
 
 - **date** `YYYY-MM-DD`, **time** `HH:MM` (local), **minutes** 1–1440
   (`NumberField`), then the shared `TaskForm` (client, project, description,

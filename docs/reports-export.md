@@ -10,9 +10,11 @@ renders them, so heavy intervals stay fast.
   Entries; see [entries.md](entries.md)). Date-only, local calendar,
   inclusive; the filter matches an entry's **start**.
 - **Group by** — three selected-buttons: **Day** (default), **Client**,
-  **Project**.
-- **Export CSV** / **Export HTML** — write the current range's raw entries
-  (see below); a flash reports `Exported N entries to CSV/HTML`.
+  **Project**. Switching group-by resets to page 1.
+- **Export CSV** / **Export HTML** — pinned to the far right of the
+  group-by row (anchored to the shared bottom edge, not a stretch spacer);
+  write the current range's raw entries (see below); a flash reports
+  `Exported N entries to CSV/HTML`.
 
 Note: the report deliberately shows **all** entries in the range (no
 client/project/billable/search filter is offered — `billable: null`,
@@ -29,11 +31,15 @@ A list of rows, each:
 | client   | client name | seconds, descending |
 | project  | `Client — Project` | seconds, descending |
 
-with `HH:MM` total and a muted `billable HH:MM` per row, plus a totals bar
-`Total HH:MM · billable HH:MM` (whole range).
+with `HH:MM` total and a muted `billable HH:MM` per row.
+
+Rows are paginated **server-side** at the global page size (the
+`pageSize` setting, default 50 — see [settings.md](settings.md)). A
+shared `PaginationBar` (`components/PaginationBar.qml`) is pinned to the
+bottom of the list with the flash/error status texts to its right.
 
 Row shape from the helper: `{ key, label, seconds, billableSeconds }` +
-response `totalSeconds`, `billableSeconds`.
+response `total`, `totalSeconds`, `billableSeconds`, `offset`, `limit`.
 
 ## Export files
 

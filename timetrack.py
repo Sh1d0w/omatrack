@@ -51,6 +51,7 @@ def default_state():
         "settings": {
             "currency": "EUR",
             "hourlyRate": 0,
+            "pageSize": 50,
             "invoice": {
                 "companyName": "",
                 "companyAddress": "",
@@ -498,9 +499,16 @@ def cmd_report(args):
         out_rows.sort(key=lambda r: r["key"])
     else:
         out_rows.sort(key=lambda r: r["seconds"], reverse=True)
+    limit = max(1, min(args.limit, 500))
+    offset = max(0, args.offset)
+    total = len(out_rows)
+    page = out_rows[offset : offset + limit]
     return {
         "ok": True,
-        "rows": out_rows,
+        "rows": page,
+        "total": total,
+        "offset": offset,
+        "limit": limit,
         "totalSeconds": sum(r["seconds"] for r in out_rows),
         "billableSeconds": sum(r["billableSeconds"] for r in out_rows),
     }
@@ -701,7 +709,7 @@ def cmd_entry_delete(args):
 # ---------------------------------------------------------------------------
 
 INVOICE_KEYS = ("companyName", "companyAddress", "taxRate", "numberPrefix", "nextNumber", "footer")
-TOP_KEYS = ("currency", "hourlyRate", "invoice")
+TOP_KEYS = ("currency", "hourlyRate", "pageSize", "invoice")
 
 
 def _validate_setting(key, value):
@@ -716,6 +724,10 @@ def _validate_setting(key, value):
             raise CmdError(f"invalid {key}: number >= 0 required")
         if key == "nextNumber" and not isinstance(value, int):
             raise CmdError("invalid nextNumber: integer >= 0 required")
+        return value
+    if key == "pageSize":
+        if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= 500:
+            raise CmdError(f"invalid {key}: integer 1-500 required")
         return value
     if key in ("numberPrefix", "companyName", "companyAddress", "footer"):
         if not isinstance(value, str):
@@ -1038,6 +1050,8 @@ def build_parser():
     sp.add_argument("--to", default=None)
     sp.add_argument("--client-id", default=None)
     sp.add_argument("--project-id", default=None)
+    sp.add_argument("--offset", type=int, default=0)
+    sp.add_argument("--limit", type=int, default=50)
 
     sp = add("client-add", cmd_client_add, "add a client")
     sp.add_argument("--name", required=True)

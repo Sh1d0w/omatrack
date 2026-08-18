@@ -1,13 +1,17 @@
 # Clients & projects
 
-`views/ClientsView.qml` and `views/ProjectsView.qml` — CRUD for the two
-reference tables. Both are flat lists (no pagination: these tables are
-expected to stay small) backed by the in-service view state.
+`views/ClientsView.qml` and `views/ProjectsView.qml` - CRUD for the two
+reference tables. Both are paginated at the bottom by the shared
+`PaginationBar` (`components/PaginationBar.qml`) with the global page-size
+selector; pagination is **QML-side slicing** (`service.clients.slice(…)`),
+because the dropdowns need the full arrays in the service anyway.
 
 ## Clients
 
 - **Add** — top row: `New client…` field + **Add** (Enter in the field
-  commits). Empty names are ignored; duplicates are rejected (see rules).
+  commits), the button pinned to the row's far right, bottom-aligned with
+  the input (anchored, not a stretch spacer). New clients append at the
+  end, so a successful add jumps the list to the last page.
 - **Rename** — each row's name is a `TextField`; **Enter commits** (only
   when non-empty and actually changed) → `service.updateClient(id, name)`.
 - **Row meta** — `N projects · added YYYY-MM-DD`.
@@ -16,15 +20,20 @@ expected to stay small) backed by the in-service view state.
   and entries must already be gone." → `service.deleteClient(id)`. The
   helper **refuses** when the client is still referenced; the red
   `lastError` line shows the count.
-- While any name field is focused, the view reports `inputActive` so the
-  window's Esc goes to the control, not the window. The dialog needs no
-  view-side plumbing: the dashboard owns it and knows when it is open.
+- The bottom pager page-navigates the client list (`prevPage`/`nextPage`
+  step by one page of the global page size); a page-size change keeps the
+  same client at the top of the page.
+- While a name field is focused or the page-size popup is open, the view
+  reports `inputActive` so the window's Esc goes to the control, not the
+  window. The dialog needs no view-side plumbing: the dashboard owns it
+  and knows when it is open.
 
 ## Projects
 
 Grouped by client: one section per client (client name as header). Each
 section carries its own `New project for <client>…` add row **above** the
-project list.
+project list. Pagination is over the **client sections** — one page of
+clients per page (their project lists render in full inside the section).
 
 - **Add** — per client section; the client is fixed by the section.
 - **Rename** — inline `TextField`, Enter commits →

@@ -20,25 +20,39 @@ Item {
   property string groupBy: "day"
 
   property var rows: []
+  property int total: 0
   property int totalSeconds: 0
   property int billableSeconds: 0
+  property int offset: 0
+  readonly property int limit: root.service ? root.service.pageSize : 50
 
-  readonly property bool inputActive: rangeBar.fieldActive
+  readonly property bool inputActive: rangeBar.fieldActive || pageBar.pageSizePopupOpen
 
   function load() {
     if (!root.service) return
     root.service.queryReport(
       { from: root.from, to: root.to, clientId: "", projectId: "", billable: null, search: "" },
       root.groupBy,
+      root.offset,
       function(resp) {
         if (resp.ok) {
           root.rows = resp.rows
+          root.total = resp.total
           root.totalSeconds = resp.totalSeconds
           root.billableSeconds = resp.billableSeconds
         } else {
           root.service.lastError = resp.error || "Report failed"
         }
       })
+  }
+
+  function prevPage() {
+    root.offset = Math.max(0, root.offset - root.limit)
+    root.load()
+  }
+  function nextPage() {
+    root.offset = Math.min(Math.max(0, root.total - root.limit), root.offset + root.limit)
+    root.load()
   }
 
   property string flash: ""
@@ -86,74 +100,86 @@ Item {
         root.from = f
         root.to = t
         root.currentPreset = preset
+        root.offset = 0
         root.load()
       }
     }
 
-    Row {
-      spacing: Style.space(8)
+    // Action row: group-by buttons on the left, the exports pinned to the
+    // far right (shared bottom edge); anchored, not a stretch spacer.
+    Item {
+      id: actionBar
+      width: parent.width
+      height: actionRow.implicitHeight
 
-      Text {
-        text: "Group by"
-        color: Color.muted
-        font.pixelSize: Style.font.caption
-        anchors.verticalCenter: parent.verticalCenter
-      }
+      Row {
+        id: actionRow
+        anchors { left: parent.left; top: parent.top }
+        spacing: Style.space(8)
 
-      Button {
-        text: "Day"
-        leftAlign: true
-        focusable: true
-        selected: root.groupBy === "day"
-        onClicked: {
-          root.groupBy = "day"
-          root.load()
+        Text {
+          text: "Group by"
+          color: Color.muted
+          font.pixelSize: Style.font.caption
+          anchors.verticalCenter: parent.verticalCenter
+        }
+
+        Button {
+          text: "Day"
+          leftAlign: true
+          focusable: true
+          selected: root.groupBy === "day"
+          onClicked: {
+            root.groupBy = "day"
+            root.offset = 0
+            root.load()
+          }
+        }
+
+        Button {
+          text: "Client"
+          leftAlign: true
+          focusable: true
+          selected: root.groupBy === "client"
+          onClicked: {
+            root.groupBy = "client"
+            root.offset = 0
+            root.load()
+          }
+        }
+
+        Button {
+          text: "Project"
+          leftAlign: true
+          focusable: true
+          selected: root.groupBy === "project"
+          onClicked: {
+            root.groupBy = "project"
+            root.offset = 0
+            root.load()
+          }
         }
       }
 
-      Button {
-        text: "Client"
-        leftAlign: true
-        focusable: true
-        selected: root.groupBy === "client"
-        onClicked: {
-          root.groupBy = "client"
-          root.load()
+      Row {
+        id: exportRow
+        anchors { right: parent.right; bottom: parent.bottom }
+        spacing: Style.space(8)
+
+        Button {
+          text: "Export CSV"
+          leftAlign: true
+          focusable: true
+          onClicked: root.doExport("csv")
+        }
+
+        Button {
+          text: "Export HTML"
+          leftAlign: true
+          focusable: true
+          onClicked: root.doExport("html")
         }
       }
-
-      Button {
-        text: "Project"
-        leftAlign: true
-        focusable: true
-        selected: root.groupBy === "project"
-        onClicked: {
-          root.groupBy = "project"
-          root.load()
-        }
-      }
-      Item { width: 1 }
-
-      Button {
-        text: "Export CSV"
-        leftAlign: true
-        focusable: true
-        onClicked: root.doExport("csv")
-      }
-
-      Button {
-        text: "Export HTML"
-        leftAlign: true
-        focusable: true
-        onClicked: root.doExport("html")
-      }
-    }
-
-    Text {
-      text: root.flash
-      color: Color.accent
-      font.pixelSize: Style.font.caption
-      visible: root.flash !== ""
     }
   }
 
@@ -164,7 +190,7 @@ Item {
       right: parent.right
       top: head.bottom
       topMargin: Style.space(10)
-      bottom: totalsBar.top
+      bottom: pagerBar.top
       bottomMargin: Style.space(10)
     }
     model: root.rows
@@ -201,6 +227,48 @@ Item {
     }
   }
 
+  // ---- pager + status -----------------------------------------------------------
+  // Pinned to the bottom of the table, above the totals bar: the shared
+  // PaginationBar plus the flash/error status texts.
+  Row {
+    id: pagerBar
+    anchors {
+      left: parent.left
+      right: parent.right
+      bottom: totalsBar.top
+      bottomMargin: Style.space(10)
+    }
+    spacing: Style.space(8)
+
+    PaginationBar {
+      id: pageBar
+      service: root.service
+      total: root.total
+      offset: root.offset
+      limit: root.limit
+      emptyText: "No rows"
+      onPrevRequested: root.prevPage()
+      onNextRequested: root.nextPage()
+    }
+
+    Text {
+      text: root.flash
+      color: Color.accent
+      font.pixelSize: Style.font.caption
+      anchors.verticalCenter: parent.verticalCenter
+      visible: root.flash !== ""
+    }
+
+    Text {
+      text: root.service ? root.service.lastError : ""
+      color: Color.urgent
+      font.pixelSize: Style.font.caption
+      anchors.verticalCenter: parent.verticalCenter
+      elide: Text.ElideRight
+      visible: root.service && root.service.lastError !== ""
+    }
+  }
+
   Item {
     id: totalsBar
     anchors {
@@ -225,5 +293,20 @@ Item {
     repeat: false
     running: root.service !== null
     onTriggered: root.load()
+  }
+
+  // Page-size changes re-query the first page (server-side pagination).
+  Connections {
+    target: root
+    function onLimitChanged(l) {
+      if (l <= 0 || !root.service) return
+      if (root.offset === 0) {
+        root.load()
+      } else {
+        var page = Math.floor(root.offset / l)
+        root.offset = Math.min(page * l, Math.max(0, root.total - l))
+        root.load()
+      }
+    }
   }
 }

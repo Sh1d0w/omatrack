@@ -95,8 +95,9 @@ minus the entries array, plus:
 - `daySeconds` / `dayBillableSeconds` — local-today totals,
 - `entryCount` — total number of entries (never the entries themselves).
 
-Entries reach QML only in pages: `entries --offset N --limit 50` (the UI
-always uses limit 50). The full entries array never enters the process.
+Entries reach QML only in pages: `entries --offset N --limit N` (the UI
+passes the global `pageSize` setting, default 50). The full entries array
+never enters the process.
 
 ## The 1s tick
 

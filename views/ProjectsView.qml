@@ -1,7 +1,7 @@
 import QtQuick
 import qs.Commons
 import qs.Ui
-
+import "../components"
 // Projects tab: one section per client. Rename inline, add per client,
 // delete with confirmation. The helper blocks deleting a project that
 // entries still reference.
@@ -14,7 +14,12 @@ Item {
   // stay null forever.
   readonly property var service: root.dashboard ? root.dashboard.service : null
   property int focusCount: 0
-  readonly property bool inputActive: focusCount > 0
+  readonly property bool inputActive: focusCount > 0 || pageBar.pageSizePopupOpen
+  // QML-side pagination over the client sections (the full projects array
+  // stays in the service for the dropdowns); the bottom pager flips pages.
+  property int offset: 0
+  readonly property int limit: root.service ? root.service.pageSize : 50
+  readonly property int totalCount: root.service ? root.service.clients.length : 0
 
   function projectsFor(clientId) {
     var out = []
@@ -35,15 +40,21 @@ Item {
     })
   }
 
+  function prevPage() { root.offset = Math.max(0, root.offset - root.limit) }
+  function nextPage() {
+    root.offset = Math.min(Math.max(0, root.totalCount - root.limit), root.offset + root.limit)
+  }
+
   ListView {
     id: listView
     anchors {
       left: parent.left
       right: parent.right
       top: parent.top
-      bottom: parent.bottom
+      bottom: pageBar.top
+      bottomMargin: Style.space(10)
     }
-    model: root.service ? root.service.clients : []
+    model: root.service ? root.service.clients.slice(root.offset, root.offset + root.limit) : []
     spacing: Style.space(14)
     clip: true
 
@@ -126,6 +137,33 @@ Item {
           }
         }
       }
+    }
+  }
+
+  // ---- pager --------------------------------------------------------------------
+  PaginationBar {
+    id: pageBar
+    anchors {
+      left: parent.left
+      right: parent.right
+      bottom: parent.bottom
+    }
+    service: root.service
+    total: root.totalCount
+    offset: root.offset
+    limit: root.limit
+    emptyText: "No clients"
+    onPrevRequested: root.prevPage()
+    onNextRequested: root.nextPage()
+  }
+
+  // Page-size changes keep the same section at the top of the page.
+  Connections {
+    target: root
+    function onLimitChanged(l) {
+      if (l <= 0 || root.totalCount === 0) return
+      var page = Math.floor(root.offset / l)
+      root.offset = Math.min(page * l, Math.max(0, root.totalCount - l))
     }
   }
 }

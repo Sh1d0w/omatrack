@@ -3,14 +3,12 @@ import qs.Commons
 import qs.Ui
 import "../components"
 
-// Timer tab: live hero + pause/resume/stop, the next-task form
-// (last-used pre-selected, description required, Start below it) and a
-// manual-entry modal.
+// Timer tab: live hero + pause/resume/stop, and the next-task form
+// (last-used pre-selected, description required, Start below it).
 //
-// While a task runs — paused included — the next-task form and Start are
-// hidden; they come back only once the task stops. The "Next task" header
-// row stays, with the "Add manual entry" button on its opposite side,
-// because manual entries work in every state.
+// While a task runs — paused included — the whole "Next task" section
+// (header, form, Start) is hidden; it comes back only once the task stops.
+// Manual entries live on the Entries tab, where they belong.
 Item {
   id: root
 
@@ -19,22 +17,7 @@ Item {
   // after this view may already be loaded, so a one-shot assignment could
   // stay null forever.
   readonly property var service: root.dashboard ? root.dashboard.service : null
-  property bool inputActive: taskForm.keyActiveItem !== null || entryForm.keyActiveItem !== null || root.entryModalOpen
-  property string flash: ""
-  property bool entryModalOpen: false
-
-  function closeEntryModal() { root.entryModalOpen = false }
-
-  // Window-level key gate: the dashboard forwards keys to views that
-  // define handleKey. Esc dismisses the manual-entry modal (the same
-  // dismissal as a scrim click).
-  function handleKey(event) {
-    if (root.entryModalOpen && event.key === Qt.Key_Esc) {
-      root.closeEntryModal()
-      return true
-    }
-    return false
-  }
+  property bool inputActive: taskForm.keyActiveItem !== null
 
   function heroTaskName() {
     var s = root.service
@@ -43,12 +26,6 @@ Item {
     var desc = s.active.description !== "" ? s.active.description : ""
     if (desc !== "" && client !== "") return client + " — " + desc
     return desc !== "" ? desc : (client !== "" ? client : "-")
-  }
-
-  Timer {
-    id: flashTimer
-    interval: 2000
-    onTriggered: root.flash = ""
   }
 
   Column {
@@ -143,32 +120,11 @@ Item {
     PanelSeparator {}
 
     // ---- next task ----------------------------------------------------------
-    // "Add manual entry", pinned to the row's far right, opens the
-    // manual-entry modal; it stays available while a task runs, because
-    // manual entries are independent of the timer. The spacer stretches to
-    // keep the button on the header's line, at the opposite edge.
-    Row {
-      width: parent.width
-      spacing: Style.space(8)
-
-      PanelSectionHeader {
-        id: nextTaskHeader
-        text: "Next task"
-        anchors.verticalCenter: parent.verticalCenter
-      }
-
-      Item {
-        width: Math.max(0, parent.width - nextTaskHeader.width
-          - addManualEntryButton.width - 2 * Style.space(8))
-      }
-
-      Button {
-        id: addManualEntryButton
-        text: "Add manual entry"
-        focusable: true
-        anchors.verticalCenter: parent.verticalCenter
-        onClicked: root.entryModalOpen = true
-      }
+    // Header shares the form's visibility rule: hidden while a task runs
+    // (paused included), there is no next task to line up until it stops.
+    PanelSectionHeader {
+      text: "Next task"
+      visible: !(root.service && root.service.running)
     }
 
     // Hidden while a task runs (paused included): there is no next task to
@@ -209,13 +165,6 @@ Item {
     }
 
     Text {
-      text: root.flash
-      color: Color.accent
-      font.pixelSize: Style.font.caption
-      visible: root.flash !== ""
-    }
-
-    Text {
       text: root.service ? root.service.lastError : ""
       color: Color.urgent
       font.pixelSize: Style.font.caption
@@ -225,67 +174,5 @@ Item {
     }
 
     Item { width: 1; height: 1 }
-  }
-  // ---- manual-entry modal ----------------------------------------------------
-  // CardOverlay (shared with the Entries edit card): scrim click or Esc
-  // dismisses; a successful add closes it and flashes.
-  CardOverlay {
-    anchors.fill: parent
-    visible: root.entryModalOpen
-    cardWidth: Style.space(420)
-    onScrimClicked: root.closeEntryModal()
-
-    Text {
-      text: "Manual entry"
-      color: Color.foreground
-      font.pixelSize: Style.font.title
-      font.bold: true
-    }
-
-    EntryForm {
-      id: entryForm
-      service: root.service
-      width: parent.width
-    }
-
-    Row {
-      spacing: Style.space(8)
-
-      Button {
-        text: "Add entry"
-        leftAlign: true
-        focusable: true
-        onClicked: {
-          var s = root.service
-          if (!s) return
-          if (!entryForm.valid) {
-            s.lastError = "Fill in a valid manual entry"
-            return
-          }
-          s.addEntry({
-            date: entryForm.dateStr,
-            time: entryForm.timeStr,
-            minutes: entryForm.minutes,
-            clientId: entryForm.clientId,
-            projectId: entryForm.projectId,
-            description: entryForm.description,
-            billable: entryForm.billable
-          }, function(resp) {
-            if (resp.ok) {
-              root.closeEntryModal()
-              root.flash = "Entry added"
-              flashTimer.restart()
-            }
-          })
-        }
-      }
-
-      Button {
-        text: "Close"
-        leftAlign: true
-        focusable: true
-        onClicked: root.closeEntryModal()
-      }
-    }
   }
 }

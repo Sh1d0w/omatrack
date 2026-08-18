@@ -3,9 +3,9 @@ import qs.Commons
 import qs.Ui
 import "../components"
 
-// Entries tab: date presets + filters, a paginated entry list (50 per
-// page — the full array never enters QML), and edit/delete through a
-// centered card overlay.
+// Entries tab: date presets + filters, a paginated entry list (page size
+// is the pageSize setting — the full array never enters QML), manual
+// entry add, and edit/delete, all through centered card overlays.
 Item {
   id: root
 
@@ -16,11 +16,13 @@ Item {
   readonly property var service: root.dashboard ? root.dashboard.service : null
   property string flash: ""
 
-  // The window keyCatcher blocks while a filter control, the edit form, or
-  // the edit overlay itself owns the keyboard.
+  // The window keyCatcher blocks while a filter control, a form field, a
+  // card overlay, or the pager's page-size popup owns the keyboard.
   readonly property bool inputActive: clientDrop.popupOpen || projectDrop.popupOpen
     || billableDrop.popupOpen || searchField.activeFocus || rangeBar.fieldActive
-    || root.editEntry !== null
+    || editForm.keyActiveItem !== null || root.editEntry !== null
+    || entryForm.keyActiveItem !== null || root.entryModalOpen
+    || pageBar.pageSizePopupOpen
 
   // ---- state -----------------------------------------------------------------
   property var entries: []
@@ -28,7 +30,7 @@ Item {
   property int totalSeconds: 0
   property int billableSeconds: 0
   property int offset: 0
-  readonly property int limit: 50
+  readonly property int limit: root.service ? root.service.pageSize : 50
 
   property string from: ""
   property string to: ""
@@ -38,6 +40,7 @@ Item {
   property string search: ""
   property string currentPreset: "all"
   property var editEntry: null
+  property bool entryModalOpen: false
 
   Timer {
     id: flashTimer
@@ -114,6 +117,8 @@ Item {
     root.editEntry = null
   }
 
+  function closeEntryModal() { root.entryModalOpen = false }
+
   function requestDelete(entry) {
     if (!entry || !root.dashboard) return
     var id = entry.id
@@ -133,9 +138,13 @@ Item {
   }
 
   // Window-level key gate: the dashboard forwards keys to views that define
-  // handleKey. Esc closes the edit overlay (same dismissal as clicking the
-  // scrim).
+  // handleKey. Esc closes whichever card overlay is open (the most recently
+  // opened one wins — same dismissal as clicking its scrim).
   function handleKey(event) {
+    if (root.entryModalOpen && event.key === Qt.Key_Esc) {
+      root.closeEntryModal()
+      return true
+    }
     if (root.editEntry !== null && event.key === Qt.Key_Esc) {
       root.closeEdit()
       return true
@@ -169,117 +178,88 @@ Item {
       }
     }
 
-    // ---- filter row ----------------------------------------------------------
-    Row {
-      spacing: Style.space(8)
+    // ---- filter row + manual-entry action ----------------------------------
+    // "Add manual entry" pins to the row's far right, bottom-aligned with
+    // the dropdown input fields (shared bottom edge). Anchored, not a
+    // stretch spacer, so it holds its position at any window width.
+    Item {
+      id: filterBar
+      width: parent.width
+      height: filterRow.implicitHeight
 
-      Dropdown {
-        id: clientDrop
-        label: "Client"
-        showLabel: true
-        width: Style.space(170)
-        value: root.clientId
-        options: {
-          var opts = [{ value: "", label: "All clients" }]
-          if (root.service) opts = opts.concat(root.service.clientOptions())
-          return opts
+      Row {
+        id: filterRow
+        anchors { left: parent.left; top: parent.top }
+        spacing: Style.space(8)
+
+        Dropdown {
+          id: clientDrop
+          label: "Client"
+          showLabel: true
+          width: Style.space(170)
+          value: root.clientId
+          options: {
+            var opts = [{ value: "", label: "All clients" }]
+            if (root.service) opts = opts.concat(root.service.clientOptions())
+            return opts
+          }
+          onChanged: function(value) {
+            root.clientId = value
+            root.applyFilters()
+          }
         }
-        onChanged: function(value) {
-          root.clientId = value
-          root.applyFilters()
+
+        Dropdown {
+          id: projectDrop
+          label: "Project"
+          showLabel: true
+          width: Style.space(190)
+          value: root.projectId
+          options: {
+            var opts = [{ value: "", label: "All projects" }]
+            if (root.service) opts = opts.concat(root.service.allProjectOptions())
+            return opts
+          }
+          onChanged: function(value) {
+            root.projectId = value
+            root.applyFilters()
+          }
         }
-      }
 
-      Dropdown {
-        id: projectDrop
-        label: "Project"
-        showLabel: true
-        width: Style.space(190)
-        value: root.projectId
-        options: {
-          var opts = [{ value: "", label: "All projects" }]
-          if (root.service) opts = opts.concat(root.service.allProjectOptions())
-          return opts
+        Dropdown {
+          id: billableDrop
+          label: "Billable"
+          showLabel: true
+          width: Style.space(120)
+          value: root.billableFilter
+          options: [
+            { value: "", label: "All" },
+            { value: "yes", label: "Billable" },
+            { value: "no", label: "Non-billable" }
+          ]
+          onChanged: function(value) {
+            root.billableFilter = value
+            root.applyFilters()
+          }
         }
-        onChanged: function(value) {
-          root.projectId = value
-          root.applyFilters()
+
+        TextField {
+          id: searchField
+          placeholderText: "Search…"
+          width: Style.space(150)
+          onTextChanged: {
+            root.search = text
+            searchDebounce.restart()
+          }
         }
-      }
-
-      Dropdown {
-        id: billableDrop
-        label: "Billable"
-        showLabel: true
-        width: Style.space(120)
-        value: root.billableFilter
-        options: [
-          { value: "", label: "All" },
-          { value: "yes", label: "Billable" },
-          { value: "no", label: "Non-billable" }
-        ]
-        onChanged: function(value) {
-          root.billableFilter = value
-          root.applyFilters()
-        }
-      }
-
-      TextField {
-        id: searchField
-        placeholderText: "Search…"
-        width: Style.space(150)
-        onTextChanged: {
-          root.search = text
-          searchDebounce.restart()
-        }
-      }
-    }
-
-    // ---- pager + status -------------------------------------------------------
-    Row {
-      spacing: Style.space(8)
-
-      Button {
-        text: "←"
-        focusable: true
-        enabled: root.offset > 0
-        onClicked: root.prevPage()
-      }
-
-      Text {
-        text: root.total > 0
-          ? "Showing " + (root.offset + 1) + "–" + Math.min(root.offset + root.limit, root.total)
-            + " of " + root.total
-          : "No entries"
-        color: Color.muted
-        font.pixelSize: Style.font.caption
-        anchors.verticalCenter: parent.verticalCenter
       }
 
       Button {
-        text: "→"
+        id: addEntryButton
+        text: "Add manual entry"
+        anchors { right: parent.right; bottom: parent.bottom }
         focusable: true
-        enabled: root.offset + root.limit < root.total
-        onClicked: root.nextPage()
-      }
-
-      Item { width: 1 }
-
-      Text {
-        text: root.flash
-        color: Color.accent
-        font.pixelSize: Style.font.caption
-        anchors.verticalCenter: parent.verticalCenter
-        visible: root.flash !== ""
-      }
-
-      Text {
-        text: root.service ? root.service.lastError : ""
-        color: Color.urgent
-        font.pixelSize: Style.font.caption
-        anchors.verticalCenter: parent.verticalCenter
-        elide: Text.ElideRight
-        visible: root.service && root.service.lastError !== ""
+        onClicked: root.entryModalOpen = true
       }
     }
   }
@@ -292,7 +272,7 @@ Item {
       right: parent.right
       top: topControls.bottom
       topMargin: Style.space(10)
-      bottom: totalsBar.top
+      bottom: pagerBar.top
       bottomMargin: Style.space(10)
     }
     model: root.entries
@@ -305,6 +285,49 @@ Item {
       service: root.service
       onEditRequested: root.openEdit(modelData)
       onDeleteRequested: root.requestDelete(modelData)
+    }
+  }
+
+  // ---- pager + status -----------------------------------------------------------
+  // Pinned to the bottom of the table: the shared PaginationBar (page
+  // navigation + the global page-size selector) with the flash/error
+  // status texts to its right.
+  Row {
+    id: pagerBar
+    anchors {
+      left: parent.left
+      right: parent.right
+      bottom: totalsBar.top
+      bottomMargin: Style.space(10)
+    }
+    spacing: Style.space(8)
+
+    PaginationBar {
+      id: pageBar
+      service: root.service
+      total: root.total
+      offset: root.offset
+      limit: root.limit
+      emptyText: "No entries"
+      onPrevRequested: root.prevPage()
+      onNextRequested: root.nextPage()
+    }
+
+    Text {
+      text: root.flash
+      color: Color.accent
+      font.pixelSize: Style.font.caption
+      anchors.verticalCenter: parent.verticalCenter
+      visible: root.flash !== ""
+    }
+
+    Text {
+      text: root.service ? root.service.lastError : ""
+      color: Color.urgent
+      font.pixelSize: Style.font.caption
+      anchors.verticalCenter: parent.verticalCenter
+      elide: Text.ElideRight
+      visible: root.service && root.service.lastError !== ""
     }
   }
 
@@ -328,9 +351,9 @@ Item {
     }
   }
 
-  // ---- edit card overlay ------------------------------------------------------------
-  // Shared card-on-scrim modal (CardOverlay, also the Timer's manual-entry
-  // modal): same visual language and dismissal semantics as the
+  // ---- edit card overlay --------------------------------------------------------
+  // Shared card-on-scrim modal (CardOverlay, also the manual-entry modal
+  // below): same visual language and dismissal semantics as the
   // window-level confirm dialog — scrim click or Esc discards (Esc via the
   // view's handleKey, routed by the dashboard's key gate).
   CardOverlay {
@@ -401,6 +424,86 @@ Item {
         focusable: true
         onClicked: root.closeEdit()
       }
+    }
+  }
+
+  // ---- manual-entry card overlay -------------------------------------------------
+  // Same shared CardOverlay language as the edit card. The EntryForm fills
+  // today's date/time and the last-used task defaults on service injection;
+  // a successful add re-queries the current page.
+  CardOverlay {
+    id: entryOverlay
+    anchors.fill: parent
+    visible: root.entryModalOpen
+    cardWidth: Style.space(420)
+    onScrimClicked: root.closeEntryModal()
+
+    Text {
+      text: "Add manual entry"
+      color: Color.foreground
+      font.pixelSize: Style.font.title
+      font.bold: true
+    }
+
+    EntryForm {
+      id: entryForm
+      service: root.service
+      width: parent.width
+    }
+
+    Row {
+      spacing: Style.space(8)
+
+      Button {
+        text: "Add entry"
+        leftAlign: true
+        focusable: true
+        onClicked: {
+          var s = root.service
+          if (!s) return
+          if (!entryForm.valid) {
+            s.lastError = "Fill in a valid manual entry"
+            return
+          }
+          s.addEntry({
+            date: entryForm.dateStr,
+            time: entryForm.timeStr,
+            minutes: entryForm.minutes,
+            clientId: entryForm.clientId,
+            projectId: entryForm.projectId,
+            description: entryForm.description,
+            billable: entryForm.billable
+          }, function(resp) {
+            if (resp.ok) {
+              root.closeEntryModal()
+              root.flash = "Entry added"
+              flashTimer.restart()
+              root.refreshCurrentPage()
+            } else {
+              s.lastError = resp.error || "Add failed"
+            }
+          })
+        }
+      }
+
+      Button {
+        text: "Close"
+        leftAlign: true
+        focusable: true
+        onClicked: root.closeEntryModal()
+      }
+    }
+  }
+
+  // Page-size changes re-paginate in place: keep the current entry (the
+  // offset's first row) as the new page's first row.
+  Connections {
+    target: root
+    function onLimitChanged(l) {
+      if (l <= 0 || !root.service || root.entries.length === 0) return
+      var page = Math.floor(root.offset / l)
+      root.offset = Math.min(page * l, Math.max(0, root.total - l))
+      root.refreshCurrentPage()
     }
   }
 

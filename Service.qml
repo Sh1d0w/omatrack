@@ -35,6 +35,14 @@ Item {
       numberPrefix: "INV-", nextNumber: 1, footer: ""
     })
   })
+
+  // Page size of every table view (settings.pageSize; default 50, clamped
+  // 1-500 so a corrupt state file cannot break the UI).
+  readonly property int pageSize: {
+    var v = parseInt(root.settings && root.settings.pageSize, 10)
+    if (isNaN(v)) return 50
+    return Math.min(500, Math.max(1, v))
+  }
   property var clients: []
   property var projects: []
   property var active: null
@@ -236,13 +244,14 @@ Item {
   }
 
   function queryEntries(filter, offset, done) {
-    var args = ["entries", "--offset", String(offset || 0), "--limit", "50"]
+    var args = ["entries", "--offset", String(offset || 0), "--limit", String(root.pageSize)]
     root.pushFilterFlags(args, filter)
     root.run(args, function(resp) { if (done) done(resp) })
   }
 
-  function queryReport(filter, groupBy, done) {
-    var args = ["report", "--group-by", groupBy]
+  function queryReport(filter, groupBy, offset, done) {
+    var args = ["report", "--group-by", groupBy,
+      "--offset", String(offset || 0), "--limit", String(root.pageSize)]
     root.pushFilterFlags(args, filter)
     root.run(args, function(resp) { if (done) done(resp) })
   }

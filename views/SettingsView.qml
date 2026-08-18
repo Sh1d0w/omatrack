@@ -2,8 +2,9 @@ import QtQuick
 import qs.Commons
 import qs.Ui
 
-// Settings tab: currency, hourly rate, and the invoice identity block.
-// Local copies sync from the service on load; Save pushes one patch.
+// Settings tab: currency, hourly rate, the table page size, and the
+// invoice identity block. Local copies sync from the service on load;
+// Save pushes one patch (the page size saves itself on change).
 Item {
   id: root
 
@@ -14,7 +15,7 @@ Item {
   readonly property var service: root.dashboard ? root.dashboard.service : null
   property int focusCount: 0
   property bool dirty: false
-  readonly property bool inputActive: focusCount > 0
+  readonly property bool inputActive: focusCount > 0 || pageDrop.popupOpen
 
   function syncFromSettings() {
     var s = root.service
@@ -107,6 +108,26 @@ Item {
         placeholderText: "e.g. 85.00"
         onActiveFocusChanged: root.focusCount = Math.max(0, root.focusCount + (activeFocus ? 1 : -1))
         onTextChanged: root.markDirty()
+      }
+    }
+
+    Row {
+      spacing: Style.space(8)
+      Text { text: "Page size"; color: Color.muted; font.pixelSize: Style.font.caption; width: Style.space(130); anchors.verticalCenter: parent.verticalCenter }
+      Dropdown {
+        id: pageDrop
+        width: Style.space(110)
+        value: String(root.service ? root.service.pageSize : 50)
+        options: [
+          { value: "10", label: "10 / page" },
+          { value: "25", label: "25 / page" },
+          { value: "50", label: "50 / page" },
+          { value: "100", label: "100 / page" }
+        ]
+        onChanged: function(v) {
+          if (root.service)
+            root.service.saveSettings({ pageSize: parseInt(v, 10) })
+        }
       }
     }
 
