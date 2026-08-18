@@ -19,7 +19,7 @@ Item {
   property string clientId: ""
   property var invoiceResult: null
 
-  readonly property bool inputActive: rangeBar.fromField.activeFocus || clientDrop.popupOpen
+  readonly property bool inputActive: rangeBar.fieldActive || clientDrop.popupOpen
 
   function generate() {
     if (!root.service || root.clientId === "") return

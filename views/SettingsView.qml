@@ -216,7 +216,7 @@ Item {
 
   Connections {
     target: root.service
-    onSettingsChanged: {
+    function onSettingsChanged() {
       if (root && !root.dirty)
         root.syncFromSettings()
     }

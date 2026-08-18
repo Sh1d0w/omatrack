@@ -17,12 +17,8 @@ Item {
   // The window keyCatcher blocks while a filter control or the edit form
   // owns the keyboard.
   readonly property bool inputActive: clientDrop.popupOpen || projectDrop.popupOpen
-    || billableDrop.popupOpen || searchField.activeFocus || rangeBarFieldActive()
+    || billableDrop.popupOpen || searchField.activeFocus || rangeBar.fieldActive
     || (root.editEntry !== null && editForm.keyActiveItem !== null)
-
-  function rangeBarFieldActive() {
-    return rangeBar.fromField.activeFocus || rangeBar.toField.activeFocus
-  }
 
   // ---- state -----------------------------------------------------------------
   property var entries: []

@@ -16,6 +16,8 @@ Item {
   property string from: ""
   property string to: ""
   property string currentPreset: "today"
+  // True while either manual date field owns keyboard focus.
+  readonly property bool fieldActive: _fromField.activeFocus || _toField.activeFocus
 
   signal changed(string from, string to, string preset)
 
@@ -44,7 +46,7 @@ Item {
     Item { width: Style.space(10) }
 
     TextField {
-      id: fromField
+      id: _fromField
       width: Style.space(96)
       placeholderText: "YYYY-MM-DD"
       text: root.from
@@ -63,7 +65,7 @@ Item {
     }
 
     TextField {
-      id: toField
+      id: _toField
       width: Style.space(96)
       placeholderText: "YYYY-MM-DD"
       text: root.to
@@ -110,8 +112,8 @@ Item {
     root.to = r[1]
     // Typing into a field breaks its text binding; set the text explicitly so
     // the controls always show the selected preset's range.
-    fromField.text = r[0]
-    toField.text = r[1]
+    _fromField.text = r[0]
+    _toField.text = r[1]
     root.currentPreset = preset
     root.changed(r[0], r[1], preset)
   }

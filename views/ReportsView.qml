@@ -21,7 +21,7 @@ Item {
   property int totalSeconds: 0
   property int billableSeconds: 0
 
-  readonly property bool inputActive: rangeBar.fromField.activeFocus || rangeBar.toField.activeFocus
+  readonly property bool inputActive: rangeBar.fieldActive
 
   function load() {
     if (!root.service) return
