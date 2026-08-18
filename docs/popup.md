@@ -6,10 +6,11 @@ start/pause, the new-task form, and a dashboard shortcut.
 
 ## Structure (top → bottom)
 
-1. **Status row** — an 8px dot (accent while running, dim otherwise) plus the
-   active task: `Acme — Hero section` / `-`, with the caption
-   `01:02:03 · billable` (running) or `No active timer` / `Today 04:12`
-   (idle).
+1. **Status row** — an 8px dot (accent while running, dim otherwise), the
+   title (`Acme — Hero section`, or the description alone, or the client
+   alone, or `-`; `No active timer` when idle) and the caption
+   (`01:02:03 · billable` / `01:02:03 · non-billable` while running;
+   `Today 04:12` or `Start a task below` when idle).
 2. **Primary action** — one full-width `Button`: `Pause` while running
    (→ `service.stopTask()`), `Start` when idle. `Start` is only *active* when
    `formReady` (client and project both set), so it visually reflects

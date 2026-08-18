@@ -20,8 +20,8 @@ One plugin, three kinds (declared in `manifest.json`):
 Because both `bar-widget` and `panel` kinds are present, the shell's
 summon/toggle routing (`shell.qml`) targets the **panel** entry:
 `omarchy-shell shell toggle io.github.sh1d0w.timetrack` opens the dashboard,
-not the popup. The bar popup opens only by clicking the bar widget (test it
-with `omarchy-shell shell togglePanelAt right <index>`).
+not the popup — there is no CLI to open the bar popup, which opens only by
+clicking the bar widget.
 
 ## File map
 

@@ -8,8 +8,9 @@ settings). Data lives in one JSON file managed by a single-writer
 
 ## Features
 
-- **Bar widget** (right section) — current client + description and live
-  elapsed time; idle shows a play glyph. Clicking opens the popup.
+- **Bar widget** (right section) — current task (the entry's description, or
+  the client) and live elapsed time; idle shows a play glyph. Clicking opens
+  the popup.
 - **Popup** — pause/start with the selected task, a "next task" form with
   the **last used client/project pre-selected**, and a **Dashboard**
   button.

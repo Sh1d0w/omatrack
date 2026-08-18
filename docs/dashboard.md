@@ -12,7 +12,7 @@ and `service`, because the root declares `property var service`.
 
 | Contract | Behavior |
 |----------|----------|
-| `open(payloadJson)` | Shows the window. Optional `{"tab": "<id>"}` pre-selects a tab; unknown/invalid ids are ignored → timer tab. Then forces focus into the key catcher. |
+| `open(payloadJson)` | Shows the window. Optional `{"tab": "<id>"}` pre-selects a tab; unknown/invalid ids are ignored (the current tab is kept). Then forces focus into the key catcher. |
 | `close()` | Host-side close (e.g. `shell hide`): hides the window with `closingFromHost = true` so the window does **not** call back into `shell.hide`. |
 | user close (titlebar X / Esc) | `requestClose()` → `shell.hide(pluginId)` → the loader drops the instance (window destroyed). |
 
@@ -23,21 +23,19 @@ While open, the header's live chip (`Acme — Hero · 01:02:03` /
 ## Layout
 
 ```
-┌────────────────────────────────────────────────────────┐
-│ Quattro — Time Tracking          ● Acme — Hero · 01:02 │  ← header (56px)
-├──────────┬─────────────────────────────────────────────┤
-│ Quattro  │                                             │
-│ time     │              active tab view                │
-│ tracking │              (Loader, fills area)           │
-│ [Timer]  │                                             │
-│ [Entries]│                                             │
+┌──────────┬─────────────────────────────────────────────┐
+│ Quattro  │ Quattro — Time Tracking  ● Acme — Hero · 0:02│
+│ time     ├─────────────────────────────────────────────┤
+│ tracking │                                             │
+│ [Timer]  │              active tab view                │
+│ [Entries]│              (Loader, fills area)           │
 │ ...      │                                             │
 └──────────┴─────────────────────────────────────────────┘
 ```
 
 - **Sidebar (190px):** title block + one `Button` per tab (Repeater over
   `TABS`); the active tab's button is `selected`.
-- **Main:** header row (title + live status chip) and a single `Loader`.
+- **Main:** header row (title + live status chip, 56px) and a single `Loader`.
   Switching tabs **destroys the old view and loads the new one** — there is
   no per-tab state caching. All persistent state lives in the service and on
   disk, so filters resetting on tab switch is expected behavior (documented

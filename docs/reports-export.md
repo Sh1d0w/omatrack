@@ -69,8 +69,8 @@ total row (entry count, total seconds, total hours). No external assets.
 ```sh
 python3 timetrack.py report --from 2026-08-01 --to 2026-08-31 --group-by client
 python3 timetrack.py export --format csv --from 2026-08-01 --out /tmp/timesheet.csv
-# --out is required for `export` when given explicitly; the UI path is
-# chosen by the service (<stateDir>/exports/…).
+# --out is always required for the CLI; the UI passes its own path
+# (<stateDir>/exports/…).
 ```
 
 `report`/`export` take only a shared lock — they never mutate state.

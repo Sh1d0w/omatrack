@@ -75,7 +75,7 @@ Failures surface in the red error line.
 
 ## Data semantics (helper side)
 
-- `entry-add --date YYYY-MM-DD --time HH:MM[:SS] --minutes N --client-id …
+- `entry-add --start YYYY-MM-DD --time HH:MM[:SS] --minutes N --client-id …
   --project-id … [--description …] [--billable 0|1]`: start is local time
   converted to UTC; `end = start + minutes`; `minutes ≥ 1`.
 - `entry-update` recombines date/time/minutes when any are given (missing

@@ -65,4 +65,4 @@ The service declares the plugin's single `IpcHandler { target: "timetrack" }`
 |------|---------|
 | `ping` | `"ok"` |
 | `status` | `{ running, client, project, description, billable, elapsedSeconds, daySeconds, dayBillableSeconds, entryCount, lastResult }` — `lastResult` is the previous start/stop's response (optimistic IPC: `start`/`stop` return before the helper finishes; the outcome lands in the next `status`) |
-| `start` / `stop` / `toggle` | optimistic; `start` falls back to `lastUsed` (or first client + first project) when no task is given |
+| `start` / `stop` / `toggle` | optimistic; `start` takes no arguments — it starts `lastUsed`, or the first client with its first project (billable defaults to `true`); `stop` returns `not running` when idle |

@@ -13,15 +13,15 @@ The label is a single binding that re-evaluates only when its inputs change
 | State     | Label                                              | Style |
 |-----------|----------------------------------------------------|-------|
 | idle      | `▶` (U+25B6)                                       | muted |
-| running   | `<client>` or `-`, plus ` · <description>` when non-empty, then ` <HH:MM:SS>` | `Color.accent` |
+| running   | the entry's description if set, else the client name (or `-`), then two spaces + `HH:MM:SS` | `Color.accent` |
 
 The running client name resolves through the service's `clientName()`; if it
 cannot resolve (data edited away out from under a running timer) the label
 falls back to `-`.
 
-The tooltip (`tooltipText`) carries the detail the 40px-wide bar can't:
+The tooltip (`tooltipText`) carries the detail the bar label can't:
 
-- running: `Acme - Hero section · 01:02:03 · billable`
+- running: `Acme — Hero section · 01:02:03 · billable` (or `non-billable`)
 - idle with time logged today: `Today 04:12 · start a task`
 - idle, empty day: `No active timer`
 
