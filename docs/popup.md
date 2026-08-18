@@ -2,19 +2,20 @@
 
 `Popup.qml` — the anchored panel that opens on left-click of the bar widget.
 One panel covers the whole "do I start or stop something" decision: status,
-start/pause, the new-task form, and a dashboard shortcut.
+start/pause/resume/stop, the new-task form, and a dashboard shortcut.
 
 ## Structure (top → bottom)
 
-1. **Status row** — an 8px dot (accent while running, dim otherwise), the
-   title (`Acme — Hero section`, or the description alone, or the client
-   alone, or `-`; `No active timer` when idle) and the caption
-   (`01:02:03 · billable` / `01:02:03 · non-billable` while running;
-   `Today 04:12` or `Start a task below` when idle).
-2. **Primary action** — one full-width `Button`: `Pause` while running
-   (→ `service.stopTask()`), `Start` when idle. `Start` is only *active* when
-   `formReady` (client and project both set), so it visually reflects
-   validity.
+1. **Status row** — an 8px dot (accent while running, dim while paused,
+   dimmest when idle), the title (`Acme — Hero section`, or the description
+   alone, or the client alone, or `-`; `No active timer` when idle) and the
+   caption (`01:02:03 · billable` while running; `01:02:03 · paused ·
+   billable` while paused; `Today 04:12` or `Start a task below` when idle).
+2. **Primary action** — idle: one full-width `Start`, active only when
+   `formReady` (client, project and a non-blank description). Running:
+   `Pause` (→ `service.pauseTask()`) beside a bordered `Stop` (→
+   `service.stopTask()`). Paused: `Resume` (→ `service.resumeTask()`) +
+   `Stop`.
 3. **`New task` section** — a `TaskForm` (client/project/description/
    billable, see below).
 4. **Footer** — `Today HH:MM` on the left, `Dashboard…` button on the right.
@@ -26,17 +27,23 @@ start/pause, the new-task form, and a dashboard shortcut.
 `TaskForm` (`components/TaskForm.qml`) is the shared four-field form also
 used by TimerView. The popup does not mirror its values:
 
-- **Pre-selection (requirement):** on open, `taskForm.applyDefaults()` seeds
+- **Pre-selection (requirement):** `taskForm.applyDefaults()` seeds
   client and project from the service's `lastUsed` (the most recently ended
   entry, or the active task) — falling back to the first client and first
-  project of that client. Seeding is re-armed on `opened` (via
-  `Qt.callLater`, so it wins over focus initialization), on service arrival,
-  and on load; it never overwrites a value the user edited.
+  project of that client. It also seeds the last description and billable
+  flag when present. `TaskForm` self-seeds when the service is injected
+  (its `onServiceChanged`; a Loader's `onLoaded` runs after
+  `onCompleted`), and the popup re-arms the seeding on `opened` (via
+  `Qt.callLater`, so it wins over focus initialization). Seeding never
+  overwrites a value the user edited.
 - **Persistence across open/close:** the `TaskForm` instance lives with the
   popup, so a half-filled form survives a stray Esc.
-- **`formReady`** (`clientId !== "" && projectId !== ""`) gates the Start
-  button; `startFromForm()` re-checks and sets
-  `service.lastError = "Pick a client and project"` if incomplete.
+- **Mandatory description:** `taskForm.valid`
+  (`clientId !== "" && projectId !== "" && description.trim() !== ""`) gates
+  the Start button. `startFromForm()` re-checks and sets
+  `service.lastError` to `"Pick a client and project"` or
+  `"Add a task description"` as appropriate; the helper itself also rejects a
+  blank/whitespace description (`description is required`).
 - `billable` defaults to `true`.
 
 ## Keyboard

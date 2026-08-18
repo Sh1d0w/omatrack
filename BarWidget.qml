@@ -7,10 +7,11 @@ import qs.Ui
 // Bar label for the current client/task + live elapsed time, and the host
 // for the quick-start popup.
 //
-// Left click reveals the popup (start/pause + new-task form + dashboard).
-// The running label re-evaluates every second via the service's clock-driven
-// `elapsedLabel` binding; idle is a static glyph, so there is zero churn
-// while no timer runs.
+// Idle shows a static clock glyph (U+25F7, covered by the shell font);
+// running shows "task  H:MM:SS", re-evaluated every second via the
+// service's clock-driven `elapsedLabel`; paused freezes the label with a
+// "(paused)" suffix. Left click reveals the popup (start/pause/resume/stop
+// + new-task form + dashboard).
 BarWidget {
   id: root
   moduleName: "io.github.sh1d0w.timetrack"
@@ -78,6 +79,9 @@ BarWidget {
     horizontalMargin: 8.5
     verticalPadding: 6
     active: isRunning
+    // The idle glyph draws at the bar icon size (13px) to match the
+    // neighboring shell icons; the running label uses the body font.
+    fontSize: isRunning ? Style.font.body : Style.bar.iconFont
 
     readonly property bool isRunning: root.service ? root.service.running : false
 
@@ -87,9 +91,9 @@ BarWidget {
       if (s.running && s.active) {
         var label = s.active.description !== "" ? s.active.description : s.clientName(s.active.clientId)
         if (label === "") label = "-"
-        return label + "  " + s.elapsedLabel
+        return label + "  " + s.elapsedLabel + (s.paused ? "  (paused)" : "")
       }
-      return "\u25B6"
+      return "\u25F7"
     }
 
     tooltipText: {
@@ -99,6 +103,7 @@ BarWidget {
         return s.clientName(s.active.clientId)
           + (s.active.description !== "" ? " — " + s.active.description : "")
           + " · " + s.elapsedLabel
+          + (s.paused ? " · paused" : "")
           + " · " + (s.active.billable ? "billable" : "non-billable")
       }
       return s.daySeconds > 0

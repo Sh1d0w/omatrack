@@ -2,8 +2,9 @@
 
 Quattro Time Tracker is an Omarchy shell plugin for tracking billable and
 non-billable work time per client and project. It shows a live timer in the
-bar, offers a one-click quick-start popup, and a dashboard window for
-managing entries, clients, projects, reports, invoices, and settings.
+bar (with pause/resume/stop), offers a one-click quick-start popup, and a
+dashboard window for managing entries, clients, projects, reports, invoices,
+and settings.
 
 Plugin id: `io.github.sh1d0w.timetrack`.
 
@@ -13,7 +14,7 @@ One plugin, three kinds (declared in `manifest.json`):
 
 | Kind         | File            | What it is                                             |
 |--------------|-----------------|--------------------------------------------------------|
-| `bar-widget` | `BarWidget.qml` | Center-section label: current task + elapsed, or ▶ idle |
+| `bar-widget` | `BarWidget.qml` | Center-section label: current task + elapsed, or ◷ idle |
 | `service`    | `Service.qml`   | Headless singleton: state, helper channel, IPC         |
 | `panel`      | `Dashboard.qml` | Toplevel dashboard window (7 tabs)                     |
 
@@ -47,13 +48,15 @@ omarchy plugin enable io.github.sh1d0w.timetrack
 
 Then:
 
-- Click the ▶ in the center bar section → quick-start popup.
+- Click the ◷ in the center bar section → quick-start popup.
 - Start a client + project first (via the popup's form after creating them in
-  the dashboard, or via the CLI):
+  the dashboard, or via the CLI). A started task always needs client, project
+  **and a description**:
 
   ```sh
   python3 timetrack.py client-add --name "Acme"
   python3 timetrack.py project-add --client-id c_XXXXXXXXXXXX --name "Landing page"
+  python3 timetrack.py start --client-id c_… --project-id p_… --description "Landing hero"
   ```
 
 - Open the dashboard: `omarchy-shell shell toggle io.github.sh1d0w.timetrack`

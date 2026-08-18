@@ -9,13 +9,15 @@ settings). Data lives in one JSON file managed by a single-writer
 ## Features
 
 - **Bar widget** (right section) — current task (the entry's description, or
-  the client) and live elapsed time; idle shows a play glyph. Clicking opens
+  the client) and live elapsed time; idle shows a clock glyph (◷); a paused
+  timer freezes the label with a `(paused)` suffix. Clicking opens
   the popup.
-- **Popup** — pause/start with the selected task, a "next task" form with
-  the **last used client/project pre-selected**, and a **Dashboard**
+- **Popup** — start/pause/resume/stop with the selected task, a "next task"
+  form with the **last used client/project/description pre-selected**
+  (description mandatory), and a **Dashboard**
   button.
 - **Dashboard** (real toplevel window, 7 tabs):
-  - *Timer* — live hero, start/pause, next-task form, manual entry form.
+  - *Timer* — live hero, start/pause/resume/stop, next-task form, manual entry form.
   - *Entries* — filterable, paginated list; add / edit / delete.
   - *Clients* & *Projects* — CRUD with referential-integrity guards.
   - *Reports* — group by day / client / project over a date interval,
@@ -49,12 +51,12 @@ installed copy is the source of truth at runtime — **re-run
 
 ## Usage
 
-- **Bar** — click the widget for the popup; `pause`/`start` the task; open
-  the Dashboard.
+- **Bar** — click the widget for the popup; `start`/`pause`/`resume`/`stop`
+  the task; open the Dashboard.
 - **Dashboard** — `omarchy-shell shell toggle io.github.sh1d0w.timetrack`
   (optionally with `'{"tab":"entries"}'`; tab ids: `timer`, `entries`,
   `clients`, `projects`, `reports`, `invoices`, `settings`).
-- **IPC / CLI** — `omarchy-shell timetrack start|stop|toggle|status|ping`
+- **IPC / CLI** — `omarchy-shell timetrack start|stop|pause|resume|toggle|status|ping`
   drives the timer from anywhere; `python3 timetrack.py <command>` exposes
   everything else (see [docs/settings.md](docs/settings.md)).
 

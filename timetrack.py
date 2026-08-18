@@ -277,7 +277,16 @@ def filter_entries(state, from_s, to_s, client_id, project_id, billable, search)
 
 def build_view(state):
     """State minus entries + lastUsed + day totals + entryCount."""
-    view = {k: state[k] for k in ("version", "settings", "clients", "projects", "active")}
+    view = {k: state[k] for k in ("version", "settings", "clients", "projects")}
+    a = state["active"]
+    if a is not None:
+        # Older state files predate the pause fields; normalize so every
+        # consumer (QML, IPC) sees the full shape.
+        a = dict(a)
+        a.setdefault("paused", False)
+        a.setdefault("pausedSeconds", 0)
+        a.setdefault("pauseStart", None)
+    view["active"] = a
     entries = state["entries"]
     last = None
     if entries:
@@ -343,6 +352,8 @@ def cmd_start(args):
     def fn(state):
         if state["active"] is not None:
             raise CmdError("timer already running")
+        if not (args.description or "").strip():
+            raise CmdError("description is required")
         c = find_client(state, args.client_id)
         p = find_project(state, args.project_id)
         if p["clientId"] != c["id"]:
@@ -354,7 +365,40 @@ def cmd_start(args):
             "description": args.description,
             "billable": bool(args.billable),
             "start": now_iso(),
+            "paused": False,
+            "pausedSeconds": 0,
+            "pauseStart": None,
         }
+        return {"ok": True, "state": build_view(state)}
+
+    return mutate(args, fn)
+
+
+def cmd_pause(args):
+    def fn(state):
+        a = state["active"]
+        if a is None:
+            raise CmdError("no timer running")
+        if a.get("paused"):
+            raise CmdError("timer is already paused")
+        a["paused"] = True
+        a["pauseStart"] = now_iso()
+        return {"ok": True, "state": build_view(state)}
+
+    return mutate(args, fn)
+
+
+def cmd_resume(args):
+    def fn(state):
+        a = state["active"]
+        if a is None:
+            raise CmdError("no timer running")
+        if not a.get("paused"):
+            raise CmdError("timer is not paused")
+        seg = int((datetime.datetime.now(UTC) - parse_iso_utc(a["pauseStart"])).total_seconds())
+        a["pausedSeconds"] = int(a.get("pausedSeconds") or 0) + max(0, seg)
+        a["paused"] = False
+        a["pauseStart"] = None
         return {"ok": True, "state": build_view(state)}
 
     return mutate(args, fn)
@@ -367,7 +411,11 @@ def cmd_stop(args):
         a = state["active"]
         end = parse_iso_utc(args.at) if args.at else datetime.datetime.now(UTC)
         start = parse_iso_utc(a["start"])
-        seconds = max(0, int((end - start).total_seconds()))
+        paused = int(a.get("pausedSeconds") or 0)
+        if a.get("paused") and a.get("pauseStart"):
+            ps = parse_iso_utc(a["pauseStart"])
+            paused += max(0, int((end - ps).total_seconds()))
+        seconds = max(0, int((end - start).total_seconds()) - paused)
         state["entries"].append(
             {
                 "id": a["id"],
@@ -962,7 +1010,7 @@ def build_parser():
     sp.add_argument("--print-dir", action="store_true", help="print state dir (no-op)")
     sp = add("state", cmd_init, "reload/ensure state; print the state view")
 
-    sp = add("start", cmd_start, "start the active timer")
+    sp = add("start", cmd_start, "start the active timer (description is mandatory)")
     sp.add_argument("--client-id", required=True)
     sp.add_argument("--project-id", required=True)
     sp.add_argument("--description", default="")
@@ -970,6 +1018,9 @@ def build_parser():
 
     sp = add("stop", cmd_stop, "stop the active timer (closes the entry)")
     sp.add_argument("--at", default=None, help="ISO-8601 end time override (naive = UTC)")
+
+    sp = add("pause", cmd_pause, "pause the active timer (no time accrues while paused)")
+    sp = add("resume", cmd_resume, "resume a paused timer")
 
     sp = add("entries", cmd_entries, "list entries (filtered, paginated, start DESC)")
     sp.add_argument("--from", dest="from_date", default=None)

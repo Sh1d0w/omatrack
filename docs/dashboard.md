@@ -18,7 +18,8 @@ and `service`, because the root declares `property var service`.
 
 No `keepLoaded`: the instance is created on summon and destroyed on close.
 While open, the header's live chip (`Acme — Hero · 01:02:03` /
-`Paused · Today 04:12`) binds to the service and re-evaluates on its 1s tick.
+`Acme — Hero · 01:02:03 (paused)` / `Today 04:12`) binds to the service and
+re-evaluates on its 1s tick (frozen while paused).
 
 ## Layout
 

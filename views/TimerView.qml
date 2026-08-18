@@ -3,8 +3,8 @@ import qs.Commons
 import qs.Ui
 import "../components"
 
-// Timer tab: live hero + start/pause, the next-task form (last-used
-// pre-selected) and manual entry.
+// Timer tab: live hero + start/pause/resume/stop, the next-task form
+// (last-used pre-selected, description required) and manual entry.
 Item {
   id: root
 
@@ -45,14 +45,23 @@ Item {
 
         Text {
           text: root.service && root.service.running ? root.service.elapsedLabel : "—"
-          color: root.service && root.service.running ? Color.foreground : Qt.darker(Color.foreground, 1.6)
+          color: {
+            var s = root.service
+            if (!s || !s.running) return Qt.darker(Color.foreground, 1.6)
+            return s.paused ? Qt.darker(Color.foreground, 1.2) : Color.foreground
+          }
           font.pixelSize: Style.font.displayLarge
           font.bold: true
           anchors.horizontalCenter: parent.horizontalCenter
         }
 
         Text {
-          text: root.service && root.service.running ? root.heroTaskName() : "No active timer"
+          text: {
+            var s = root.service
+            if (!s || !s.running) return "No active timer"
+            var name = root.heroTaskName()
+            return s.paused ? name + "  (Paused)" : name
+          }
           color: Color.foreground
           font.pixelSize: Style.font.subtitle
           font.bold: true
@@ -65,6 +74,7 @@ Item {
             if (!s) return ""
             if (s.running && s.active) {
               var bits = []
+              if (s.paused) bits.push("paused")
               if (s.active.description !== "") bits.push(s.active.description)
               bits.push("started " + s.localTimeStr(s.active.start))
               bits.push(s.active.billable ? "billable" : "non-billable")
@@ -79,25 +89,58 @@ Item {
       }
     }
 
-    Button {
-      id: mainButton
-      text: root.service && root.service.running ? "Pause" : "Start"
-      fontSize: Style.font.subtitle
-      leftAlign: true
-      focusable: true
+    // ---- primary action ---------------------------------------------------
+    // Idle: Start (gated by form validity). Running: Pause + Stop.
+    // Paused: Resume + Stop.
+    Row {
+      spacing: Style.space(8)
       anchors.horizontalCenter: parent.horizontalCenter
-      onClicked: {
-        var s = root.service
-        if (!s) return
-        if (s.running) {
-          s.stopTask()
-        } else {
+      visible: !(root.service && root.service.running)
+
+      Button {
+        text: "Start"
+        fontSize: Style.font.subtitle
+        leftAlign: true
+        focusable: true
+        active: taskForm.valid
+        onClicked: {
+          var s = root.service
+          if (!s) return
           if (taskForm.clientId === "" || taskForm.projectId === "") {
             s.lastError = "Pick a client and a project first"
             return
           }
+          if (taskForm.description.trim() === "") {
+            s.lastError = "Add a task description first"
+            return
+          }
           s.startTask(taskForm.clientId, taskForm.projectId, taskForm.description, taskForm.billable)
         }
+      }
+    }
+
+    Row {
+      spacing: Style.space(8)
+      anchors.horizontalCenter: parent.horizontalCenter
+      visible: !!(root.service && root.service.running)
+
+      Button {
+        text: root.service.paused ? "Resume" : "Pause"
+        fontSize: Style.font.subtitle
+        leftAlign: true
+        focusable: true
+        active: true
+        onClicked: root.service.paused ? root.service.resumeTask() : root.service.pauseTask()
+      }
+
+      Button {
+        text: "Stop"
+        fontSize: Style.font.subtitle
+        leftAlign: true
+        focusable: true
+        active: true
+        bordered: true
+        onClicked: root.service.stopTask()
       }
     }
 
@@ -112,10 +155,6 @@ Item {
       id: taskForm
       service: root.service
       width: parent.width
-
-      Component.onCompleted: {
-        if (root.service) taskForm.applyDefaults()
-      }
     }
 
     PanelSeparator {}
@@ -129,10 +168,6 @@ Item {
       id: entryForm
       service: root.service
       width: parent.width
-
-      Component.onCompleted: {
-        if (root.service) entryForm.defaultsToToday()
-      }
     }
 
     Row {

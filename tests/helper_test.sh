@@ -75,19 +75,45 @@ L="$("${PY[@]}" start --client-id "$CID" --project-id "$PID" --description x --b
 err "second start rejected" "$L"
 check "second start error message" '"timer already running"' "$L"
 
-# Timestamps are second-resolution: give the active entry a full second
-# so a fast machine cannot produce a 0-second duration.
+# Timestamps are second-resolution: work, pause, work again so a fast
+# machine still produces a meaningful duration, and the paused middle is
+# excluded from the stored entry.
+T0="$(date +%s)"
+sleep 1.1
+L="$("${PY[@]}" pause 2>&1 || true)"
+ok "pause" "$L"
+check "pause marks active paused" '"paused": true' "$L"
+check "pause records pauseStart" '"pauseStart": "2' "$L"
+
+L="$("${PY[@]}" pause 2>&1 || true)"
+err "double pause rejected" "$L"
+check "double pause error" '"timer is already paused"' "$L"
+
+sleep 1.1
+L="$("${PY[@]}" resume 2>&1 || true)"
+ok "resume" "$L"
+check "resume clears paused" '"paused": false' "$L"
+# Timestamps are second-truncated, so a 1.1s pause can bank 1 or 2 s.
+PS="$(jget "$L" 'd["state"]["active"]["pausedSeconds"]')"
+must "resume banks paused seconds" "[ \"$PS\" -ge 1 ] && [ \"$PS\" -le 3 ]"
+
+L="$("${PY[@]}" resume 2>&1 || true)"
+err "double resume rejected" "$L"
+check "double resume error" '"timer is not paused"' "$L"
+
 sleep 1.1
 L="$("${PY[@]}" stop 2>&1 || true)"
 ok "stop" "$L"
 check "stop clears active" '"active": null' "$L"
+T1="$(date +%s)"
 
 L="$("${PY[@]}" entries 2>&1 || true)"
 ok "entries (no filter)" "$L"
 check "entries total is 1" '"total": 1,' "$L"
 check "entries totalSeconds > 0" '"totalSeconds": [1-9][0-9]*' "$L"
 EID1="$(jget "$L" 'd["entries"][0]["id"]')"
-
+ES="$(jget "$L" 'd["entries"][0]["seconds"]')"
+must "stopped duration excludes the paused segment" "[ "$ES" -ge 2 ] && [ "$ES" -le $((T1 - T0 - 1)) ]"
 L="$("${PY[@]}" entries --search "HERO" 2>&1 || true)"
 ok "entries search" "$L"
 check "search matches description (case-insensitive)" '"total": 1,' "$L"
@@ -194,6 +220,27 @@ L="$("${PY[@]}" invoice --client-id "$CID2" --from 2020-01-01 --to 2030-12-31 2>
 ok "invoice #2" "$L"
 check "invoice #2 number increments" '"number": "INV-0002"' "$L"
 
+# --- mandatory description + idle guards ---------------------------------------
+
+L="$("${PY[@]}" start --client-id "$CID2" --project-id "$PID2" --billable 1 2>&1 || true)"
+err "start without description rejected" "$L"
+check "missing description error" '"description is required"' "$L"
+
+L="$("${PY[@]}" start --client-id "$CID2" --project-id "$PID2" --description "   " --billable 1 2>&1 || true)"
+err "whitespace description rejected" "$L"
+check "whitespace description error" '"description is required"' "$L"
+
+L="$("${PY[@]}" pause 2>&1 || true)"
+err "pause with no timer rejected" "$L"
+check "pause idle error" '"no timer running"' "$L"
+
+L="$("${PY[@]}" resume 2>&1 || true)"
+err "resume with no timer rejected" "$L"
+check "resume idle error" '"no timer running"' "$L"
+
+L="$("${PY[@]}" stop 2>&1 || true)"
+err "stop with no timer rejected" "$L"
+check "stop idle error" '"no timer running"' "$L"
 echo
 echo "passed: $pass  failed: $fail"
 if [ "$fail" -ne 0 ]; then

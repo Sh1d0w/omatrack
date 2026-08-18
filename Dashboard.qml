@@ -225,7 +225,9 @@ Item {
                   width: Style.space(8)
                   height: Style.space(8)
                   radius: width / 2
-                  color: root.service && root.service.running ? Color.accent : Qt.darker(Color.foreground, 1.8)
+                  color: root.service && root.service.running
+                    ? (root.service.paused ? Qt.darker(Color.foreground, 1.4) : Color.accent)
+                    : Qt.darker(Color.foreground, 1.8)
                   anchors.verticalCenter: parent.verticalCenter
                 }
 
@@ -238,9 +240,9 @@ Item {
                       var client = s.clientName(s.active.clientId)
                       var name = desc !== "" ? (client !== "" ? client + " — " + desc : desc)
                                           : (client !== "" ? client : "-")
-                      return name + " · " + s.elapsedLabel
+                      return name + " · " + s.elapsedLabel + (s.paused ? " (paused)" : "")
                     }
-                    return "Paused · Today " + s.fmtHM(s.daySeconds)
+                    return "Today " + s.fmtHM(s.daySeconds)
                   }
                   color: Color.muted
                   font.pixelSize: Style.font.subtitle

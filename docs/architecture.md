@@ -80,7 +80,9 @@ exports/      generated CSV/HTML timesheets
   range bounds).
 - `active` is an entry without `end`/`seconds` while a timer runs — it is
   written to disk **immediately on start**, which is what makes a running
-  timer survive shell restarts.
+  timer survive shell restarts. While paused it additionally carries
+  `paused: true` and `pauseStart`; finished pause segments bank into
+  `pausedSeconds` (old records normalize to `false`/`0`/`null`).
 - IDs: `c_`/`p_`/`e_` + 12 hex chars of `uuid4`.
 
 ## What QML holds (the "view")
@@ -105,17 +107,26 @@ SystemClock { precision: SystemClock.Seconds; enabled: root.running }
 ```
 
 It is a C++ clock (no JS `Timer`, no process, no disk) and is **disabled
-while idle**, so the idle state has zero churn. `elapsedSeconds` is derived:
-`floor(now − active.start)`; the bar and popup bind to `elapsedLabel`.
+while idle**, so the idle state has zero churn. `elapsedSeconds` is the
+working time: `floor(now − active.start) − pausedSeconds − the in-flight
+pause segment` (that last term is 0 unless paused, in which case the value
+is frozen). The bar, popup and dashboard chip all bind to `elapsedLabel`.
 
 ## Timer semantics
 
-- `start` persists `active` at once (see above).
-- **Pause = stop**: the entry is closed with `end = now` and appended to
-  `entries`. **Resume = a new entry** (`start` again). This keeps every
-  entry a simple, immutable-after-stop interval.
+- `start` requires a non-blank `--description` (client and project are
+  always required) and persists `active` at once (see above).
+- **Pause** sets `active.paused = true` and `active.pauseStart = now`; no
+  time accrues while paused (the bar/popup/dashboard labels freeze).
+  **Resume** banks `now − pauseStart` into `active.pausedSeconds` and clears
+  the flags. Both reject themselves (`timer is already paused` /
+  `timer is not paused`) and reject when idle.
+- **Stop** closes the entry: `end = now` (or `--at`), and the stored
+  duration excludes all pause segments. Stopping while paused closes at the
+  pause moment (the open segment is banked first).
 - `stop` accepts an `--at` ISO override (naive = UTC) for corrections.
-- Duration is `max(0, int(end − start))` seconds; sub-second usage is 0.
+- Duration is `max(0, int(end − start) − pausedSeconds)` seconds; sub-second
+  usage is 0.
 
 ## Hot reload vs. shell restart
 
@@ -131,10 +142,10 @@ while idle**, so the idle state has zero churn. `elapsedSeconds` is derived:
 | Source            | Cost while idle | Cost while a timer runs |
 |-------------------|-----------------|--------------------------|
 | QML polling       | none (no `Timer` loops anywhere) | none |
-| `SystemClock`     | disabled        | one 1s C++ tick → relabel |
+| `SystemClock`     | disabled        | one 1s C++ tick → relabel (no-op while paused) |
 | `timetrack.py`    | not running     | not running (elapsed is computed in QML) |
 | disk I/O          | none            | none |
 | `FileView` watch  | kernel inotify, no work | same |
 
-The helper runs only on user actions (start/stop/mutate/query/export/invoice),
+The helper runs only on user actions (start/pause/resume/stop/mutate/query/export/invoice),
 typically <50 ms each.

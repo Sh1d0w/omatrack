@@ -44,6 +44,8 @@ Item {
   property int entryCount: 0
   property string lastError: ""
   readonly property bool running: active !== null
+  readonly property bool paused:
+    root.active !== null && root.active.paused === true
 
   // ---- live timer (C++ 1s tick; zero cost while idle) -----------------------
   SystemClock {
@@ -52,10 +54,17 @@ Item {
     enabled: root.running
   }
 
-  readonly property int elapsedSeconds:
-    root.active
-      ? Math.max(0, Math.floor(clock.date.getTime() / 1000 - Date.parse(root.active.start) / 1000))
-      : 0
+  // Elapsed working time: wall clock since start, minus banked paused
+  // seconds, minus the in-flight pause segment (algebraically constant
+  // while paused, so the frozen display costs only the tick itself).
+  readonly property int elapsedSeconds: root.active ? Math.max(0, Math.floor(
+      clock.date.getTime() / 1000
+      - Date.parse(root.active.start) / 1000
+      - (Number(root.active.pausedSeconds) || 0)
+      - (root.active.paused && root.active.pauseStart !== null
+          ? Math.max(0, clock.date.getTime() / 1000 - Date.parse(root.active.pauseStart) / 1000)
+          : 0)
+  )) : 0
   readonly property string elapsedLabel: root.fmtHMS(root.elapsedSeconds)
 
   // ---- formatting --------------------------------------------------------------
@@ -207,6 +216,14 @@ Item {
     root.run(["stop"], root.withView(done))
   }
 
+  function pauseTask(done) {
+    root.run(["pause"], root.withView(done))
+  }
+
+  function resumeTask(done) {
+    root.run(["resume"], root.withView(done))
+  }
+
   function pushFilterFlags(args, filter) {
     if (!filter) return
     if (filter.from) args.push("--from", String(filter.from))
@@ -303,8 +320,9 @@ Item {
   }
 
   // ---- IPC target (the plugin's only IpcHandler) -----------------------------------
-  // Synchronous calls: start/stop return optimistically; the helper's actual
-  // result lands in `_ipcResult` for the next call and in `status()` state.
+  // Synchronous calls: start/stop/pause/resume return optimistically; the
+  // helper's actual result lands in `_ipcResult` for the next call and in
+  // `status()` state.
   property string _ipcResult: ""
 
   IpcHandler {
@@ -316,6 +334,7 @@ Item {
       var a = root.active
       return JSON.stringify({
         running: root.running,
+        paused: root.paused,
         client: a ? root.clientName(a.clientId) : "",
         project: a ? root.projectName(a.projectId) : "",
         description: a ? a.description : "",
@@ -329,7 +348,7 @@ Item {
     }
 
     function start(): string {
-      if (root.running) return "already running"
+      if (root.running) return root.paused ? "paused (resume first)" : "already running"
       var lu = root.lastUsed
       var c = (lu && lu.clientId) || (root.clients.length > 0 ? root.clients[0].id : "")
       var ps = c ? root.projectOptions(c) : []
@@ -337,8 +356,10 @@ Item {
         ? lu.projectId
         : (ps.length > 0 ? ps[0].value : "")
       if (!c || !p) return "no client/project"
+      var d = (lu && lu.description) || ""
+      if (d.trim() === "") return "no description on file (start once from the UI)"
       root._ipcResult = ""
-      root.startTask(c, p, (lu && lu.description) || "",
+      root.startTask(c, p, d,
         (lu && typeof lu.billable === "boolean" ? lu.billable : true),
         function(resp) { root._ipcResult = resp.ok ? "started" : String(resp.error) })
       return "started"
@@ -351,6 +372,25 @@ Item {
       return "stopped"
     }
 
-    function toggle(): string { return root.running ? root.stop() : root.start() }
+    function pause(): string {
+      if (!root.running) return "not running"
+      if (root.paused) return "already paused"
+      root._ipcResult = ""
+      root.pauseTask(function(resp) { root._ipcResult = resp.ok ? "paused" : String(resp.error) })
+      return "paused"
+    }
+
+    function resume(): string {
+      if (!root.running) return "not running"
+      if (!root.paused) return "not paused"
+      root._ipcResult = ""
+      root.resumeTask(function(resp) { root._ipcResult = resp.ok ? "resumed" : String(resp.error) })
+      return "resumed"
+    }
+
+    function toggle(): string {
+      if (!root.running) return root.start()
+      return root.paused ? root.resume() : root.pause()
+    }
   }
 }

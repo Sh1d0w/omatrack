@@ -10,6 +10,10 @@ import "."
 Item {
   id: root
   width: parent ? parent.width : Style.spacing.dropdownWidth
+  // Implicit size from the form column (same reason as TaskForm): the
+  // entry edit card derives its height from implicitHeight.
+  implicitWidth: formColumn.implicitWidth
+  implicitHeight: formColumn.implicitHeight
 
   required property var service
 
@@ -34,9 +38,14 @@ Item {
     dateField.activeFocus ? dateField
       : (timeField.activeFocus ? timeField
         : (minutesField.field.activeFocus ? minutesField.field : task.keyActiveItem))
+  // Hosts inject the service after construction; fill today's values and
+  // the task defaults then (defaultsToToday() guards against re-filling).
+  onServiceChanged: { if (root.service) root.defaultsToToday() }
+
 
   Column {
-    anchors.fill: parent
+    id: formColumn
+    width: parent.width
     spacing: Style.space(8)
 
     Row {

@@ -5,9 +5,9 @@ import qs.Commons
 import qs.Ui
 import "components"
 
-// Quick-start popup anchored to the bar widget: live status, start/pause,
-// the new-task form (last client + project pre-selected by default) and a
-// shortcut to the dashboard.
+// Quick-start popup anchored to the bar widget: live status,
+// start/pause/resume/stop, the new-task form (client/project/description,
+// last-used values pre-selected by default) and a shortcut to the dashboard.
 //
 // Shape contract for the bar (Bar.findPanelWidget): `opened`/`open()`/
 // `close()`/`toggle()` come from the Panel base; `popoutSwitchClosing` and
@@ -27,7 +27,7 @@ Panel {
   // Form state: TaskForm owns the four values (it persists while this popup
   // is alive, so a half-filled form survives a stray Esc). applyDefaults()
   // seeds last-used values until the user edits anything.
-  readonly property bool formReady: taskForm.clientId !== "" && taskForm.projectId !== ""
+  readonly property bool formReady: taskForm.valid
 
   KeyboardPanel {
     id: panel
@@ -72,7 +72,7 @@ Panel {
           height: Style.space(8)
           radius: width / 2
           color: root.service && root.service.running
-            ? Color.accent
+            ? (root.service.paused ? Qt.darker(Color.foreground, 1.4) : Color.accent)
             : Qt.darker(Color.foreground, 1.8)
           anchors.verticalCenter: parent.verticalCenter
         }
@@ -105,7 +105,9 @@ Panel {
               var s = root.service
               if (!s) return ""
               if (s.running && s.active)
-                return s.elapsedLabel + " · " + (s.active.billable ? "billable" : "non-billable")
+                return s.elapsedLabel + " · "
+                  + (s.paused ? "paused · " : "")
+                  + (s.active.billable ? "billable" : "non-billable")
               return s.daySeconds > 0 ? "Today " + s.fmtHM(s.daySeconds) : "Start a task below"
             }
             color: Color.muted
@@ -115,15 +117,43 @@ Panel {
       }
 
       // 2. Primary action --------------------------------------------------
+      // Idle: single Start (gated by form validity). Running: Pause + Stop.
+      // Paused: Resume + Stop. (The old single "Pause" button actually
+      // *stopped* the task; its mislabel is gone.)
       Button {
+        id: startButton
         width: parent.width
         fontSize: Style.font.subtitle
-        text: root.service && root.service.running ? "Pause" : "Start"
+        text: "Start"
+        visible: !(root.service && root.service.running)
         focusable: true
-        active: !!(root.service && !root.service.running) && root.formReady
-        onClicked: {
-          if (root.service && root.service.running) root.service.stopTask()
-          else root.startFromForm()
+        active: root.formReady
+        onClicked: root.startFromForm()
+      }
+
+      Row {
+        width: parent.width
+        spacing: Style.space(8)
+        visible: !!(root.service && root.service.running)
+
+        Button {
+          id: pauseResumeButton
+          width: parent.width - stopButton.implicitWidth - parent.spacing
+          fontSize: Style.font.subtitle
+          text: root.service.paused ? "Resume" : "Pause"
+          focusable: true
+          active: true
+          onClicked: root.service.paused ? root.service.resumeTask() : root.service.pauseTask()
+        }
+
+        Button {
+          id: stopButton
+          fontSize: Style.font.subtitle
+          text: "Stop"
+          focusable: true
+          active: true
+          bordered: true
+          onClicked: root.service.stopTask()
         }
       }
 
@@ -178,9 +208,10 @@ Panel {
 
   // ---- lifecycle -----------------------------------------------------------
 
+  // TaskForm self-seeds its last-used defaults when the service is
+  // injected (its onServiceChanged); the only thing the popup must do
+  // is re-arm the seeding on reopen.
   onOpenedChanged: { if (opened) Qt.callLater(function() { taskForm.applyDefaults() }) }
-  onServiceChanged: { taskForm.applyDefaults() }
-  Component.onCompleted: { taskForm.applyDefaults() }
 
   // ---- actions ---------------------------------------------------------------
 
@@ -188,6 +219,10 @@ Panel {
     if (!root.service || root.service.running) return
     if (taskForm.clientId === "" || taskForm.projectId === "") {
       root.service.lastError = "Pick a client and project"
+      return
+    }
+    if (taskForm.description.trim() === "") {
+      root.service.lastError = "Add a task description"
       return
     }
     root.service.startTask(taskForm.clientId, taskForm.projectId, taskForm.description, taskForm.billable)

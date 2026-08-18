@@ -10,18 +10,24 @@ the live label for the current task and the host for the quick-start popup.
 The label is a single binding that re-evaluates only when its inputs change
 (service map, running state, and the 1s `elapsedLabel` while running):
 
-| State     | Label                                              | Style |
-|-----------|----------------------------------------------------|-------|
-| idle      | `▶` (U+25B6)                                       | muted |
-| running   | the entry's description if set, else the client name (or `-`), then two spaces + `HH:MM:SS` | `Color.accent` |
+| State   | Label                                                          | Style          |
+|---------|----------------------------------------------------------------|----------------|
+| idle    | `◷` (U+25F7, clock face)                                       | muted          |
+| running | the entry's description (required) or the client name (legacy, or `-`), then two spaces + `HH:MM:SS` | `Color.accent` |
+| paused  | same as running, plus `  (paused)` — the label is frozen       | `Color.accent` |
 
 The running client name resolves through the service's `clientName()`; if it
 cannot resolve (data edited away out from under a running timer) the label
 falls back to `-`.
 
-The tooltip (`tooltipText`) carries the detail the bar label can't:
+The idle glyph is drawn at the bar icon size (`Style.bar.iconFont`,
+13px) to match the neighboring shell icons; the running and paused labels
+use the body font. Both come from the button's `fontSize`, which tracks
+`isRunning`.
 
-- running: `Acme — Hero section · 01:02:03 · billable` (or `non-billable`)
+The tooltip (`tooltipText`) carries the detail the bar label can't:
+- running: `Acme — Hero section · 01:02:03 · billable` (or `non-billable`);
+  while paused the same line carries an extra ` · paused`
 - idle with time logged today: `Today 04:12 · start a task`
 - idle, empty day: `No active timer`
 
@@ -57,6 +63,8 @@ delegating to the loaded popup) and uses `popoutSwitchClosing` /
 
 ## Contingency: idle glyph
 
-The idle label uses the geometric glyph `▶`. If the bar font renders it as
+The idle label uses the geometric glyph `◷` (U+25F7), which the shell font
+(Caskaydia Mono / Adwaita) covers — U+23F1/⏱ is **not** covered, so the
+stopwatch glyph would fall back mid-bar. If the bar font ever renders it as
 tofu, switch the idle label to the text `idle` (one-line change in the
 `label` binding) and re-verify with `omarchy capture screenshot`.

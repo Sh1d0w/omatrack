@@ -39,8 +39,10 @@ mutation commands return the compact view (state minus entries +
 |---------|-----------|-------|
 | `init` | `[--print-dir]` | create state file + directories (idempotent); `--print-dir` prints the state dir |
 | `state` | — | ensure state; print the current state view |
-| `start` | `--client-id --project-id [--description] [--billable 0\|1]` | error if a timer is already running; persists `active` immediately (billable defaults 1) |
-| `stop` | `[--at ISO-8601]` | closes `active` into `entries`; naive `--at` is UTC |
+| `start` | `--client-id --project-id --description [--billable 0\|1]` | `--description` is **mandatory** (blank/whitespace → `description is required`); error if a timer is already running; persists `active` immediately (billable defaults 1) |
+| `stop` | `[--at ISO-8601]` | closes `active` into `entries`; the stored duration **excludes paused segments** (stopping while paused closes at the pause moment); naive `--at` is UTC |
+| `pause` | — | freezes `active`: `paused: true`, `pauseStart` = now; rejects `no timer running` / `timer is already paused` |
+| `resume` | — | banks the pause segment into `pausedSeconds` and clears the flags; rejects `no timer running` / `timer is not paused` |
 | `entries` | `[--from --to] [--client-id] [--project-id] [--billable 0\|1] [--search] [--offset N] [--limit N]` | start-DESC list; limit clamped 1..500 (default 50); plus `total`, `totalSeconds`, `billableSeconds`, `nextOffset` (null on last page) |
 | `report` | `--group-by day\|client\|project [--from --to] [--client-id] [--project-id]` | aggregated rows; billable/search are **not accepted** (all matched entries count) |
 | `client-add` | `--name` | case-insensitive duplicate rejected |
@@ -64,5 +66,5 @@ The service declares the plugin's single `IpcHandler { target: "timetrack" }`
 | Call | Returns |
 |------|---------|
 | `ping` | `"ok"` |
-| `status` | `{ running, client, project, description, billable, elapsedSeconds, daySeconds, dayBillableSeconds, entryCount, lastResult }` — `lastResult` is the previous start/stop's response (optimistic IPC: `start`/`stop` return before the helper finishes; the outcome lands in the next `status`) |
-| `start` / `stop` / `toggle` | optimistic; `start` takes no arguments — it starts `lastUsed`, or the first client with its first project (billable defaults to `true`); `stop` returns `not running` when idle |
+| `status` | `{ running, paused, client, project, description, billable, elapsedSeconds, daySeconds, dayBillableSeconds, entryCount, lastResult }` — `elapsedSeconds` excludes paused time; `lastResult` is the previous start/stop/pause/resume's response (optimistic IPC: those calls return before the helper finishes; the outcome lands in the next `status`) |
+| `start` / `stop` / `pause` / `resume` / `toggle` | optimistic; `start` takes no arguments — it starts `lastUsed` (its description is required: an empty last-used description returns `no description on file (start once from the UI)`), else the first client's first project; `stop`/`pause`/`resume` return `not running` / `not paused` / `already paused` as applicable; `toggle` = start when idle, else pause/resume |
