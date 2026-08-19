@@ -5,22 +5,34 @@
 
 ## The tab
 
+`views/SettingsView.qml` organizes the settings into four sections —
+**Billing** (currency, hourly rate), **Company** (company name, address),
+**Tax & numbering** (tax rate, no. prefix, next number), and **Footer**
+(footer text) — each introduced by a `PanelSectionHeader` under a
+`PanelSeparator`. Every field is a shared `components/LabeledField.qml`
+(body-size label above the kit TextField, muted helper line below),
+laid out on an equal-width grid (2/2/3/1 columns, content capped at
+720px) so all inputs in a row are the same size. The section stack
+scrolls when the window is short; the save row, status texts, and the
+data file path stay pinned at the bottom.
+
 Local field copies sync from the service on load and whenever
 `settings` changes (only while the tab is not dirty, so edits are never
-clobbered). Any edit marks the tab dirty (`unsaved changes` chip); **Save**
-validates locally, then pushes one patch via
-`service.saveSettings(patch)` → `settings-set --json`.
+clobbered). Any edit marks the tab dirty (`unsaved changes` chip);
+**Save** validates locally, then pushes one patch via
+`service.saveSettings(patch)` → `settings-set --json`; a successful save
+shows a `Settings saved` flash for two seconds.
 
 | Field        | Local validation | Notes |
 |--------------|------------------|-------|
 | Currency     | — (helper: non-empty, ≤ 8 chars, trimmed) | empty field saves `EUR` |
 | Hourly rate  | finite, ≥ 0      | number |
-| Company      | —                | invoice block |
-| Address      | —                | invoice block |
+| Company name | —                | printed in the invoice header |
+| Address      | —                | printed under the company name |
 | Tax rate %   | finite, 0–100    | helper accepts ≥ 0; the UI caps at 100 |
 | No. prefix   | —                | default `INV-` |
 | Next number  | integer ≥ 1      | helper: integer ≥ 0; the UI requires ≥ 1 so numbering never restarts at 0 |
-| Footer       | —                | optional invoice footer line |
+| Footer       | —                | optional line at the bottom of every invoice |
 
 Helper-side `settings-set --json '{...}'` accepts a **partial patch** over
 the top-level keys and/or the `invoice` object; unknown fields error.
