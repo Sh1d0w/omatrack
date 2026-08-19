@@ -54,6 +54,9 @@ Item {
 
   readonly property int totalCount: root.filteredProjects.length
 
+  readonly property string emptyMessage:
+    root.clientFilter === "" ? "No projects" : "No projects for this client"
+
   // The edit card's client, set by openEdit(); "" while the card is closed.
   property string editClientId: ""
 
@@ -257,6 +260,11 @@ Item {
       onEditRequested: root.openEdit(modelData)
       onDeleteRequested: root.requestDelete(modelData)
     }
+
+    EmptyMessage {
+      message: root.emptyMessage
+      visible: root.totalCount === 0
+    }
   }
 
   // ---- pager + status ---------------------------------------------------
@@ -279,7 +287,7 @@ Item {
       total: root.totalCount
       offset: root.offset
       limit: root.limit
-      emptyText: "No projects"
+      emptyText: root.emptyMessage
       onPrevRequested: root.prevPage()
       onNextRequested: root.nextPage()
     }

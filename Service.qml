@@ -41,6 +41,7 @@ Item {
   readonly property int pageSize: 15
   property var clients: []
   property var projects: []
+  property var invoices: []
   property var active: null
   property var lastUsed: null
   property int daySeconds: 0
@@ -181,6 +182,7 @@ Item {
     if (s.settings !== undefined) root.settings = s.settings
     if (s.clients !== undefined) root.clients = s.clients
     if (s.projects !== undefined) root.projects = s.projects
+    if (s.invoices !== undefined) root.invoices = s.invoices
     if ("active" in s) root.active = s.active
     if ("lastUsed" in s) root.lastUsed = s.lastUsed
     if (s.daySeconds !== undefined) root.daySeconds = s.daySeconds

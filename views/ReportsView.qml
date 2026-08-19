@@ -233,6 +233,11 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
       }
     }
+
+    EmptyMessage {
+      message: "No rows"
+      visible: root.total === 0
+    }
   }
 
   // ---- pager + status -----------------------------------------------------------

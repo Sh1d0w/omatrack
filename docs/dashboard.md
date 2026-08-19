@@ -87,7 +87,7 @@ every key before any other handler (focused control included):
    (cancel / confirm, with `selectedIndex` driving the highlight);
 2. otherwise the active view's `handleKey`, if it defines one (the open
    card overlay closes on Esc — Entries edit / manual-entry, Clients and
-   Projects add / edit);
+   Projects add / edit, Invoices generate);
 3. otherwise fall through — a window-level `PanelKeyCatcher` handles
    `Esc` (closes the window), focused controls keep their keys.
 

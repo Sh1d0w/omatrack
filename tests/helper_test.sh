@@ -5,6 +5,9 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export XDG_STATE_HOME="$(mktemp -d)"
+# Invoices default to ~/Downloads (like exports); keep that inside the
+# throwaway tree too.
+export HOME="$XDG_STATE_HOME"
 trap 'rm -rf "$XDG_STATE_HOME"' EXIT
 
 PY=(python3 "$ROOT/timetrack.py")
@@ -196,6 +199,11 @@ must "invoice #1 shows client" 'grep -q "Acme" "$INV1"'
 must "invoice #1 shows number" 'grep -q "INV-0001" "$INV1"'
 must "invoice #1 shows tax line" 'grep -q "Tax 19%" "$INV1"'
 
+check "invoice #1 recorded in state" '"invoices": \[' "$L"
+must "invoice #1 record number" '[ "$(jget "$L" "d[\"state\"][\"invoices\"][0][\"number\"]")" = "INV-0001" ]'
+must "invoice #1 record client id" '[ "$(jget "$L" "d[\"state\"][\"invoices\"][0][\"clientId\"]")" = "$CID" ]'
+must "invoice #1 record total > 0" '[ "$(jget "$L" "1 if d[\"state\"][\"invoices\"][0][\"total\"] > 0 else 0")" = "1" ]'
+
 # --- teardown: guards lift once references are gone ---------------------------------
 
 L="$("${PY[@]}" entry-delete --id "$EID1" 2>&1 || true)"
@@ -223,6 +231,9 @@ ok "entry-add billable for invoice #2" "$L"
 L="$("${PY[@]}" invoice --client-id "$CID2" --from 2020-01-01 --to 2030-12-31 2>&1 || true)"
 ok "invoice #2" "$L"
 check "invoice #2 number increments" '"number": "INV-0002"' "$L"
+
+must "invoice #2 recorded first (newest first)" '[ "$(jget "$L" "d[\"state\"][\"invoices\"][0][\"number\"]")" = "INV-0002" ]'
+must "two invoices recorded" '[ "$(jget "$L" "len(d[\"state\"][\"invoices\"])")" = "2" ]'
 
 # --- mandatory description + idle guards ---------------------------------------
 

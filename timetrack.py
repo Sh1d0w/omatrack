@@ -33,7 +33,6 @@ STATE_DIR = os.path.join(
 )
 STATE_FILE = os.path.join(STATE_DIR, "state.json")
 LOCK_FILE = os.path.join(STATE_DIR, ".lock")
-INVOICE_DIR = os.path.join(STATE_DIR, "invoices")
 
 
 class CmdError(Exception):
@@ -63,15 +62,20 @@ def default_state():
         "projects": [],
         "entries": [],
         "active": None,
+        "invoices": [],
     }
 
 
 def load_state():
     try:
         with open(STATE_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
+            state = json.load(f)
     except FileNotFoundError:
         raise CmdError("state file missing (run: init)")
+    # Older state files predate the invoice records; normalize so every
+    # command sees the full shape.
+    state.setdefault("invoices", [])
+    return state
 
 
 def atomic_write(path, write_fn):
@@ -126,7 +130,13 @@ def now_iso():
 
 def ensure_dirs():
     os.makedirs(STATE_DIR, exist_ok=True)
-    os.makedirs(INVOICE_DIR, exist_ok=True)
+
+
+def default_invoice_dir():
+    # Invoices are documents for the user, not state: they land in the
+    # user's Downloads folder (the same destination as exports) unless
+    # --out says otherwise.
+    return os.path.expanduser("~/Downloads")
 
 
 # ---------------------------------------------------------------------------
@@ -274,8 +284,9 @@ def filter_entries(state, from_s, to_s, client_id, project_id, billable, search)
 
 
 def build_view(state):
-    """State minus entries + lastUsed + day totals + entryCount."""
-    view = {k: state[k] for k in ("version", "settings", "clients", "projects")}
+    """State minus entries + lastUsed + day totals + entryCount.
+    `invoices` (metadata records of generated invoices) is included."""
+    view = {k: state[k] for k in ("version", "settings", "clients", "projects", "invoices")}
     a = state["active"]
     if a is not None:
         # Older state files predate the pause fields; normalize so every
@@ -972,7 +983,15 @@ def cmd_invoice(args):
             "</tr>"
             for l in lines
         )
-        address_html = f"<div>{address}</div>" if invoice_cfg.get("companyAddress") else ""
+        # The company block renders only what is configured; with neither a
+        # company name nor an address set, the block is omitted entirely.
+        company_html = f"<div><strong>{company}</strong></div>" if company else ""
+        address_html = f"<div>{address}</div>" if address else ""
+        company_block = (
+            f'<div style="margin-bottom:1.5rem;">{company_html}{address_html}</div>'
+            if (company_html or address_html)
+            else ""
+        )
         footer_html = (
             f"<p style=\"color:#666;margin-top:2rem;\">"
             f"{html.escape(invoice_cfg.get('footer', ''))}</p>"
@@ -981,11 +1000,8 @@ def cmd_invoice(args):
         )
         doc = _page(
             f"Invoice {number}",
-            f"<div style=\"margin-bottom:1.5rem;\">"
-            f"<div><strong>{company or '(company name not set)'}</strong></div>"
-            f"{address_html}"
-            f"</div>"
-            f"<div class=\"meta\">Bill To: <strong>{html.escape(c['name'])}</strong><br>"
+            company_block
+            + f"<div class=\"meta\">Bill To: <strong>{html.escape(c['name'])}</strong><br>"
             f"Period: {html.escape(args.from_date)} to {html.escape(args.to)}<br>"
             f"Issued: {today} &nbsp;·&nbsp; Invoice: {html.escape(number)}</div>"
             "<table>\n<thead>\n"
@@ -995,14 +1011,33 @@ def cmd_invoice(args):
             "<tfoot>\n"
             f"<tr><td colspan=\"3\">subtotal</td><td class=\"num\">{money(currency, subtotal)}</td></tr>\n"
             f"<tr><td colspan=\"3\">Tax {tax_rate:g}%</td><td class=\"num\">{money(currency, tax)}</td></tr>\n"
-            f"<tr><td colspan=\"3\">total</td><td class=\"num\">{money(currency, total)}</td></tr>\n"
+            f"<tr><td colspan=\"3\">Total</td><td class=\"num\">{money(currency, total)}</td></tr>\n"
             "</tfoot>\n</table>"
             + footer_html,
         )
         out = args.out or os.path.join(
-            INVOICE_DIR, f"{number.replace(os.sep, '_')}_{args.from_date}_{args.to}.html"
+            default_invoice_dir(), f"{number.replace(os.sep, '_')}_{args.from_date}_{args.to}.html"
         )
         atomic_write(out, lambda f: f.write(doc))
+        # Record the invoice in state (newest first) so the Invoices tab's
+        # table shows it without scanning the Downloads folder.
+        state["invoices"].insert(
+            0,
+            {
+                "id": new_id("inv_"),
+                "number": number,
+                "clientId": c["id"],
+                "client": c["name"],
+                "from": args.from_date,
+                "to": args.to,
+                "seconds": sum(e["seconds"] for e in matched),
+                "subtotal": subtotal,
+                "tax": tax,
+                "total": total,
+                "path": os.path.abspath(out),
+                "createdAt": now_iso(),
+            },
+        )
         return {
             "ok": True,
             "path": os.path.abspath(out),

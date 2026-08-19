@@ -309,6 +309,11 @@ Item {
       onEditRequested: root.openEdit(modelData)
       onDeleteRequested: root.requestDelete(modelData)
     }
+
+    EmptyMessage {
+      message: "No entries"
+      visible: root.total === 0
+    }
   }
 
   // ---- pager + status -----------------------------------------------------------

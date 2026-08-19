@@ -45,8 +45,11 @@ Location: `$XDG_STATE_HOME/omarchy/timetrack/` (default
 ```
 state.json    the state (below)
 .lock         flock file (never read as data)
-invoices/     generated invoice HTML
 ```
+
+Generated invoice HTML is not state — it is written to the user's
+`~/Downloads` (the same destination as exports); `state.json` carries
+the metadata and the path.
 
 `state.json` (version 1):
 
@@ -70,7 +73,15 @@ invoices/     generated invoice HTML
     "end":   "2026-08-18T09:30:00+00:00",
     "seconds": 5400
   }],
-  "active": null
+  "active": null,
+  "invoices": [{
+    "id": "inv_<hex12>", "number": "INV-0001",
+    "clientId": "c_…", "client": "Acme",
+    "from": "2026-08-01", "to": "2026-08-31",
+    "seconds": 5400, "subtotal": 135.0, "tax": 25.65, "total": 160.65,
+    "path": "<stateDir>/invoices/INV-0001_2026-08-01_2026-08-31.html",
+    "createdAt": "<utc iso>"
+  }]
 }
 ```
 
@@ -82,7 +93,11 @@ invoices/     generated invoice HTML
   timer survive shell restarts. While paused it additionally carries
   `paused: true` and `pauseStart`; finished pause segments bank into
   `pausedSeconds` (old records normalize to `false`/`0`/`null`).
-- IDs: `c_`/`p_`/`e_` + 12 hex chars of `uuid4`.
+- IDs: `c_`/`p_`/`e_`/`inv_` + 12 hex chars of `uuid4`.
+- `invoices` — metadata of generated invoices, **newest first** (the
+  Invoices tab's table). Old state files without the key normalize to
+  `[]` on load. The HTML files in `invoices/` stay the document of
+  record; the state entry is what the UI lists.
 
 ## What QML holds (the "view")
 
@@ -92,7 +107,9 @@ minus the entries array, plus:
 - `lastUsed` — the most recently ended entry (or the active task): the
   popup's pre-selected defaults,
 - `daySeconds` / `dayBillableSeconds` — local-today totals,
-- `entryCount` — total number of entries (never the entries themselves).
+- `entryCount` — total number of entries (never the entries themselves),
+- `invoices` — the full invoice metadata array (compact; unlike entries,
+  it enters the process in whole).
 
 Entries reach QML only in pages: `entries --offset N --limit N` (the UI
 passes the fixed page size, 15). The full entries array never enters the

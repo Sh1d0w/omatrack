@@ -181,6 +181,11 @@ Item {
       onEditRequested: root.openEdit(modelData)
       onDeleteRequested: root.requestDelete(modelData)
     }
+
+    EmptyMessage {
+      message: "No clients"
+      visible: root.totalCount === 0
+    }
   }
 
   // ---- pager + status ---------------------------------------------------
