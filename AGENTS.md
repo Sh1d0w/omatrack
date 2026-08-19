@@ -8,8 +8,8 @@ projects, reports, invoices, settings).
 
 - Plugin id: `io.github.sh1d0w.omatrack` (third-party ids must not start with `omarchy.`).
 - Developed in this repo. The **installed copy** is what runs: the plugin
-  registry forbids symlinks, so `scripts/install.sh` copies the runtime files
-  into `~/.config/omarchy/plugins/io.github.sh1d0w.omatrack/`.
+  registry forbids symlinks, so a one-line local install (Dev loop below)
+  copies the runtime files into `~/.config/omarchy/plugins/io.github.sh1d0w.omatrack/`.
 
 ## Layout
 
@@ -26,7 +26,6 @@ views/               dashboard tabs: Timer, Entries, Clients, Projects,
                      Reports, Invoices, Settings
 tests/helper_test.sh shell tests for omatrack.py (throwaway XDG_STATE_HOME)
 docs/                one file per feature (see rule below)
-scripts/install.sh   copies runtime files into the plugin dir
 ```
 
 ## Runtime contract
@@ -46,9 +45,28 @@ scripts/install.sh   copies runtime files into the plugin dir
 
 ## Dev loop
 
+### Local install
+
+Single command, run from the **repo root**. Wipes the stale copy and re-copies
+only the runtime files (`.git`, `docs/`, `tests/` stay in the repo):
+
+```sh
+DEST=~/.config/omarchy/plugins/io.github.sh1d0w.omatrack \
+  && rm -rf "$DEST" \
+  && mkdir -p "$DEST" \
+  && cp -R --parents manifest.json Service.qml BarWidget.qml Popup.qml \
+       Dashboard.qml omatrack.py components views "$DEST" \
+  && chmod +x "$DEST/omatrack.py" \
+  && (omarchy-shell shell rescanPlugins >/dev/null 2>&1 || true)
+```
+
+Re-run it after any change — the shell hot-reloads saved plugin files.
+
+### Per-change loop
+
 ```sh
 bash tests/helper_test.sh     # data engine (must PASS)
-bash scripts/install.sh       # copy into the plugin dir
+# <run the local-install command above to copy into the plugin dir>
 omarchy plugin validate ~/.config/omarchy/plugins/io.github.sh1d0w.omatrack
 qmllint -I /usr/share/omarchy/shell <file.qml>   # every QML file
 ```

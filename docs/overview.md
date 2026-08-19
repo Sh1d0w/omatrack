@@ -43,8 +43,8 @@ views/               TimerView, EntriesView, ClientsView, ProjectsView,
 ## Quick start
 
 ```sh
-# from this repo
-bash scripts/install.sh
+# from this repo — single local-install command (full form in AGENTS.md → Dev loop)
+DEST=~/.config/omarchy/plugins/io.github.sh1d0w.omatrack && rm -rf "$DEST" && mkdir -p "$DEST" && cp -R --parents manifest.json Service.qml BarWidget.qml Popup.qml Dashboard.qml omatrack.py components views "$DEST" && chmod +x "$DEST/omatrack.py" && (omarchy-shell shell rescanPlugins >/dev/null 2>&1 || true)
 omarchy plugin enable io.github.sh1d0w.omatrack
 ```
 

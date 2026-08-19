@@ -66,7 +66,7 @@ Everything is local: `~/.local/state/omarchy/omatrack/state.json` (`XDG_STATE_HO
 
 - Repo layout, architecture, and per-feature docs live in [docs/](docs/) — [overview](docs/overview.md), [architecture](docs/architecture.md), [bar widget](docs/bar-widget.md), [popup](docs/popup.md), [dashboard](docs/dashboard.md), [entries](docs/entries.md), [clients & projects](docs/clients-projects.md), [reports & export](docs/reports-export.md), [invoices](docs/invoices.md), [settings & CLI](docs/settings.md).
 - Test suite: `bash tests/helper_test.sh` (99 checks against a throwaway `XDG_STATE_HOME`).
-- Dev loop: edit → `bash scripts/install.sh` → the shell hot-reloads saved plugin files.
+- Dev loop: edit → re-run the single local-install command (AGENTS.md → Dev loop) → the shell hot-reloads saved plugin files.
 
 ## License
 
