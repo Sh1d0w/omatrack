@@ -33,18 +33,17 @@ OmaTrack is a time tracking plugin for the [Omarchy](https://omarchyplugins.com/
 ## Install
 
 ```sh
-git clone https://github.com/Sh1d0w/omatrack.git ~/src/omatrack && cd ~/src/omatrack
-bash scripts/install.sh
-omarchy plugin enable io.github.sh1d0w.omatrack
+omarchy plugin add https://github.com/Sh1d0w/omatrack.git --enable
 ```
 
-`install.sh` copies the runtime files into `~/.config/omarchy/plugins/io.github.sh1d0w.omatrack/` (override the base dir with `OMARCHY_PLUGINS_DIR`). The plugin registry forbids symlinks, so the installed copy is the source of truth at runtime — re-run `install.sh` after any change, then `omarchy restart shell` if a `Service.qml` change does not take effect.
+`plugin add` clones the repository into the plugin folder (the registry
+forbids symlinks, so a real clone is required) and enables the plugin.
+Update it later with `omarchy plugin update io.github.sh1d0w.omatrack`.
 
 ## Uninstall
 
 ```sh
-omarchy plugin disable io.github.sh1d0w.omatrack
-rm -rf ~/.config/omarchy/plugins/io.github.sh1d0w.omatrack
+omarchy plugin remove io.github.sh1d0w.omatrack
 ```
 
 To also remove your data:
