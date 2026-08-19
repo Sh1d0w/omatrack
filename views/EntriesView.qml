@@ -171,6 +171,7 @@ Item {
       height: Math.max(headTitle.implicitHeight, addEntryButton.implicitHeight)
 
       Text {
+        textFormat: Text.PlainText
         id: headTitle
         anchors { left: parent.left; verticalCenter: parent.verticalCenter }
         text: "Entries"
@@ -190,6 +191,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: "Every tracked time entry, newest first — filter by date, client, project, or billable status, and add, edit, or delete from the rows."
       color: Color.muted
       font.pixelSize: Style.font.caption
@@ -289,6 +291,7 @@ Item {
         anchors { right: parent.right; bottom: parent.bottom }
 
         Text {
+          textFormat: Text.PlainText
           text: "Search"
           color: Qt.darker(Color.popups.text, 1.4)
           font.family: Style.font.family
@@ -368,6 +371,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: root.flash
       color: Color.accent
       font.pixelSize: Style.font.caption
@@ -376,6 +380,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: root.service ? root.service.lastError : ""
       color: Color.urgent
       font.pixelSize: Style.font.caption
@@ -399,6 +404,7 @@ Item {
     height: Style.space(20)
 
     Text {
+      textFormat: Text.PlainText
       anchors.verticalCenter: parent.verticalCenter
       text: "Total " + (root.service ? root.service.fmtHM(root.totalSeconds) : "—")
         + " · billable " + (root.service ? root.service.fmtHM(root.billableSeconds) : "—")
@@ -421,6 +427,7 @@ Item {
     onScrimClicked: root.closeEdit()
 
     Text {
+      textFormat: Text.PlainText
       text: "Edit entry"
       color: Color.foreground
       font.pixelSize: Style.font.title
@@ -496,6 +503,7 @@ Item {
     onScrimClicked: root.closeEntryModal()
 
     Text {
+      textFormat: Text.PlainText
       text: "Add manual entry"
       color: Color.foreground
       font.pixelSize: Style.font.title

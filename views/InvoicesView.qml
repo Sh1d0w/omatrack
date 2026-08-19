@@ -151,6 +151,7 @@ Item {
     spacing: Style.space(10)
 
     Text {
+      textFormat: Text.PlainText
       text: "Invoices"
       color: Color.foreground
       font.pixelSize: Style.font.title
@@ -158,6 +159,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: "Generated invoices, newest first — one client, one date range, one line per project at the configured hourly rate."
       color: Color.muted
       font.pixelSize: Style.font.caption
@@ -260,6 +262,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: root.flash
       color: Color.accent
       font.pixelSize: Style.font.caption
@@ -268,6 +271,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: root.service ? root.service.lastError : ""
       color: Color.urgent
       font.pixelSize: Style.font.caption
@@ -290,6 +294,7 @@ Item {
     onScrimClicked: root.closeGenerate()
 
     Text {
+      textFormat: Text.PlainText
       text: "Generate invoice"
       color: Color.foreground
       font.pixelSize: Style.font.title

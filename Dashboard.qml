@@ -158,12 +158,14 @@ Item {
               width: parent.width
               spacing: Style.space(1)
               Text {
+                textFormat: Text.PlainText
                 text: "OmaTrack"
                 color: Color.foreground
                 font.pixelSize: Style.font.heading
                 font.bold: true
               }
               Text {
+                textFormat: Text.PlainText
                 text: "time tracking"
                 color: Color.muted
                 font.pixelSize: Style.font.caption
@@ -208,6 +210,7 @@ Item {
               spacing: Style.space(12)
 
               Text {
+                textFormat: Text.PlainText
                 text: "OmaTrack"
                 color: Color.foreground
                 font.pixelSize: Style.font.heading
@@ -232,6 +235,7 @@ Item {
                 }
 
                 Text {
+                  textFormat: Text.PlainText
                   text: {
                     var s = root.service
                     if (!s) return ""

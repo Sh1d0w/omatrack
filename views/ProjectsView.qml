@@ -199,6 +199,7 @@ Item {
       height: Math.max(headTitle.implicitHeight, addBtn.implicitHeight)
 
       Text {
+        textFormat: Text.PlainText
         id: headTitle
         anchors { left: parent.left; verticalCenter: parent.verticalCenter }
         text: "Projects"
@@ -218,6 +219,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: "Where each client's time is assigned — every project belongs to exactly one client, and the top filter narrows the table to that client's projects."
       color: Color.muted
       font.pixelSize: Style.font.caption
@@ -303,6 +305,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: root.flash
       color: Color.accent
       font.pixelSize: Style.font.caption
@@ -311,6 +314,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: root.service ? root.service.lastError : ""
       color: Color.urgent
       font.pixelSize: Style.font.caption
@@ -334,6 +338,7 @@ Item {
     onScrimClicked: root.closeEdit()
 
     Text {
+      textFormat: Text.PlainText
       text: "Edit project"
       color: Color.foreground
       font.pixelSize: Style.font.title
@@ -393,6 +398,7 @@ Item {
     onScrimClicked: root.closeAdd()
 
     Text {
+      textFormat: Text.PlainText
       text: "Add project"
       color: Color.foreground
       font.pixelSize: Style.font.title

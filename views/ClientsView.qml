@@ -141,6 +141,7 @@ Item {
       height: Math.max(headTitle.implicitHeight, addButton.implicitHeight)
 
       Text {
+        textFormat: Text.PlainText
         id: headTitle
         anchors { left: parent.left; verticalCenter: parent.verticalCenter }
         text: "Clients"
@@ -160,6 +161,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: "The companies your time is billed to — each row shows its projects and creation date; a client with projects or entries cannot be deleted."
       color: Color.muted
       font.pixelSize: Style.font.caption
@@ -225,6 +227,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: root.flash
       color: Color.accent
       font.pixelSize: Style.font.caption
@@ -233,6 +236,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: root.service ? root.service.lastError : ""
       color: Color.urgent
       font.pixelSize: Style.font.caption
@@ -255,6 +259,7 @@ Item {
     onScrimClicked: root.closeEdit()
 
     Text {
+      textFormat: Text.PlainText
       text: "Edit client"
       color: Color.foreground
       font.pixelSize: Style.font.title
@@ -301,6 +306,7 @@ Item {
     onScrimClicked: root.closeAdd()
 
     Text {
+      textFormat: Text.PlainText
       text: "Add client"
       color: Color.foreground
       font.pixelSize: Style.font.title

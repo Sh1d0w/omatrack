@@ -32,6 +32,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: root.total > 0
         ? "Showing " + (root.offset + 1) + "–"
           + Math.min(root.offset + root.limit, root.total) + " of " + root.total

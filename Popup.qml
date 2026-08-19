@@ -88,6 +88,7 @@ Panel {
           anchors.verticalCenter: parent.verticalCenter
 
           Text {
+            textFormat: Text.PlainText
             width: parent.width
             elide: Text.ElideRight
             text: {
@@ -104,6 +105,7 @@ Panel {
           }
 
           Text {
+            textFormat: Text.PlainText
             width: parent.width
             elide: Text.ElideRight
             text: {
@@ -191,6 +193,7 @@ Panel {
 
       // 4. Footer -----------------------------------------------------------
       Text {
+        textFormat: Text.PlainText
         width: parent.width
         text: root.service ? "Today " + root.service.fmtHM(root.service.daySeconds) : ""
         color: Color.muted
@@ -199,6 +202,7 @@ Panel {
 
       // 5. Errors -----------------------------------------------------------
       Text {
+        textFormat: Text.PlainText
         visible: !!root.service && root.service.lastError !== ""
         text: root.service ? root.service.lastError : ""
         color: Color.urgent

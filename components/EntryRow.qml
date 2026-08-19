@@ -45,6 +45,7 @@ Item {
       anchors.verticalCenter: parent.verticalCenter
 
       Text {
+        textFormat: Text.PlainText
         width: parent.width
         elide: Text.ElideRight
         text: {
@@ -60,6 +61,7 @@ Item {
       }
 
       Text {
+        textFormat: Text.PlainText
         width: parent.width
         elide: Text.ElideRight
         text: e.description !== "" ? e.description : "-"
@@ -74,6 +76,7 @@ Item {
       anchors.verticalCenter: parent.verticalCenter
 
       Text {
+        textFormat: Text.PlainText
         visible: e.billable === true
         text: "billable"
         color: Color.accent
@@ -82,6 +85,7 @@ Item {
       }
 
       Text {
+        textFormat: Text.PlainText
         text: root.service.fmtHMS(e.seconds)
         color: Color.foreground
         font.pixelSize: Style.font.subtitle

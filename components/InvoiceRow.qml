@@ -44,6 +44,7 @@ Item {
       anchors.verticalCenter: parent.verticalCenter
 
       Text {
+        textFormat: Text.PlainText
         width: parent.width
         elide: Text.ElideRight
         text: inv.number + " · " + inv.client
@@ -53,6 +54,7 @@ Item {
       }
 
       Text {
+        textFormat: Text.PlainText
         width: parent.width
         elide: Text.ElideRight
         text: inv.from + " → " + inv.to + " · created "
@@ -68,6 +70,7 @@ Item {
       anchors.verticalCenter: parent.verticalCenter
 
       Text {
+        textFormat: Text.PlainText
         text: Number(inv.total).toFixed(2)
           + (root.service.settings && root.service.settings.currency
               ? " " + root.service.settings.currency

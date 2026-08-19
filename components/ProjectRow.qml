@@ -45,6 +45,7 @@ Item {
       anchors.verticalCenter: parent.verticalCenter
 
       Text {
+        textFormat: Text.PlainText
         width: parent.width
         elide: Text.ElideRight
         text: p.name
@@ -54,6 +55,7 @@ Item {
       }
 
       Text {
+        textFormat: Text.PlainText
         width: parent.width
         elide: Text.ElideRight
         text: root.service.clientName(p.clientId)
