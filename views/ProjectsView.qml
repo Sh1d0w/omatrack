@@ -4,13 +4,13 @@ import qs.Ui
 import "../components"
 // Projects tab: a paginated table (each row a ProjectRow: name + owning
 // client, Edit / Del) narrowed by the top Client picker (default
-// "All clients"), an add row scoped to the selected client, and a
-// centered edit card (CardOverlay) with the same visual language and
-// dismissal contract as the Clients edit card. The edit card's client
-// picker also moves the project to another client (the update API's
-// target client). The helper refuses to delete a project still
-// referenced by entries — the error surfaces in the red lastError line
-// next to the pager.
+// "All clients"), an Add project button opening a centered add card with
+// its own Client picker, and a centered edit card — both CardOverlay
+// modals with the same visual language and dismissal contract as the
+// Clients edit card. The edit card's client picker also moves the
+// project to another client (the update API's target client). The helper
+// refuses to delete a project still referenced by entries — the error
+// surfaces in the red lastError line next to the pager.
 Item {
   id: root
 
@@ -20,13 +20,17 @@ Item {
   // stay null forever.
   readonly property var service: root.dashboard ? root.dashboard.service : null
   // The window keyCatcher blocks while a picker popup, an add/edit field,
-  // or the open edit card owns the keyboard.
-  readonly property bool inputActive: clientDrop.popupOpen || editClientDrop.popupOpen
-    || focusCount > 0 || root.editProject !== null
+  // or an open add/edit card owns the keyboard.
+  readonly property bool inputActive: clientDrop.popupOpen || addClientDrop.popupOpen
+    || editClientDrop.popupOpen || focusCount > 0
+    || root.editProject !== null || root.addProjectOpen
   property int focusCount: 0
   property int offset: 0
   readonly property int limit: root.service ? root.service.pageSize : 15
   property var editProject: null
+  property bool addProjectOpen: false
+  // The add card's client; "" until the card is first opened.
+  property string addClientId: ""
   property string flash: ""
 
   // The top Client picker: "" (the default, "All clients") shows every
@@ -59,18 +63,40 @@ Item {
     onTriggered: root.flash = ""
   }
 
+  function openAdd() {
+    var s = root.service
+    if (!s) return
+    addName.text = ""
+    // Default to the table's filtered client when one is picked, else the
+    // first client.
+    root.addClientId = (root.clientFilter !== "" && s.clientName(root.clientFilter) !== "")
+      ? root.clientFilter
+      : (s.clients.length > 0 ? s.clients[0].id : "")
+    // Explicit set: a previous in-card picker selection replaces the
+    // value binding, which would otherwise leave a stale label here.
+    addClientDrop.value = root.addClientId
+    root.addProjectOpen = true
+    Qt.callLater(function() { addName.forceActiveFocus() })
+  }
+
+  function closeAdd() { root.addProjectOpen = false }
+
   function addProject() {
     var s = root.service
     var name = addName.text.trim()
     if (!name || !s) return
-    if (root.clientFilter === "") {
-      s.lastError = "Pick a client first"
+    if (root.addClientId === "") {
+      s.lastError = "Pick a client"
       return
     }
-    s.addProject(root.clientFilter, name, function(resp) {
+    s.addProject(root.addClientId, name, function(resp) {
       if (resp.ok) {
-        addName.text = ""
-        // The helper appends, so the new project is on the last page.
+        root.closeAdd()
+        // The new project belongs to the add card's client: follow it in
+        // the filter so the new row is visible (the helper appends, so it
+        // is on the last page).
+        root.clientFilter = root.addClientId
+        clientDrop.value = root.addClientId
         root.offset = Math.max(0, root.totalCount - root.limit)
         root.flash = "Project added"
         flashTimer.restart()
@@ -88,6 +114,9 @@ Item {
     root.editProject = project
     editName.text = project.name
     root.editClientId = project.clientId
+    // Explicit set: a previous in-card picker selection replaces the
+    // value binding, which would otherwise leave a stale label here.
+    editClientDrop.value = project.clientId
   }
 
   function closeEdit() { root.editProject = null }
@@ -132,9 +161,13 @@ Item {
   }
 
   // Window-level key gate: the dashboard forwards keys to views that define
-  // handleKey. Esc closes the edit card (same dismissal as clicking its
-  // scrim).
+  // handleKey. Esc closes whichever card is open (the add card is declared
+  // last, so it wins), same dismissal as clicking its scrim.
   function handleKey(event) {
+    if (root.addProjectOpen && event.key === Qt.Key_Esc) {
+      root.closeAdd()
+      return true
+    }
     if (root.editProject !== null && event.key === Qt.Key_Esc) {
       root.closeEdit()
       return true
@@ -161,12 +194,10 @@ Item {
       font.bold: true
     }
 
-    // Add row: the Client picker is the table filter (default
-    // "All clients") and the add's target — adding while "All clients"
-    // is selected surfaces "Pick a client first" in the status line.
-    // The name label mirrors the picker label (caption/bold + labelGap)
-    // and the field box uses controlHeight, so the boxes line up; the
-    // Add button pins to the far right, bottom-aligned with the row.
+    // Top row: the Client picker is the table filter (default "All
+    // clients"); the Add button pins to the far right and opens the add
+    // card (CardOverlay) with its own Client picker, which defaults to
+    // the filtered client.
     Item {
       id: addBar
       width: parent.width
@@ -190,36 +221,13 @@ Item {
         }
       }
 
-      Column {
-        id: nameColumn
-        spacing: Style.spacing.labelGap
-        anchors { right: addBtn.left; rightMargin: Style.space(8); bottom: parent.bottom }
-
-        Text {
-          text: "Project"
-          color: Qt.darker(Color.popups.text, 1.4)
-          font.family: Style.font.family
-          font.pixelSize: Style.font.caption
-          font.bold: true
-        }
-
-        TextField {
-          id: addName
-          placeholderText: "New project…"
-          width: Style.space(220)
-          height: Style.spacing.controlHeight
-          onActiveFocusChanged: root.focusCount = Math.max(0, root.focusCount + (activeFocus ? 1 : -1))
-          onAccepted: root.addProject()
-        }
-      }
-
       Button {
         id: addBtn
-        text: "Add"
+        text: "Add project"
         leftAlign: true
         anchors { right: parent.right; bottom: parent.bottom }
         focusable: true
-        onClicked: root.addProject()
+        onClicked: root.openAdd()
       }
     }
   }
@@ -347,6 +355,65 @@ Item {
         leftAlign: true
         focusable: true
         onClicked: root.closeEdit()
+      }
+    }
+  }
+
+  // ---- add card overlay --------------------------------------------------
+  // Same CardOverlay language and dismissal as the edit card: a name
+  // field (focused on open) and a Client picker (defaulting to the
+  // filtered client, else the first). **Add project** or Enter commits
+  // (name non-empty, client picked); scrim click or Esc discards.
+  // Declared after the edit card, so it draws above it and wins the Esc
+  // gate. A successful add filters the table to the picked client and
+  // jumps to the last page.
+  CardOverlay {
+    id: addOverlay
+    anchors.fill: parent
+    visible: root.addProjectOpen
+    cardWidth: Style.space(420)
+    onScrimClicked: root.closeAdd()
+
+    Text {
+      text: "Add project"
+      color: Color.foreground
+      font.pixelSize: Style.font.title
+      font.bold: true
+    }
+
+    TextField {
+      id: addName
+      width: parent.width
+      placeholderText: "Project name"
+      onActiveFocusChanged: root.focusCount = Math.max(0, root.focusCount + (activeFocus ? 1 : -1))
+      onAccepted: root.addProject()
+    }
+
+    Dropdown {
+      id: addClientDrop
+      label: "Client"
+      showLabel: true
+      width: parent.width
+      value: root.addClientId
+      options: root.service ? root.service.clientOptions() : []
+      onChanged: function(value) { root.addClientId = value }
+    }
+
+    Row {
+      spacing: Style.space(8)
+
+      Button {
+        text: "Add project"
+        leftAlign: true
+        focusable: true
+        onClicked: root.addProject()
+      }
+
+      Button {
+        text: "Close"
+        leftAlign: true
+        focusable: true
+        onClicked: root.closeAdd()
       }
     }
   }

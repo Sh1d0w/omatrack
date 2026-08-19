@@ -12,10 +12,13 @@ arrays in the service anyway.
   client name (bold) with `N projects · added YYYY-MM-DD` (muted) below
   it, and **Edit** / **Del** on the right. Clicking anywhere on the row
   (or **Edit**) opens the edit card; **Del** asks for confirmation.
-- **Add** — top row: `New client…` field + **Add** (Enter in the field
-  commits), the button pinned to the row's far right, bottom-aligned with
-  the input (anchored, not a stretch spacer). New clients append at the
-  end, so a successful add jumps the list to the last page.
+- **Add** — the **Add client** button (top row, far right) opens a
+  centered 420px `CardOverlay` (the shared card-on-scrim modal, same as
+  the edit card) with a single `Client name` field, focused on open.
+  **Add client** or **Enter** commits (non-empty) →
+  `service.addClient(name)`. Scrim click or **Esc** discards (Esc via the
+  view's `handleKey`, routed by the dashboard's key gate). New clients
+  append at the end, so a successful add jumps the list to the last page.
 - **Rename** — the edit card: a centered 420px `CardOverlay` (the shared
   card-on-scrim modal, same as the Entries edit card) with a single
   `Client name` field pre-filled with the current name. **Save** or
@@ -32,7 +35,7 @@ arrays in the service anyway.
   `lastError` line shows the count.
 - The bottom pager page-navigates the client list (`prevPage`/`nextPage`
   step by one fixed page of 15).
-- While the add field or the edit card is open, the view reports
+- While the add card or the edit card is open, the view reports
   `inputActive` so the window's Esc goes to the card (which closes it)
   instead of the window. The delete dialog needs no view-side plumbing:
   the dashboard owns it and knows when it is open.
@@ -49,12 +52,15 @@ One flat paginated table (no per-client grouping), narrowed by the top
 - **Filter** — the top row's labeled `Client` picker (default
   **All clients**) narrows the table to one client's projects; picking
   a client resets the pager to page one.
-- **Add** — same top row: a `Project name` field + **Add** (Enter
-  commits), pinned to the row's far right. The add is scoped to the
-  filter — with **All clients** selected, **Add** surfaces
-  `Pick a client first` in the status line (the helper demands an
-  existing client anyway). New projects append at the end, so a
-  successful add jumps the list to the last page.
+- **Add** — the **Add project** button (top row, far right) opens a
+  centered 420px `CardOverlay` with a `Project name` field (focused on
+  open) and a labeled `Client` picker. The picker defaults to the
+  filtered client when one is selected, else the first client. **Add
+  project** or **Enter** commits (name non-empty, client picked) →
+  `service.addProject(clientId, name)`. Scrim click or **Esc** discards
+  (Esc via the view's `handleKey`, routed by the dashboard's key gate).
+  A successful add filters the table to the picked client (so the new
+  row is visible) and jumps to the last page (the helper appends).
 - **Edit / rename / move** — the edit card: a centered 420px
   `CardOverlay` with a `Project name` field and a labeled `Client`
   picker, both pre-filled. **Save** or **Enter** commits (only when
@@ -72,9 +78,9 @@ One flat paginated table (no per-client grouping), narrowed by the top
   [dashboard.md](dashboard.md)) with "Delete this project? Entries that
   reference it must already be gone." → `service.deleteProject(id)`;
   refused by the helper while entries reference it.
-- While a picker popup, a name field, or the edit card is open, the view
-  reports `inputActive` so the window's Esc goes to the card (which
-  closes it) instead of the window. The delete dialog needs no
+- While a picker popup, an add/edit field, or an add/edit card is open,
+  the view reports `inputActive` so the window's Esc goes to the card
+  (which closes it) instead of the window. The delete dialog needs no
   view-side plumbing: the dashboard owns it and knows when it is open.
 
 ## Data rules (helper side)

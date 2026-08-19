@@ -3,10 +3,11 @@ import qs.Commons
 import qs.Ui
 import "../components"
 // Clients tab: a paginated table (each row a ClientRow: name + meta, Edit
-// / Del), a top add row, and a centered edit card (CardOverlay) with the
-// same visual language and dismissal contract as the Entries edit card.
-// The helper refuses to delete a client still referenced by projects or
-// entries — the error surfaces in the red lastError line next to the pager.
+// / Del), an Add client button opening a centered add card, and a
+// centered edit card — both CardOverlay modals with the same visual
+// language and dismissal contract as the Entries edit card. The helper
+// refuses to delete a client still referenced by projects or entries —
+// the error surfaces in the red lastError line next to the pager.
 Item {
   id: root
 
@@ -16,13 +17,15 @@ Item {
   // stay null forever.
   readonly property var service: root.dashboard ? root.dashboard.service : null
   property int focusCount: 0
-  // The window keyCatcher blocks while the add field or the edit card
+  // The window keyCatcher blocks while the add card or the edit card
   // (its field, or just the open card) owns the keyboard.
   readonly property bool inputActive: focusCount > 0 || root.editClient !== null
+    || root.addClientOpen
   property int offset: 0
   readonly property int limit: root.service ? root.service.pageSize : 15
   readonly property int totalCount: root.service ? root.service.clients.length : 0
   property var editClient: null
+  property bool addClientOpen: false
   property string flash: ""
 
   Timer {
@@ -31,12 +34,21 @@ Item {
     onTriggered: root.flash = ""
   }
 
+  function openAdd() {
+    if (!root.service) return
+    addName.text = ""
+    root.addClientOpen = true
+    Qt.callLater(function() { addName.forceActiveFocus() })
+  }
+
+  function closeAdd() { root.addClientOpen = false }
+
   function addClient() {
     var name = addName.text.trim()
     if (!name || !root.service) return
     root.service.addClient(name, function(resp) {
       if (resp.ok) {
-        addName.text = ""
+        root.closeAdd()
         // The helper appends, so the new client is on the last page.
         root.offset = Math.max(0, root.totalCount - root.limit)
         root.flash = "Client added"
@@ -94,9 +106,13 @@ Item {
   }
 
   // Window-level key gate: the dashboard forwards keys to views that define
-  // handleKey. Esc closes the edit card (same dismissal as clicking its
-  // scrim).
+  // handleKey. Esc closes whichever card is open (the add card is declared
+  // last, so it wins), same dismissal as clicking its scrim.
   function handleKey(event) {
+    if (root.addClientOpen && event.key === Qt.Key_Esc) {
+      root.closeAdd()
+      return true
+    }
     if (root.editClient !== null && event.key === Qt.Key_Esc) {
       root.closeEdit()
       return true
@@ -123,29 +139,20 @@ Item {
       font.bold: true
     }
 
-    // Add row: the button pins to the far right, bottom-aligned with the
-    // input (shared bottom edge); anchored, not a stretch spacer, so it
-    // holds its position at any window width.
+    // Add action: pinned to the far right; opens the add card (CardOverlay)
+    // below — the same modal language as the edit card.
     Item {
       id: addBar
       width: parent.width
-      height: addName.implicitHeight
-
-      TextField {
-        id: addName
-        anchors { left: parent.left; top: parent.top }
-        placeholderText: "New client…"
-        width: Style.space(220)
-        onActiveFocusChanged: root.focusCount = Math.max(0, root.focusCount + (activeFocus ? 1 : -1))
-        onAccepted: root.addClient()
-      }
+      height: addButton.implicitHeight
 
       Button {
-        text: "Add"
+        id: addButton
+        text: "Add client"
         leftAlign: true
         anchors { right: parent.right; bottom: parent.bottom }
         focusable: true
-        onClicked: root.addClient()
+        onClicked: root.openAdd()
       }
     }
   }
@@ -261,6 +268,52 @@ Item {
         leftAlign: true
         focusable: true
         onClicked: root.closeEdit()
+      }
+    }
+  }
+
+  // ---- add card overlay --------------------------------------------------
+  // Same CardOverlay language and dismissal as the edit card: a single
+  // name field (focused on open); **Add client** or Enter commits
+  // (non-empty), scrim click or Esc discards. Declared after the edit
+  // card, so it draws above it and wins the Esc gate.
+  CardOverlay {
+    id: addOverlay
+    anchors.fill: parent
+    visible: root.addClientOpen
+    cardWidth: Style.space(420)
+    onScrimClicked: root.closeAdd()
+
+    Text {
+      text: "Add client"
+      color: Color.foreground
+      font.pixelSize: Style.font.title
+      font.bold: true
+    }
+
+    TextField {
+      id: addName
+      width: parent.width
+      placeholderText: "Client name"
+      onActiveFocusChanged: root.focusCount = Math.max(0, root.focusCount + (activeFocus ? 1 : -1))
+      onAccepted: root.addClient()
+    }
+
+    Row {
+      spacing: Style.space(8)
+
+      Button {
+        text: "Add client"
+        leftAlign: true
+        focusable: true
+        onClicked: root.addClient()
+      }
+
+      Button {
+        text: "Close"
+        leftAlign: true
+        focusable: true
+        onClicked: root.closeAdd()
       }
     }
   }

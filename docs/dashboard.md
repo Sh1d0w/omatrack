@@ -85,8 +85,9 @@ every key before any other handler (focused control included):
 
 1. confirm dialog open → its `handleKey` owns Esc / ← → / Tab / Enter
    (cancel / confirm, with `selectedIndex` driving the highlight);
-2. otherwise the active view's `handleKey`, if it defines one (the
- Entries edit card and manual-entry card close on Esc);
+2. otherwise the active view's `handleKey`, if it defines one (the open
+   card overlay closes on Esc — Entries edit / manual-entry, Clients and
+   Projects add / edit);
 3. otherwise fall through — a window-level `PanelKeyCatcher` handles
    `Esc` (closes the window), focused controls keep their keys.
 

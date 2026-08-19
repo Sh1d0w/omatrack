@@ -4,7 +4,8 @@ import qs.Ui
 
 // The in-view modal: a centered card on a dimmed scrim — the same visual
 // language and dismissal contract as the window-level ConfirmDialog. Used
-// by the Entries edit card and the Timer manual-entry modal.
+// by the Entries edit and manual-entry cards and the Clients/Projects
+// add and edit cards.
 //
 // The host binds `visible`, closes on `scrimClicked` (or Esc via its own
 // handleKey), and drops content in via the default property — it lands in
