@@ -7,8 +7,8 @@ import "components"
 
 // Quick-start popup anchored to the bar widget: live status, the new-task
 // form (client/project/description, last-used values pre-selected by
-// default) with Start below it, pause/resume/stop, and a shortcut to the
-// dashboard.
+// default) with Start below it, pause/resume/stop, and a ⚙ icon button at
+// the top right that opens the dashboard.
 //
 // The new-task section (header, form, Start) is idle-only: while a task
 // runs — paused included — the popup shrinks to status + controls and
@@ -83,7 +83,7 @@ Panel {
         }
 
         Column {
-          width: parent.width - Style.space(18)
+          width: parent.width - Style.space(8) - dashboardButton.implicitWidth - 2 * Style.space(10)
           spacing: Style.space(2)
           anchors.verticalCenter: parent.verticalCenter
 
@@ -118,6 +118,16 @@ Panel {
             color: Color.muted
             font.pixelSize: Style.font.caption
           }
+        }
+        PanelActionButton {
+          id: dashboardButton
+          iconText: "⚙"
+          tooltipText: "Open dashboard"
+          focusable: true
+          size: Style.space(30)
+          fontSize: Style.font.iconLarge
+          anchors.verticalCenter: parent.verticalCenter
+          onClicked: root.openDashboard()
         }
       }
 
@@ -180,25 +190,11 @@ Panel {
       PanelSeparator {}
 
       // 4. Footer -----------------------------------------------------------
-      Row {
+      Text {
         width: parent.width
-        spacing: Style.space(8)
-
-        Text {
-          text: root.service ? "Today " + root.service.fmtHM(root.service.daySeconds) : ""
-          color: Color.muted
-          font.pixelSize: Style.font.caption
-          anchors.verticalCenter: parent.verticalCenter
-        }
-
-        Item { width: 1 }
-
-        Button {
-          text: "Dashboard…"
-          leftAlign: true
-          focusable: true
-          onClicked: root.openDashboard()
-        }
+        text: root.service ? "Today " + root.service.fmtHM(root.service.daySeconds) : ""
+        color: Color.muted
+        font.pixelSize: Style.font.caption
       }
 
       // 5. Errors -----------------------------------------------------------

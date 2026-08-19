@@ -11,6 +11,8 @@ start/pause/resume/stop, the new-task form, and a dashboard shortcut.
    alone, or the client alone, or `-`; `No active timer` when idle) and the
    caption (`01:02:03 · billable` while running; `01:02:03 · paused ·
    billable` while paused; `Today 04:12` or `Start a task below` when idle).
+   At the top right, a ⚙ `PanelActionButton` (30×30, 18px glyph, tooltip
+   "Open dashboard") opens the dashboard.
 2. **`New task` section** — a `New task` header, a `TaskForm`
    (client/project/description/billable, see below), and a full-width
    `Start` **below the form**, active only when `formReady` (client,
@@ -21,7 +23,7 @@ start/pause/resume/stop, the new-task form, and a dashboard shortcut.
    a bordered `Stop` (→ `service.stopTask()`). Paused: `Resume` (→
    `service.resumeTask()`) + `Stop`. Nothing here when idle (Start lives
    below the form, item 2).
-4. **Footer** — `Today HH:MM` on the left, `Dashboard…` button on the right.
+4. **Footer** — `Today HH:MM` on the left.
 5. **Error line** — the service's `lastError`, red, word-wrapped (e.g. a
    failed start).
 
@@ -69,7 +71,10 @@ panel-side IpcHandler would collide with it.
 
 ## Dashboard button
 
-`Dashboard…` closes the popup, then calls `root.bar.shell.summon("io.github.sh1d0w.timetrack",
+The ⚙ icon (U+2699, monochrome — no VS16, which would force color-emoji
+rendering and dodge the theme tint) sits at the top right of the status
+row as a `PanelActionButton` with `focusable: true`. Clicking it closes the
+popup, then calls `root.bar.shell.summon("io.github.sh1d0w.timetrack",
 JSON.stringify({}))` — in-process, no process spawn — and opens the
 dashboard on its default tab (timer). The close is explicit: the summon
 goes through the shell's panel-loader path (the plugin has a `panel` kind),
