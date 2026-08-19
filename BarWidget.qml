@@ -14,12 +14,12 @@ import qs.Ui
 // + new-task form + dashboard).
 BarWidget {
   id: root
-  moduleName: "io.github.sh1d0w.timetrack"
+  moduleName: "io.github.sh1d0w.omatrack"
 
   // The plugin's headless engine (singleton, in-process). The binding
   // re-evaluates when the shell reassigns its service map.
   readonly property var service:
-    bar ? bar.shell.serviceFor("io.github.sh1d0w.timetrack") : null
+    bar ? bar.shell.serviceFor("io.github.sh1d0w.omatrack") : null
 
   // ---- Popup. Shape contract for shell summon/hide/toggle routing:
   //      Bar.findPanelWidget requires open/close/opened on the bar-widget

@@ -1,4 +1,6 @@
-# Quattro Time Tracker
+# OmaTrack
+
+> Freelance and Project time tracking plugin for Omarchy
 
 An [Omarchy](https://omarchyplugins.com/) Quattro shell plugin for time
 tracking: a live timer in the bar, a click-to-open quick-start popup, and a
@@ -38,12 +40,12 @@ Requirements: Omarchy with the Quattro shell, `python3` (stdlib only),
 ```sh
 git clone <this-repo> ~/src/omarchy-timetrack && cd ~/src/omarchy-timetrack
 bash scripts/install.sh
-omarchy plugin enable io.github.sh1d0w.timetrack --section right
+omarchy plugin enable io.github.sh1d0w.omatrack --section center
 ```
 
 `scripts/install.sh` copies the runtime files (manifest + QML + helper +
 `components/` + `views/`) into `~/.config/omarchy/plugins/
-io.github.sh1d0w.timetrack/` (override the base dir with
+io.github.sh1d0w.omatrack/` (override the base dir with
 `OMARCHY_PLUGINS_DIR`). The plugin registry forbids symlinks, so the
 installed copy is the source of truth at runtime — **re-run
 `install.sh` after every change**, then `omarchy restart shell` if a
@@ -53,7 +55,7 @@ installed copy is the source of truth at runtime — **re-run
 
 - **Bar** — click the widget for the popup; `start`/`pause`/`resume`/`stop`
   the task; open the Dashboard.
-- **Dashboard** — `omarchy-shell shell toggle io.github.sh1d0w.timetrack`
+- **Dashboard** — `omarchy-shell shell toggle io.github.sh1d0w.omatrack`
   (optionally with `'{"tab":"entries"}'`; tab ids: `timer`, `entries`,
   `clients`, `projects`, `reports`, `invoices`, `settings`).
 - **IPC / CLI** — `omarchy-shell timetrack start|stop|pause|resume|toggle|status|ping`

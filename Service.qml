@@ -3,7 +3,7 @@ import Quickshell
 import Quickshell.Io
 import qs.Commons
 
-// Headless engine of the Quattro Time Tracker plugin.
+// Headless engine of the OmaTrack plugin.
 //
 // Owns the single serialized channel to `timetrack.py` (the only writer of
 // the state file), the in-memory state view (clients/projects/settings/

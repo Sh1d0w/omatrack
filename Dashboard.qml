@@ -19,7 +19,7 @@ Item {
   property var service: null
   property var confirmPending: null
 
-  readonly property string pluginId: "io.github.sh1d0w.timetrack"
+  readonly property string pluginId: "io.github.sh1d0w.omatrack"
   property string activeTab: "timer"
 
   function open(payloadJson) {
@@ -86,7 +86,7 @@ Item {
 
   FloatingWindow {
     id: window
-    title: "Quattro — Time Tracking"
+    title: "OmaTrack"
     color: Color.background
     implicitWidth: 1100
     implicitHeight: 700
@@ -158,7 +158,7 @@ Item {
               width: parent.width
               spacing: Style.space(1)
               Text {
-                text: "Quattro"
+                text: "OmaTrack"
                 color: Color.foreground
                 font.pixelSize: Style.font.heading
                 font.bold: true
@@ -208,7 +208,7 @@ Item {
               spacing: Style.space(12)
 
               Text {
-                text: "Quattro — Time Tracking"
+                text: "OmaTrack"
                 color: Color.foreground
                 font.pixelSize: Style.font.heading
                 font.bold: true

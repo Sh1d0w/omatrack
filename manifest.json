@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "id": "io.github.sh1d0w.timetrack",
-  "name": "Quattro Time Tracker",
+  "id": "io.github.sh1d0w.omatrack",
+  "name": "OmaTrack",
   "version": "1.0.0",
   "author": "sh1d0w",
   "license": "MIT",
-  "description": "Time tracking: bar widget with live client/task timer, quick-start popup, and a dashboard window for entries, clients, projects, reports, exports, and invoices.",
+  "description": "Freelance and Project time tracking plugin for Omarchy",
   "kinds": ["bar-widget", "service", "panel"],
   "entryPoints": {
     "barWidget": "BarWidget.qml",
@@ -13,7 +13,7 @@
     "panel": "Dashboard.qml"
   },
   "barWidget": {
-    "displayName": "Quattro Time Tracker",
+    "displayName": "OmaTrack",
     "description": "Live timer for the current client/task with quick start/stop and a full management dashboard.",
     "category": "Productivity",
     "allowMultiple": false,

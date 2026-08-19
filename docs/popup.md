@@ -74,7 +74,7 @@ panel-side IpcHandler would collide with it.
 The ⚙ icon (U+2699, monochrome — no VS16, which would force color-emoji
 rendering and dodge the theme tint) sits at the top right of the status
 row as a `PanelActionButton` with `focusable: true`. Clicking it closes the
-popup, then calls `root.bar.shell.summon("io.github.sh1d0w.timetrack",
+popup, then calls `root.bar.shell.summon("io.github.sh1d0w.omatrack",
 JSON.stringify({}))` — in-process, no process spawn — and opens the
 dashboard on its default tab (timer). The close is explicit: the summon
 goes through the shell's panel-loader path (the plugin has a `panel` kind),

@@ -2,7 +2,7 @@
 
 `Dashboard.qml` — the `panel` kind. A real toplevel `FloatingWindow`
 (`implicitWidth: 1100`, `implicitHeight: 700`, minimum `860×560`, title
-"Quattro — Time Tracking") managed by the shell's panel loader.
+"OmaTrack") managed by the shell's panel loader.
 
 ## Shell contract
 
@@ -25,7 +25,7 @@ re-evaluates on its 1s tick (frozen while paused).
 
 ```
 ┌──────────┬─────────────────────────────────────────────┐
-│ Quattro  │ Quattro — Time Tracking  ● Acme — Hero · 0:02│
+│ OmaTrack │ OmaTrack  ● Acme — Hero · 0:02              │
 │ time     ├─────────────────────────────────────────────┤
 │ tracking │                                             │
 │ [Timer]  │              active tab view                │
@@ -103,8 +103,8 @@ cycles within the view.
 ## Summon
 
 ```sh
-omarchy-shell shell toggle io.github.sh1d0w.timetrack            # timer tab
-omarchy-shell shell toggle io.github.sh1d0w.timetrack '{"tab":"reports"}'
+omarchy-shell shell toggle io.github.sh1d0w.omatrack            # timer tab
+omarchy-shell shell toggle io.github.sh1d0w.omatrack '{"tab":"reports"}'
 ```
 
 `toggle` re-summons an existing open instance (calls `open(payloadJson)`

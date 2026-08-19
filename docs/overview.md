@@ -1,12 +1,12 @@
 # Overview
 
-Quattro Time Tracker is an Omarchy shell plugin for tracking billable and
+OmaTrack is an Omarchy shell plugin for tracking billable and
 non-billable work time per client and project. It shows a live timer in the
 bar (with pause/resume/stop), offers a one-click quick-start popup, and a
 dashboard window for managing entries, clients, projects, reports, invoices,
 and settings.
 
-Plugin id: `io.github.sh1d0w.timetrack`.
+Plugin id: `io.github.sh1d0w.omatrack`.
 
 ## The three plugin kinds
 
@@ -20,7 +20,7 @@ One plugin, three kinds (declared in `manifest.json`):
 
 Because both `bar-widget` and `panel` kinds are present, the shell's
 summon/toggle routing (`shell.qml`) targets the **panel** entry:
-`omarchy-shell shell toggle io.github.sh1d0w.timetrack` opens the dashboard,
+`omarchy-shell shell toggle io.github.sh1d0w.omatrack` opens the dashboard,
 not the popup — there is no CLI to open the bar popup, which opens only by
 clicking the bar widget.
 
@@ -45,7 +45,7 @@ views/               TimerView, EntriesView, ClientsView, ProjectsView,
 ```sh
 # from this repo
 bash scripts/install.sh
-omarchy plugin enable io.github.sh1d0w.timetrack
+omarchy plugin enable io.github.sh1d0w.omatrack
 ```
 
 Then:
@@ -61,7 +61,7 @@ Then:
   python3 timetrack.py start --client-id c_… --project-id p_… --description "Landing hero"
   ```
 
-- Open the dashboard: `omarchy-shell shell toggle io.github.sh1d0w.timetrack`
+- Open the dashboard: `omarchy-shell shell toggle io.github.sh1d0w.omatrack`
   (or the popup's Dashboard button).
 
 ## Feature index

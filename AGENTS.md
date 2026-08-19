@@ -1,4 +1,4 @@
-# AGENTS.md — Quattro Time Tracker
+# AGENTS.md — OmaTrack
 
 ## Project summary
 
@@ -6,10 +6,10 @@ An Omarchy (Quattro shell) plugin for time tracking: a live bar widget, a
 quick-start popup, and a full management dashboard (entries, clients,
 projects, reports, invoices, settings).
 
-- Plugin id: `io.github.sh1d0w.timetrack` (third-party ids must not start with `omarchy.`).
+- Plugin id: `io.github.sh1d0w.omatrack` (third-party ids must not start with `omarchy.`).
 - Developed in this repo. The **installed copy** is what runs: the plugin
   registry forbids symlinks, so `scripts/install.sh` copies the runtime files
-  into `~/.config/omarchy/plugins/io.github.sh1d0w.timetrack/`.
+  into `~/.config/omarchy/plugins/io.github.sh1d0w.omatrack/`.
 
 ## Layout
 
@@ -34,13 +34,13 @@ scripts/install.sh   copies runtime files into the plugin dir
 - The shell is one long-running Quickshell process. Plugins run **in-process**,
   unsandboxed. Never start a second Quickshell.
 - `Service.qml` is a `service` kind: a headless singleton, accessed from the
-  bar widget via `bar.shell.serviceFor("io.github.sh1d0w.timetrack")` and
+  bar widget via `bar.shell.serviceFor("io.github.sh1d0w.omatrack")` and
   injected into the dashboard (the root declares `property var service`).
 - All state mutations go through `timetrack.py` — the **single writer** of
   `~/.local/state/omarchy/timetrack/state.json` (atomic tmp + `os.replace`,
   `fcntl.flock`). QML never writes the file directly.
 - The dashboard is a `panel` kind rendered by the shell's panel loader as a
-  `FloatingWindow`. Summon: `omarchy-shell shell toggle io.github.sh1d0w.timetrack '{"tab":"entries"}'`.
+  `FloatingWindow`. Summon: `omarchy-shell shell toggle io.github.sh1d0w.omatrack '{"tab":"entries"}'`.
   The bar popup opens only on bar click (the shell routes summon/toggle to the
   panel when both kinds are present).
 
@@ -49,7 +49,7 @@ scripts/install.sh   copies runtime files into the plugin dir
 ```sh
 bash tests/helper_test.sh     # data engine (must PASS)
 bash scripts/install.sh       # copy into the plugin dir
-omarchy plugin validate ~/.config/omarchy/plugins/io.github.sh1d0w.timetrack
+omarchy plugin validate ~/.config/omarchy/plugins/io.github.sh1d0w.omatrack
 qmllint -I /usr/share/omarchy/shell <file.qml>   # every QML file
 ```
 

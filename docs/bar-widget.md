@@ -2,7 +2,7 @@
 
 `BarWidget.qml` — the `bar-widget` kind, installed in the **center** section
 (`defaultSection: "center"`, enabled with
-`omarchy plugin enable io.github.sh1d0w.timetrack`). It is
+`omarchy plugin enable io.github.sh1d0w.omatrack`). It is
 the live label for the current task and the host for the quick-start popup.
 
 ## Display
@@ -39,7 +39,7 @@ The bar widget is a host-injected object: the shell gives it `bar`,
 
 ```qml
 readonly property var service:
-    bar ? bar.shell.serviceFor("io.github.sh1d0w.timetrack") : null
+    bar ? bar.shell.serviceFor("io.github.sh1d0w.omatrack") : null
 ```
 
 This binding re-evaluates when the shell reassigns its `_services` map, so

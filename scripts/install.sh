@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Install the Quattro Time Tracker plugin into the Omarchy third-party plugin
+# Install the OmaTrack plugin into the Omarchy third-party plugin
 # dir. Copies only the runtime files: the plugin registry forbids symlinks, so
 # a live dev checkout cannot be linked. Re-run after any change — the shell
 # hot-reloads plugin files on save (run `omarchy restart shell` if a
 # Service.qml change does not take effect).
 set -euo pipefail
 
-PLUGIN_ID="io.github.sh1d0w.timetrack"
+PLUGIN_ID="io.github.sh1d0w.omatrack"
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEST="${OMARCHY_PLUGINS_DIR:-$HOME/.config/omarchy/plugins}/$PLUGIN_ID"
 

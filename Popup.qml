@@ -21,7 +21,7 @@ import "components"
 // as its popout identity.
 Panel {
   id: root
-  moduleName: "io.github.sh1d0w.timetrack"
+  moduleName: "io.github.sh1d0w.omatrack"
   manageIpc: false  // the service owns the single "timetrack" IPC target
 
   // Injected by the BarWidget via injectPopup().
@@ -238,7 +238,7 @@ Panel {
     // open over the dashboard window.
     root.close()
     if (sh && typeof sh.summon === "function") {
-      sh.summon("io.github.sh1d0w.timetrack", JSON.stringify({}))
+      sh.summon("io.github.sh1d0w.omatrack", JSON.stringify({}))
     }
   }
 }

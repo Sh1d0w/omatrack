@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Quattro Time Tracker — state engine and CLI.
+"""OmaTrack — state engine and CLI.
 
 Single writer for the plugin's state file. python3 stdlib only.
 
