@@ -19,7 +19,8 @@ the Entries tab. Manual entries live on the **Entries** tab
    runs (paused included): there is no next task to line up until it
    stops.
 4. **Next-task form** — `TaskForm` (client, project, description,
-   billable; last-used values pre-selected, description required).
+   billable; last-used client/project/billable pre-selected, description
+   starts empty and is required).
    **Idle-only:** hidden while a task runs — paused included — and
    returns only when the task stops.
 5. **Start** — below the form it starts from, `active` only when

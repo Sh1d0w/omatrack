@@ -13,8 +13,8 @@ settings). Data lives in one JSON file managed by a single-writer
   timer freezes the label with a `(paused)` suffix. Clicking opens
   the popup.
 - **Popup** — start/pause/resume/stop with the selected task, a "next task"
-  form with the **last used client/project/description pre-selected**
-  (description mandatory), and a **Dashboard**
+  form with the **last used client/project pre-selected**
+  (description starts empty and is mandatory), and a **Dashboard**
   button.
 - **Dashboard** (real toplevel window, 7 tabs):
   - *Timer* — live hero, start/pause/resume/stop, next-task form, manual entry form.

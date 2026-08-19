@@ -7,8 +7,8 @@ import qs.Ui
 //
 // Owns its four values; the host reads them back directly. `valid` is the
 // start gate: client, project and a non-blank description are all required.
-// `applyDefaults()` seeds last-client/last-project/last-description/
-// last-billable exactly once (until the user edits anything, which sets
+// `applyDefaults()` seeds last-client/last-project/last-billable
+// exactly once (until the user edits anything, which sets
 // `userTouched`). `keyActiveItem` tells the host which control currently
 // owns the keys, if any.
 Item {
@@ -129,7 +129,8 @@ Item {
     root._applyingDefaults = true
     root.clientId = (lu && lu.clientId) || (s.clients.length > 0 ? s.clients[0].id : "")
     root.reselectProjectFor(root.clientId)
-    root.description = (lu && lu.description) || ""
+    // Description is deliberately left empty: every started task gets a
+    // fresh description typed by the user.
     root.billable = (lu && typeof lu.billable === "boolean") ? lu.billable : true
     root._applyingDefaults = false
   }

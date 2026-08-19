@@ -33,12 +33,13 @@ used by TimerView. The popup does not mirror its values:
 - **Pre-selection (requirement):** `taskForm.applyDefaults()` seeds
   client and project from the service's `lastUsed` (the most recently ended
   entry, or the active task) — falling back to the first client and first
-  project of that client. It also seeds the last description and billable
-  flag when present. `TaskForm` self-seeds when the service is injected
-  (its `onServiceChanged`; a Loader's `onLoaded` runs after
-  `onCompleted`), and the popup re-arms the seeding on `opened` (via
-  `Qt.callLater`, so it wins over focus initialization). Seeding never
-  overwrites a value the user edited.
+  project of that client — and the last billable flag when present. The
+  description is deliberately seeded **empty**: every started task gets a
+  fresh description, never a copy of the last one. `TaskForm` self-seeds
+  when the service is injected (its `onServiceChanged`; a Loader's
+  `onLoaded` runs after `onCompleted`), and the popup re-arms the seeding on
+  `opened` (via `Qt.callLater`, so it wins over focus initialization).
+  Seeding never overwrites a value the user edited.
 - **Persistence across open/close:** the `TaskForm` instance lives with the
   popup, so a half-filled form survives a stray Esc.
 - **Mandatory description:** `taskForm.valid`
