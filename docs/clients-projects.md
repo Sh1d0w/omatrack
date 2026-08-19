@@ -8,13 +8,23 @@ arrays in the service anyway.
 
 ## Clients
 
+- **Table** — each row is a `ClientRow` (`components/ClientRow.qml`): the
+  client name (bold) with `N projects · added YYYY-MM-DD` (muted) below
+  it, and **Edit** / **Del** on the right. Clicking anywhere on the row
+  (or **Edit**) opens the edit card; **Del** asks for confirmation.
 - **Add** — top row: `New client…` field + **Add** (Enter in the field
   commits), the button pinned to the row's far right, bottom-aligned with
   the input (anchored, not a stretch spacer). New clients append at the
   end, so a successful add jumps the list to the last page.
-- **Rename** — each row's name is a `TextField`; **Enter commits** (only
-  when non-empty and actually changed) → `service.updateClient(id, name)`.
-- **Row meta** — `N projects · added YYYY-MM-DD`.
+- **Rename** — the edit card: a centered 420px `CardOverlay` (the shared
+  card-on-scrim modal, same as the Entries edit card) with a single
+  `Client name` field pre-filled with the current name. **Save** or
+  **Enter** commits (only when non-empty and actually changed) →
+  `service.updateClient(id, name)`. Scrim click or **Esc** discards
+  (Esc via the view's `handleKey`, routed by the dashboard's key gate).
+- **Status line** — right of the bottom pager: an accent flash
+  ("Client added" / "Client saved", 2 s) and the red `lastError`
+  (duplicate-name refusal, delete block with counts).
 - **Delete** — **Del** → the window-level confirm dialog (see
   [dashboard.md](dashboard.md)) with "Delete this client? Its projects
   and entries must already be gone." → `service.deleteClient(id)`. The
@@ -22,9 +32,10 @@ arrays in the service anyway.
   `lastError` line shows the count.
 - The bottom pager page-navigates the client list (`prevPage`/`nextPage`
   step by one fixed page of 15).
-- While a name field is focused, the view reports `inputActive` so the
-  window's Esc goes to the control, not the window. The dialog needs no
-  view-side plumbing: the dashboard owns it and knows when it is open.
+- While the add field or the edit card is open, the view reports
+  `inputActive` so the window's Esc goes to the card (which closes it)
+  instead of the window. The delete dialog needs no view-side plumbing:
+  the dashboard owns it and knows when it is open.
 
 ## Projects
 

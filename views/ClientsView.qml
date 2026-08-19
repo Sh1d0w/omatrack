@@ -2,10 +2,11 @@ import QtQuick
 import qs.Commons
 import qs.Ui
 import "../components"
-// Clients tab: rename inline (Enter commits), add (new clients append at
-// the end and the list jumps to them), delete with confirmation, and a
-// bottom pager. The helper refuses to delete a client still referenced
-// by projects or entries — the error surfaces in lastError.
+// Clients tab: a paginated table (each row a ClientRow: name + meta, Edit
+// / Del), a top add row, and a centered edit card (CardOverlay) with the
+// same visual language and dismissal contract as the Entries edit card.
+// The helper refuses to delete a client still referenced by projects or
+// entries — the error surfaces in the red lastError line next to the pager.
 Item {
   id: root
 
@@ -15,18 +16,19 @@ Item {
   // stay null forever.
   readonly property var service: root.dashboard ? root.dashboard.service : null
   property int focusCount: 0
-  readonly property bool inputActive: focusCount > 0
+  // The window keyCatcher blocks while the add field or the edit card
+  // (its field, or just the open card) owns the keyboard.
+  readonly property bool inputActive: focusCount > 0 || root.editClient !== null
   property int offset: 0
   readonly property int limit: root.service ? root.service.pageSize : 15
+  readonly property int totalCount: root.service ? root.service.clients.length : 0
+  property var editClient: null
+  property string flash: ""
 
-  function projectsFor(clientId) {
-    var n = 0
-    if (root.service) {
-      var ps = root.service.projects
-      for (var i = 0; i < ps.length; i++)
-        if (ps[i].clientId === clientId) n++
-    }
-    return n
+  Timer {
+    id: flashTimer
+    interval: 2000
+    onTriggered: root.flash = ""
   }
 
   function addClient() {
@@ -37,9 +39,69 @@ Item {
         addName.text = ""
         // The helper appends, so the new client is on the last page.
         root.offset = Math.max(0, root.totalCount - root.limit)
+        root.flash = "Client added"
+        flashTimer.restart()
       } else
         root.service.lastError = resp.error || "Add failed"
     })
+  }
+
+  function prevPage() { root.offset = Math.max(0, root.offset - root.limit) }
+  function nextPage() {
+    root.offset = Math.min(Math.max(0, root.totalCount - root.limit), root.offset + root.limit)
+  }
+
+  function openEdit(client) {
+    root.editClient = client
+    editName.text = client.name
+  }
+
+  function closeEdit() { root.editClient = null }
+
+  function saveEdit() {
+    var s = root.service
+    if (!s || root.editClient === null) return
+    var name = editName.text.trim()
+    if (!name) {
+      s.lastError = "Name must not be empty"
+      return
+    }
+    if (name === root.editClient.name) {
+      root.closeEdit()
+      return
+    }
+    var id = root.editClient.id
+    s.updateClient(id, name, function(resp) {
+      if (resp.ok) {
+        root.closeEdit()
+        root.flash = "Client saved"
+        flashTimer.restart()
+      } else
+        s.lastError = resp.error || "Rename failed"
+    })
+  }
+
+  function requestDelete(client) {
+    if (!client || !root.dashboard) return
+    var id = client.id
+    root.dashboard.confirmAction("Delete this client? Its projects and entries must already be gone.", function() {
+      if (!root.service) return
+      root.service.deleteClient(id, function(resp) {
+        if (!resp.ok)
+          root.service.lastError = resp.error || "Delete failed"
+      })
+    })
+  }
+
+  // Window-level key gate: the dashboard forwards keys to views that define
+  // handleKey. Esc closes the edit card (same dismissal as clicking its
+  // scrim).
+  function handleKey(event) {
+    if (root.editClient !== null && event.key === Qt.Key_Esc) {
+      root.closeEdit()
+      return true
+    }
+    return false
   }
 
   Column {
@@ -90,13 +152,6 @@ Item {
 
   // QML-side pagination: the full clients array stays in the service (the
   // dropdowns need it), only the current page slice becomes the list model.
-  readonly property int totalCount: root.service ? root.service.clients.length : 0
-
-  function prevPage() { root.offset = Math.max(0, root.offset - root.limit) }
-  function nextPage() {
-    root.offset = Math.min(Math.max(0, root.totalCount - root.limit), root.offset + root.limit)
-  }
-
   ListView {
     id: listView
     anchors {
@@ -104,7 +159,7 @@ Item {
       right: parent.right
       top: head.bottom
       topMargin: Style.space(10)
-      bottom: pageBar.top
+      bottom: pagerBar.top
       bottomMargin: Style.space(10)
       leftMargin: Style.space(16)
       rightMargin: Style.space(16)
@@ -113,57 +168,19 @@ Item {
     spacing: 2
     clip: true
 
-    delegate: Row {
-      id: clientRow
-      width: ListView.view.width
-      spacing: Style.space(8)
-
-      TextField {
-        text: modelData.name
-        width: parent.width - Style.space(230)
-        font.bold: true
-        font.pixelSize: Style.font.body
-        onActiveFocusChanged: root.focusCount = Math.max(0, root.focusCount + (activeFocus ? 1 : -1))
-        onAccepted: {
-          var name = text.trim()
-          if (name && name !== modelData.name)
-            root.service.updateClient(modelData.id, name, function(resp) {
-              if (!resp.ok)
-                root.service.lastError = resp.error || "Rename failed"
-            })
-        }
-      }
-
-      Text {
-        text: root.projectsFor(modelData.id) + " projects"
-          + (modelData.createdAt ? " · added " + root.service.localDateStr(new Date(modelData.createdAt)) : "")
-        color: Color.muted
-        font.pixelSize: Style.font.caption
-        anchors.verticalCenter: parent.verticalCenter
-      }
-
-      Button {
-        text: "Del"
-        leftAlign: true
-        focusable: true
-        anchors.verticalCenter: parent.verticalCenter
-        onClicked: {
-          var id = modelData.id
-          root.dashboard.confirmAction("Delete this client? Its projects and entries must already be gone.", function() {
-            if (!root.service) return
-            root.service.deleteClient(id, function(resp) {
-              if (!resp.ok)
-                root.service.lastError = resp.error || "Delete failed"
-            })
-          })
-        }
-      }
+    delegate: ClientRow {
+      width: listView.width
+      service: root.service
+      onEditRequested: root.openEdit(modelData)
+      onDeleteRequested: root.requestDelete(modelData)
     }
   }
 
-  // ---- pager --------------------------------------------------------------------
-  PaginationBar {
-    id: pageBar
+  // ---- pager + status ---------------------------------------------------
+  // Pinned to the bottom of the table: the shared PaginationBar (page
+  // navigation) with the flash/error status texts to its right.
+  Row {
+    id: pagerBar
     anchors {
       left: parent.left
       right: parent.right
@@ -172,11 +189,79 @@ Item {
       rightMargin: Style.space(16)
       bottomMargin: Style.space(16)
     }
-    total: root.totalCount
-    offset: root.offset
-    limit: root.limit
-    emptyText: "No clients"
-    onPrevRequested: root.prevPage()
-    onNextRequested: root.nextPage()
+    spacing: Style.space(8)
+
+    PaginationBar {
+      id: pageBar
+      total: root.totalCount
+      offset: root.offset
+      limit: root.limit
+      emptyText: "No clients"
+      onPrevRequested: root.prevPage()
+      onNextRequested: root.nextPage()
+    }
+
+    Text {
+      text: root.flash
+      color: Color.accent
+      font.pixelSize: Style.font.caption
+      anchors.verticalCenter: parent.verticalCenter
+      visible: root.flash !== ""
+    }
+
+    Text {
+      text: root.service ? root.service.lastError : ""
+      color: Color.urgent
+      font.pixelSize: Style.font.caption
+      anchors.verticalCenter: parent.verticalCenter
+      elide: Text.ElideRight
+      visible: root.service && root.service.lastError !== ""
+    }
+  }
+
+  // ---- edit card overlay --------------------------------------------------
+  // Shared card-on-scrim modal (CardOverlay): same visual language and
+  // dismissal semantics as the Entries edit card — scrim click or Esc
+  // discards (Esc via the view's handleKey, routed by the dashboard's key
+  // gate). Enter in the name field saves.
+  CardOverlay {
+    id: editOverlay
+    anchors.fill: parent
+    visible: root.editClient !== null
+    cardWidth: Style.space(420)
+    onScrimClicked: root.closeEdit()
+
+    Text {
+      text: "Edit client"
+      color: Color.foreground
+      font.pixelSize: Style.font.title
+      font.bold: true
+    }
+
+    TextField {
+      id: editName
+      width: parent.width
+      placeholderText: "Client name"
+      onActiveFocusChanged: root.focusCount = Math.max(0, root.focusCount + (activeFocus ? 1 : -1))
+      onAccepted: root.saveEdit()
+    }
+
+    Row {
+      spacing: Style.space(8)
+
+      Button {
+        text: "Save"
+        leftAlign: true
+        focusable: true
+        onClicked: root.saveEdit()
+      }
+
+      Button {
+        text: "Close"
+        leftAlign: true
+        focusable: true
+        onClicked: root.closeEdit()
+      }
+    }
   }
 }

@@ -20,7 +20,8 @@ BarWidget.qml        right-section bar label + popup host
 Popup.qml            anchored quick-start popup
 Dashboard.qml        toplevel dashboard window (FloatingWindow)
 timetrack.py         state engine + CLI (python3 stdlib only; single writer)
-components/          shared UI: TaskForm, EntryForm, DateRangeBar, EntryRow
+components/          shared UI: TaskForm, EntryForm, DateRangeBar, EntryRow,
+                     ClientRow, CardOverlay, PaginationBar
 views/               dashboard tabs: Timer, Entries, Clients, Projects,
                      Reports, Invoices, Settings
 tests/helper_test.sh shell tests for timetrack.py (throwaway XDG_STATE_HOME)
@@ -66,8 +67,9 @@ feature, add or update its doc in the same change.**
 ## Conventions
 
 - No code duplication. `components/` (`TaskForm`, `EntryForm`, `DateRangeBar`,
-  `EntryRow`) and the shell's `qs.Ui` kit are the shared pieces; views compose
-  them instead of re-implementing.
+  `EntryRow`, `ClientRow`, `CardOverlay`, `PaginationBar`) and the shell's
+  `qs.Ui` kit are the shared pieces; views compose them instead of
+  re-implementing.
 - `timetrack.py`: python3 **stdlib only**, one JSON line per run
   (`{"ok": true, ...}` / `{"ok": false, "error": "..."}`), timestamps as UTC
   ISO-8601 seconds.
