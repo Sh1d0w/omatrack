@@ -1,86 +1,74 @@
 # OmaTrack
 
-> Freelance and Project time tracking plugin for Omarchy
+> Freelance and project time tracking for Omarchy
 
-An [Omarchy](https://omarchyplugins.com/) Quattro shell plugin for time
-tracking: a live timer in the bar, a click-to-open quick-start popup, and a
-full management dashboard (entries, clients, projects, reports, invoices,
-settings). Data lives in one JSON file managed by a single-writer
-`python3` helper — no database, no polling, no extra processes.
+![OmaTrack — bar timer and quick-start popup](docs/images/preview.png)
+
+OmaTrack is a time tracking plugin for the [Omarchy](https://omarchyplugins.com/) Quattro shell. It puts a live timer in your bar, a quick-start popup one click away, and a full dashboard for managing your entries, clients, projects, reports, and invoices. All data stays local in a single JSON file — no database, no cloud, no telemetry.
 
 ## Features
 
-- **Bar widget** (right section) — current task (the entry's description, or
-  the client) and live elapsed time; idle shows a clock glyph (◷); a paused
-  timer freezes the label with a `(paused)` suffix. Clicking opens
-  the popup.
-- **Popup** — start/pause/resume/stop with the selected task, a "next task"
-  form with the **last used client/project pre-selected**
-  (description starts empty and is mandatory), and a **Dashboard**
-  button.
-- **Dashboard** (real toplevel window, 7 tabs):
-  - *Timer* — live hero, start/pause/resume/stop, next-task form, manual entry form.
-  - *Entries* — filterable, paginated list; add / edit / delete.
-  - *Clients* & *Projects* — CRUD with referential-integrity guards.
-  - *Reports* — group by day / client / project over a date interval,
-    export to **CSV** or **HTML**.
-  - *Invoices* — billable entries for one client + range → numbered HTML
-    invoice at the configured hourly rate.
-  - *Settings* — currency, hourly rate, invoice identity + numbering.
-- **Performant by design** — the only per-second work is one `SystemClock`
-  tick in QML while a timer runs; entries are paginated (15/page); reports
-  are computed in the helper, not in QML; exports are files opened with the
-  system handler (no QtWebEngine — unavailable in this runtime).
+- **Live bar timer** — current task and elapsed time in the bar. Click it to open the quick-start popup.
+- **Quick-start popup** — start, pause, resume, or stop a task in one screen, with your last client and project pre-selected.
+- **Dashboard** — a toplevel window with seven tabs:
+
+  | Tab | What it does |
+  | --- | --- |
+  | **Timer** | Live timer hero plus start/pause/resume/stop, new-task form, and manual entry form |
+  | **Entries** | Filterable, paginated log — add, edit, delete |
+  | **Clients & Projects** | Manage both, with referential-integrity guards |
+  | **Reports** | Totals by day / client / project over any date range, export to CSV or HTML |
+  | **Invoices** | Billable entries for one client and range → numbered HTML invoice at your hourly rate |
+  | **Settings** | Currency, hourly rate, invoice identity and numbering |
+
+- **CLI-driven** — `omarchy-shell timetrack start|stop|pause|resume|toggle|status` drives the timer from anywhere, and `python3 timetrack.py -h` exposes the full command set.
+- **Lightweight** — no database, no polling, no extra processes: one JSON state file, written atomically by a stdlib-only `python3` helper.
+
+## Requirements
+
+- Omarchy with the Quattro shell
+- `python3` (standard library only)
+- `xdg-open` (opens CSV/HTML exports)
 
 ## Install
 
-Requirements: Omarchy with the Quattro shell, `python3` (stdlib only),
-`xdg-open`.
-
 ```sh
-git clone <this-repo> ~/src/omarchy-timetrack && cd ~/src/omarchy-timetrack
+git clone https://github.com/Sh1d0w/omatrack.git ~/src/omatrack && cd ~/src/omatrack
 bash scripts/install.sh
-omarchy plugin enable io.github.sh1d0w.omatrack --section center
+omarchy plugin enable io.github.sh1d0w.omatrack
 ```
 
-`scripts/install.sh` copies the runtime files (manifest + QML + helper +
-`components/` + `views/`) into `~/.config/omarchy/plugins/
-io.github.sh1d0w.omatrack/` (override the base dir with
-`OMARCHY_PLUGINS_DIR`). The plugin registry forbids symlinks, so the
-installed copy is the source of truth at runtime — **re-run
-`install.sh` after every change**, then `omarchy restart shell` if a
-`Service.qml` change does not take effect.
+`install.sh` copies the runtime files into `~/.config/omarchy/plugins/io.github.sh1d0w.omatrack/` (override the base dir with `OMARCHY_PLUGINS_DIR`). The plugin registry forbids symlinks, so the installed copy is the source of truth at runtime — re-run `install.sh` after any change, then `omarchy restart shell` if a `Service.qml` change does not take effect.
+
+## Uninstall
+
+```sh
+omarchy plugin disable io.github.sh1d0w.omatrack
+rm -rf ~/.config/omarchy/plugins/io.github.sh1d0w.omatrack
+```
+
+To also remove your data:
+
+```sh
+rm ~/.local/state/omarchy/timetrack/state.json
+```
 
 ## Usage
 
-- **Bar** — click the widget for the popup; `start`/`pause`/`resume`/`stop`
-  the task; open the Dashboard.
-- **Dashboard** — `omarchy-shell shell toggle io.github.sh1d0w.omatrack`
-  (optionally with `'{"tab":"entries"}'`; tab ids: `timer`, `entries`,
-  `clients`, `projects`, `reports`, `invoices`, `settings`).
-- **IPC / CLI** — `omarchy-shell timetrack start|stop|pause|resume|toggle|status|ping`
-  drives the timer from anywhere; `python3 timetrack.py <command>` exposes
-  everything else (see [docs/settings.md](docs/settings.md)).
+- **Bar** — click the timer icon for the popup: start/stop the current task or set up the next one (client, project, description, billable).
+- **Dashboard** — `omarchy-shell shell toggle io.github.sh1d0w.omatrack`, optionally with `'{"tab":"entries"}'` (tab ids: `timer`, `entries`, `clients`, `projects`, `reports`, `invoices`, `settings`).
+- **CLI** — `omarchy-shell timetrack start|stop|pause|resume|toggle|status|ping` for the timer; `python3 timetrack.py -h` for entries, reports, clients, projects, invoices, and settings.
 
 ## Data & privacy
 
-All data is local: `~/.local/state/omarchy/timetrack/state.json`
-(`XDG_STATE_HOME` honored), written atomically under an exclusive flock.
-No network, no telemetry. Delete the state file to start over.
+Everything is local: `~/.local/state/omarchy/timetrack/state.json` (`XDG_STATE_HOME` honored), written atomically under an exclusive file lock. No network, no telemetry. Delete the state file to start over.
 
 ## Development
 
-Repo layout, architecture, and the per-feature docs are in
-[docs/](docs/) — [overview](docs/overview.md),
-[architecture](docs/architecture.md), [bar widget](docs/bar-widget.md),
-[popup](docs/popup.md), [dashboard](docs/dashboard.md),
-[entries](docs/entries.md), [clients & projects](docs/clients-projects.md),
-[reports & export](docs/reports-export.md),
-[invoices](docs/invoices.md), [settings & CLI](docs/settings.md).
-
-The helper test suite: `bash tests/helper_test.sh` (uses a throwaway
-`XDG_STATE_HOME`; 58 checks).
+- Repo layout, architecture, and per-feature docs live in [docs/](docs/) — [overview](docs/overview.md), [architecture](docs/architecture.md), [bar widget](docs/bar-widget.md), [popup](docs/popup.md), [dashboard](docs/dashboard.md), [entries](docs/entries.md), [clients & projects](docs/clients-projects.md), [reports & export](docs/reports-export.md), [invoices](docs/invoices.md), [settings & CLI](docs/settings.md).
+- Test suite: `bash tests/helper_test.sh` (99 checks against a throwaway `XDG_STATE_HOME`).
+- Dev loop: edit → `bash scripts/install.sh` → the shell hot-reloads saved plugin files.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+[MIT](LICENSE) © sh1d0w
