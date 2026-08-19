@@ -172,13 +172,17 @@ check "settings persisted: companyName" '"companyName": "Me UG"' "$L"
 L="$("${PY[@]}" export --format csv --out "$CSV_FILE" 2>&1 || true)"
 ok "export csv" "$L"
 must "csv file exists" '[ -f "$CSV_FILE" ]'
-must "csv header exact" '[ "$(sed -n 1p "$CSV_FILE")" = "start,end,client,project,description,billable,duration_seconds,duration_hours" ]'
-must "csv has one data row" '[ "$(wc -l < "$CSV_FILE")" -eq 2 ]'
+must "csv header exact" '[ "$(sed -n 1p "$CSV_FILE")" = "Start,End,Client,Project,Description,Billable,Duration (hours),Price" ]'
+must "csv has data row plus total row" '[ "$(wc -l < "$CSV_FILE")" -eq 3 ]'
+must "csv total row" '[ "$(sed -n 3p "$CSV_FILE")" = "total (1 entries),,,,,,$(python3 -c "print(f\"{$ES/3600:.2f}\")"),USD $(python3 -c "print(f\"{round($ES/3600*90, 2):,.2f}\")")" ]'
+must "csv price uses currency symbol" 'grep -q "USD " "$CSV_FILE"'
 
 L="$("${PY[@]}" export --format html --out "$HTML_FILE" 2>&1 || true)"
 ok "export html" "$L"
 must "html file exists" '[ -f "$HTML_FILE" ]'
 must "html totals row" 'grep -q "total (1 entries)" "$HTML_FILE"'
+must "html tfoot spans 6 columns" 'grep -q '\''<td colspan="6">total (1 entries)</td>'\'' "$HTML_FILE"'
+must "html numeric cells centered" '[ "$(grep -o '\''class="ctr"'\'' "$HTML_FILE" | wc -l)" -eq 8 ]'
 
 # --- invoices -----------------------------------------------------------------------
 

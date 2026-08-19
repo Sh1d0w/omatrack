@@ -797,6 +797,7 @@ def _page(title, body, mono=True):
         "th, td { text-align: left; padding: 4px 10px; border-bottom: 1px solid #ddd; }\n"
         "th { background: #f0f0f0; }\n"
         ".num { text-align: right; }\n"
+        ".ctr { text-align: center; }\n"
         "tfoot td { font-weight: bold; border-top: 2px solid #999; }\n"
         "</style>\n</head>\n<body>\n"
         f"<h1>{html.escape(title)}</h1>\n"
@@ -806,8 +807,9 @@ def _page(title, body, mono=True):
 
 
 CSV_COLUMNS = [
-    "start", "end", "client", "project", "description", "billable", "duration_seconds", "duration_hours",
+    "Start", "End", "Client", "Project", "Description", "Billable", "Duration (hours)", "Price",
 ]
+CENTERED_COLUMNS = frozenset(("Billable", "Duration (hours)", "Price"))
 
 
 def cmd_export(args):
@@ -826,11 +828,15 @@ def cmd_export(args):
         args.from_date, args.to, args.client_id, args.project_id, args.billable
     )
     total_seconds = sum(e["seconds"] for e in matched)
+    currency = state["settings"].get("currency", "")
+    rate = state["settings"].get("hourlyRate", 0)
+    priced = [(e, round(e["seconds"] / 3600 * rate, 2)) for e in matched]
+    total_price = round(sum(p for _, p in priced), 2)
 
     def rows_for_csv(f):
         w = csv.writer(f, lineterminator="\n")
         w.writerow(CSV_COLUMNS)
-        for e in matched:
+        for e, price in priced:
             w.writerow(
                 [
                     _entry_local_str(e["start"]),
@@ -839,14 +845,26 @@ def cmd_export(args):
                     pnames.get(e["projectId"], ""),
                     e["description"],
                     1 if e["billable"] else 0,
-                    e["seconds"],
                     f"{_duration_hours(e['seconds']):.2f}",
+                    money(currency, price),
                 ]
             )
+        w.writerow(
+            [
+                f"total ({len(priced)} entries)",
+                "",
+                "",
+                "",
+                "",
+                "",
+                f"{_duration_hours(total_seconds):.2f}",
+                money(currency, total_price),
+            ]
+        )
 
     def rows_for_html(f):
         rows = []
-        for e in matched:
+        for e, price in priced:
             rows.append(
                 "<tr>"
                 f"<td>{html.escape(_entry_local_str(e['start']))}</td>"
@@ -854,9 +872,9 @@ def cmd_export(args):
                 f"<td>{html.escape(cnames.get(e['clientId'], ''))}</td>"
                 f"<td>{html.escape(pnames.get(e['projectId'], ''))}</td>"
                 f"<td>{html.escape(e['description'])}</td>"
-                f"<td class=\"num\">{1 if e['billable'] else 0}</td>"
-                f"<td class=\"num\">{e['seconds']}</td>"
-                f"<td class=\"num\">{_duration_hours(e['seconds']):.2f}</td>"
+                f"<td class=\"ctr\">{1 if e['billable'] else 0}</td>"
+                f"<td class=\"ctr\">{_duration_hours(e['seconds']):.2f}</td>"
+                f"<td class=\"ctr\">{money(currency, price)}</td>"
                 "</tr>"
             )
         f.write(
@@ -865,14 +883,17 @@ def cmd_export(args):
                 f"<div class=\"meta\">{html.escape(summary)} · generated "
                 f"{datetime.datetime.now().astimezone().isoformat(timespec='seconds')}</div>\n"
                 "<table>\n<thead>\n<tr>"
-                + "".join(f"<th>{c}</th>" for c in CSV_COLUMNS)
+                + "".join(
+                    f"<th class=\"ctr\">{c}</th>" if c in CENTERED_COLUMNS else f"<th>{c}</th>"
+                    for c in CSV_COLUMNS
+                )
                 + "</tr>\n</thead>\n<tbody>\n"
                 + "\n".join(rows)
                 + "\n</tbody>\n"
                 "<tfoot>\n<tr>"
-                f"<td colspan=\"6\">total ({len(matched)} entries)</td>"
-                f"<td class=\"num\">{total_seconds}</td>"
-                f"<td class=\"num\">{_duration_hours(total_seconds):.2f}</td>"
+                f"<td colspan=\"6\">total ({len(priced)} entries)</td>"
+                f"<td class=\"ctr\">{_duration_hours(total_seconds):.2f}</td>"
+                f"<td class=\"ctr\">{money(currency, total_price)}</td>"
                 "</tr>\n</tfoot>\n</table>",
             )
         )

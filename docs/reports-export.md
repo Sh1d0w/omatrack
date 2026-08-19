@@ -54,21 +54,29 @@ no QtWebEngine), opened by the user from the file manager/CLI:
 Exact header:
 
 ```
-start,end,client,project,description,billable,duration_seconds,duration_hours
+Start,End,Client,Project,Description,Billable,Duration (hours),Price
 ```
 
 - one row per matching entry, sorted by start **ascending**;
 - times as local `YYYY-MM-DD HH:MM`;
-- `billable` as `1`/`0`;
-- `duration_hours` with 2 decimals;
+- `Billable` as `1`/`0`;
+- `Duration (hours)` with 2 decimals;
+- `Price` = entry hours × `hourlyRate` (settings), rounded to 2 decimals,
+  prefixed with the configured `currency` (e.g. `EUR 123.45`; bare number
+  when the currency is empty);
+- a final total row: `total (N entries)` followed by the total hours and
+  the total price (sum of the rounded row prices);
 - proper CSV quoting via the stdlib `csv` module.
 
 ### HTML
 
 A self-contained monospace timesheet page: title, a meta line (range
 summary + generated timestamp), a table with the same columns as the CSV
-(times shown as `YYYY-MM-DD HH:MM`, billable as `1`/`0`), and a `tfoot`
-total row (entry count, total seconds, total hours). No external assets.
+(times shown as `YYYY-MM-DD HH:MM`, billable as `1`/`0`, prices with the
+settings currency), and a `tfoot` total row (entry count, total hours,
+total price). The numeric columns (Billable, Duration, Price) are
+centered in both the header cells and the data cells, so headers and
+values align. No external assets.
 
 ## CLI
 
