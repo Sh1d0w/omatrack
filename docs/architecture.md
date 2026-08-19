@@ -46,7 +46,6 @@ Location: `$XDG_STATE_HOME/omarchy/timetrack/` (default
 state.json    the state (below)
 .lock         flock file (never read as data)
 invoices/     generated invoice HTML
-exports/      generated CSV/HTML timesheets
 ```
 
 `state.json` (version 1):

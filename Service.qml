@@ -20,9 +20,10 @@ Item {
   property var pluginRegistry: null
 
   // ---- paths ----------------------------------------------------------------
+  readonly property string home: Quickshell.env("HOME")
   readonly property string helperPath: Qt.resolvedUrl("timetrack.py").toString().replace("file://", "")
   readonly property string stateDir:
-    (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state"))
+    (Quickshell.env("XDG_STATE_HOME") || (home + "/.local/state"))
     + "/omarchy/timetrack"
   readonly property string statePath: stateDir + "/state.json"
 
@@ -305,7 +306,9 @@ Item {
   }
 
   function exportRange(filter, format, done) {
-    var out = root.stateDir + "/exports/timesheet_"
+    // Exports go to the user's Downloads folder; the flash in
+    // ReportsView reports the full path from the response.
+    var out = root.home + "/Downloads/timesheet_"
       + (filter && filter.from ? filter.from : "all") + "_"
       + (filter && filter.to ? filter.to : "all")
       + "." + (format === "csv" ? "csv" : "html")

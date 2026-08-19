@@ -70,7 +70,10 @@ Item {
       kind,
       function(resp) {
         if (resp.ok) {
-          root.flash = "Exported " + resp.count + " entries to " + (kind === "csv" ? "CSV" : "HTML")
+          var p = String(resp.path || "")
+          var home = root.service.home
+          if (home && p.indexOf(home) === 0) p = "~" + p.slice(home.length)
+          root.flash = "Exported " + resp.count + " entries to " + p
           flashTimer.restart()
         } else {
           root.service.lastError = resp.error || "Export failed"

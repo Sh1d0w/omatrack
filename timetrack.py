@@ -34,7 +34,6 @@ STATE_DIR = os.path.join(
 STATE_FILE = os.path.join(STATE_DIR, "state.json")
 LOCK_FILE = os.path.join(STATE_DIR, ".lock")
 INVOICE_DIR = os.path.join(STATE_DIR, "invoices")
-EXPORT_DIR = os.path.join(STATE_DIR, "exports")
 
 
 class CmdError(Exception):
@@ -128,7 +127,6 @@ def now_iso():
 def ensure_dirs():
     os.makedirs(STATE_DIR, exist_ok=True)
     os.makedirs(INVOICE_DIR, exist_ok=True)
-    os.makedirs(EXPORT_DIR, exist_ok=True)
 
 
 # ---------------------------------------------------------------------------

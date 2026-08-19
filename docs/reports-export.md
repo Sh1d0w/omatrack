@@ -13,8 +13,8 @@ renders them, so heavy intervals stay fast.
   **Project**. Switching group-by resets to page 1.
 - **Export CSV** / **Export HTML** — pinned to the far right of the
   group-by row (anchored to the shared bottom edge, not a stretch spacer);
-  write the current range's raw entries (see below); a flash reports
-  `Exported N entries to CSV/HTML`.
+  write the current range's raw entries to `~/Downloads` (see below); a
+  flash reports `Exported N entries to <path>`.
 
 Note: the report deliberately shows **all** entries in the range (no
 client/project/billable/search filter is offered — `billable: null`,
@@ -45,7 +45,7 @@ response `total`, `totalSeconds`, `billableSeconds`, `offset`, `limit`.
 
 `export --format csv|html` takes the same range/filter object as `report`
 (the UI passes the range with no other filters), writes to
-`<stateDir>/exports/timesheet_<from|all>_<to|all>.<ext>` and returns
+`~/Downloads/timesheet_<from|all>_<to|all>.<ext>` and returns
 `{ ok, path, count, seconds }`. Files are plain documents (this runtime has
 no QtWebEngine), opened by the user from the file manager/CLI:
 
@@ -76,7 +76,7 @@ total row (entry count, total seconds, total hours). No external assets.
 python3 timetrack.py report --from 2026-08-01 --to 2026-08-31 --group-by client
 python3 timetrack.py export --format csv --from 2026-08-01 --out /tmp/timesheet.csv
 # --out is always required for the CLI; the UI passes its own path
-# (<stateDir>/exports/…).
+# (~/Downloads/…).
 ```
 
 `report`/`export` take only a shared lock — they never mutate state.
