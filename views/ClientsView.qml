@@ -3,11 +3,12 @@ import qs.Commons
 import qs.Ui
 import "../components"
 // Clients tab: a paginated table (each row a ClientRow: name + meta, Edit
-// / Del), an Add client button opening a centered add card, and a
-// centered edit card — both CardOverlay modals with the same visual
-// language and dismissal contract as the Entries edit card. The helper
-// refuses to delete a client still referenced by projects or entries —
-// the error surfaces in the red lastError line next to the pager.
+// / Del), a "+" button in the heading row (tooltip "Add client") opening
+// a centered add card, and a centered edit card — both CardOverlay modals
+// with the same visual language and dismissal contract as the Entries
+// edit card. The helper refuses to delete a client still referenced by
+// projects or entries — the error surfaces in the red lastError line
+// next to the pager.
 Item {
   id: root
 
@@ -132,11 +133,30 @@ Item {
     }
     spacing: Style.space(10)
 
-    Text {
-      text: "Clients"
-      color: Color.foreground
-      font.pixelSize: Style.font.title
-      font.bold: true
+    // Heading row: title on the left, the "+" add button on the far
+    // right, vertically centered; the tooltip names the action (open the
+    // add card).
+    Item {
+      width: parent.width
+      height: Math.max(headTitle.implicitHeight, addButton.implicitHeight)
+
+      Text {
+        id: headTitle
+        anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+        text: "Clients"
+        color: Color.foreground
+        font.pixelSize: Style.font.title
+        font.bold: true
+      }
+
+      Button {
+        id: addButton
+        iconText: "+"
+        tooltipText: "Add client"
+        anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+        focusable: true
+        onClicked: root.openAdd()
+      }
     }
 
     Text {
@@ -145,23 +165,6 @@ Item {
       font.pixelSize: Style.font.caption
       width: parent.width
       wrapMode: Text.Wrap
-    }
-
-    // Add action: pinned to the far right; opens the add card (CardOverlay)
-    // below — the same modal language as the edit card.
-    Item {
-      id: addBar
-      width: parent.width
-      height: addButton.implicitHeight
-
-      Button {
-        id: addButton
-        text: "Add client"
-        leftAlign: true
-        anchors { right: parent.right; bottom: parent.bottom }
-        focusable: true
-        onClicked: root.openAdd()
-      }
     }
   }
 

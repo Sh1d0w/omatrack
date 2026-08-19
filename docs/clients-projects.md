@@ -9,14 +9,16 @@ arrays in the service anyway.
 ## Clients
 
 - **Heading** — the "Clients" title + the muted one-liner, like the
-  other tabs.
+  other tabs, plus a **`+`** button (tooltip "Add client") on the title
+  row, far right.
 - **Table** — each row is a `ClientRow` (`components/ClientRow.qml`): the
   client name (bold) with `N projects · added YYYY-MM-DD` (muted) below
   it, and **Edit** / **Del** on the right. Clicking anywhere on the row
   (or **Edit**) opens the edit card; **Del** asks for confirmation.
-- **Add** — the **Add client** button (top row, far right) opens a
-  centered 420px `CardOverlay` (the shared card-on-scrim modal, same as
-  the edit card) with a single `Client name` field, focused on open.
+- **Add** — the **`+`** button in the heading row (far right, tooltip
+  "Add client") opens a centered 420px `CardOverlay` (the shared
+  card-on-scrim modal, same as the edit card) with a single `Client name`
+  field, focused on open.
   **Add client** or **Enter** commits (non-empty) →
   `service.addClient(name)`. Scrim click or **Esc** discards (Esc via the
   view's `handleKey`, routed by the dashboard's key gate). New clients
@@ -48,18 +50,20 @@ One flat paginated table (no per-client grouping), narrowed by the top
 `Client` picker.
 
 - **Heading** — the "Projects" title + the muted one-liner, like the
-  other tabs.
+  other tabs, plus a **`+`** button (tooltip "Add project") on the title
+  row, far right.
 - **Table** — each row is a `ProjectRow` (`components/ProjectRow.qml`):
   the project name (bold) with the owning client (muted) below it, and
   **Edit** / **Del** on the right. Clicking anywhere on the row (or
   **Edit**) opens the edit card; **Del** asks for confirmation.
-- **Filter** — the top row's labeled `Client` picker (default
-  **All clients**) narrows the table to one client's projects; picking
-  a client resets the pager to page one.
-- **Add** — the **Add project** button (top row, far right) opens a
-  centered 420px `CardOverlay` with a `Project name` field (focused on
-  open) and a labeled `Client` picker. The picker defaults to the
-  filtered client when one is selected, else the first client. **Add
+- **Filter** — the labeled `Client` picker (own row under the heading,
+  default **All clients**) narrows the table to one client's projects;
+  picking a client resets the pager to page one.
+- **Add** — the **`+`** button in the heading row (far right, tooltip
+  "Add project") opens a centered 420px `CardOverlay` with a
+  `Project name` field (focused on open) and a labeled `Client` picker.
+  The picker defaults to the filtered client when one is selected, else
+  the first client. **Add
   project** or **Enter** commits (name non-empty, client picked) →
   `service.addProject(clientId, name)`. Scrim click or **Esc** discards
   (Esc via the view's `handleKey`, routed by the dashboard's key gate).

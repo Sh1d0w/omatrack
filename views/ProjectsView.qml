@@ -4,13 +4,14 @@ import qs.Ui
 import "../components"
 // Projects tab: a paginated table (each row a ProjectRow: name + owning
 // client, Edit / Del) narrowed by the top Client picker (default
-// "All clients"), an Add project button opening a centered add card with
-// its own Client picker, and a centered edit card — both CardOverlay
-// modals with the same visual language and dismissal contract as the
-// Clients edit card. The edit card's client picker also moves the
-// project to another client (the update API's target client). The helper
-// refuses to delete a project still referenced by entries — the error
-// surfaces in the red lastError line next to the pager.
+// "All clients"), a "+" button in the heading row (tooltip "Add
+// project") opening a centered add card with its own Client picker, and
+// a centered edit card — both CardOverlay modals with the same visual
+// language and dismissal contract as the Clients edit card. The edit
+// card's client picker also moves the project to another client (the
+// update API's target client). The helper refuses to delete a project
+// still referenced by entries — the error surfaces in the red lastError
+// line next to the pager.
 Item {
   id: root
 
@@ -190,11 +191,30 @@ Item {
     }
     spacing: Style.space(10)
 
-    Text {
-      text: "Projects"
-      color: Color.foreground
-      font.pixelSize: Style.font.title
-      font.bold: true
+    // Heading row: title on the left, the "+" add button on the far
+    // right, vertically centered; the tooltip names the action (open the
+    // add card).
+    Item {
+      width: parent.width
+      height: Math.max(headTitle.implicitHeight, addBtn.implicitHeight)
+
+      Text {
+        id: headTitle
+        anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+        text: "Projects"
+        color: Color.foreground
+        font.pixelSize: Style.font.title
+        font.bold: true
+      }
+
+      Button {
+        id: addBtn
+        iconText: "+"
+        tooltipText: "Add project"
+        anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+        focusable: true
+        onClicked: root.openAdd()
+      }
     }
 
     Text {
@@ -205,40 +225,22 @@ Item {
       wrapMode: Text.Wrap
     }
 
-    // Top row: the Client picker is the table filter (default "All
-    // clients"); the Add button pins to the far right and opens the add
-    // card (CardOverlay) with its own Client picker, which defaults to
-    // the filtered client.
-    Item {
-      id: addBar
-      width: parent.width
-      height: clientDrop.implicitHeight
-
-      Dropdown {
-        id: clientDrop
-        anchors { left: parent.left; top: parent.top }
-        label: "Client"
-        showLabel: true
-        width: Style.space(170)
-        value: root.clientFilter
-        options: {
-          var opts = [{ value: "", label: "All clients" }]
-          if (root.service) opts = opts.concat(root.service.clientOptions())
-          return opts
-        }
-        onChanged: function(value) {
-          root.clientFilter = value
-          root.offset = 0
-        }
+    // The Client picker is the table filter (default "All clients"); the
+    // add card's own Client picker defaults to the filtered client.
+    Dropdown {
+      id: clientDrop
+      label: "Client"
+      showLabel: true
+      width: Style.space(170)
+      value: root.clientFilter
+      options: {
+        var opts = [{ value: "", label: "All clients" }]
+        if (root.service) opts = opts.concat(root.service.clientOptions())
+        return opts
       }
-
-      Button {
-        id: addBtn
-        text: "Add project"
-        leftAlign: true
-        anchors { right: parent.right; bottom: parent.bottom }
-        focusable: true
-        onClicked: root.openAdd()
+      onChanged: function(value) {
+        root.clientFilter = value
+        root.offset = 0
       }
     }
   }

@@ -163,11 +163,30 @@ Item {
     }
     spacing: Style.space(10)
 
-    Text {
-      text: "Entries"
-      color: Color.foreground
-      font.pixelSize: Style.font.title
-      font.bold: true
+    // Heading row: title on the left, the "+" add button on the far
+    // right, vertically centered; the tooltip names the action (open the
+    // manual-entry card).
+    Item {
+      width: parent.width
+      height: Math.max(headTitle.implicitHeight, addEntryButton.implicitHeight)
+
+      Text {
+        id: headTitle
+        anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+        text: "Entries"
+        color: Color.foreground
+        font.pixelSize: Style.font.title
+        font.bold: true
+      }
+
+      Button {
+        id: addEntryButton
+        iconText: "+"
+        tooltipText: "Add manual entry"
+        anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+        focusable: true
+        onClicked: root.entryModalOpen = true
+      }
     }
 
     Text {
@@ -195,14 +214,13 @@ Item {
       }
     }
 
-    // ---- filter row + manual-entry action ----------------------------------
+    // ---- filter row ----------------------------------------------------------
     // The labeled dropdowns run left to right; the labeled search field
-    // and "Add manual entry" pin to the row's far right, bottom-aligned
-    // with the dropdown fields (shared bottom edge). Anchored, not a
-    // stretch spacer, so they hold their position at any window width.
-    // The search label mirrors the dropdown label (caption/bold +
-    // labelGap) and the field box uses controlHeight, so the boxes line
-    // up.
+    // pins to the row's far right, bottom-aligned with the dropdown
+    // fields (shared bottom edge). Anchored, not a stretch spacer, so it
+    // holds its position at any window width. The search label mirrors
+    // the dropdown label (caption/bold + labelGap) and the field box
+    // uses controlHeight, so the boxes line up.
     Item {
       id: filterBar
       width: parent.width
@@ -268,7 +286,7 @@ Item {
       Column {
         id: searchColumn
         spacing: Style.spacing.labelGap
-        anchors { right: addEntryButton.left; rightMargin: Style.space(8); bottom: parent.bottom }
+        anchors { right: parent.right; bottom: parent.bottom }
 
         Text {
           text: "Search"
@@ -290,13 +308,6 @@ Item {
         }
       }
 
-      Button {
-        id: addEntryButton
-        text: "Add manual entry"
-        anchors { right: parent.right; bottom: parent.bottom }
-        focusable: true
-        onClicked: root.entryModalOpen = true
-      }
     }
   }
 

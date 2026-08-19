@@ -6,8 +6,9 @@ all through the filter row and centered card overlays.
 
 ## Filtering
 
-The tab opens with the shared heading ("Entries" title + muted
-one-liner), then the control rows above the list:
+The tab opens with the shared heading ("Entries" title + the muted
+one-liner, plus a **`+`** button on the title row, far right, tooltip
+"Add manual entry"), then the control rows above the list:
 
 **Date range** — the shared `DateRangeBar`
 (`components/DateRangeBar.qml`; Reports reuses it preset-only; see
@@ -18,15 +19,14 @@ a date by hand switches the preset to manual (`preset ""`). Date-only
 ranges match entries whose **start** is in the inclusive local-day range
 (the helper resolves `from`/`to` to local `00:00:00` / `23:59:59`).
 
-**Field filters + add** — the labeled dropdowns (Client, Project,
-Billable) run left to right; the **labeled search field** and the
-**`Add manual entry`** button pin to the row's far right, bottom-aligned
-with the dropdown fields (anchored to the row's right/bottom edges, not a
-stretch spacer, so they hold their position at any window width). The
-search field carries the same caption label as the dropdowns (mirroring
-the kit's label + `labelGap` + `controlHeight` stack), so its box lines
-up with the dropdown boxes. Each filter change re-queries immediately
-(search is debounced 300 ms):
+**Field filters** — the labeled dropdowns (Client, Project, Billable)
+run left to right; the **labeled search field** pins to the row's far
+right, bottom-aligned with the dropdown fields (anchored to the row's
+right/bottom edges, not a stretch spacer, so it holds its position at
+any window width). The search field carries the same caption label as
+the dropdowns (mirroring the kit's label + `labelGap` + `controlHeight`
+stack), so its box lines up with the dropdown boxes. Each filter change
+re-queries immediately (search is debounced 300 ms):
 
 | Filter     | Options                                        |
 |------------|------------------------------------------------|
@@ -63,10 +63,11 @@ the **whole filtered set**, not just the page.
 
 ## Add entry
 
-`Add manual entry` (filter row, far right) opens a centered modal on a
-scrim — `CardOverlay` (`components/CardOverlay.qml`, shared with the edit
-card below): title, `EntryForm` (date, time, minutes, then the shared
-`TaskForm`), `Add entry` and `Close`.
+The **`+`** button in the heading row (far right, tooltip "Add manual
+entry") opens a centered modal on a scrim — `CardOverlay`
+(`components/CardOverlay.qml`, shared with the edit card below): title,
+`EntryForm` (date, time, minutes, then the shared `TaskForm`), `Add
+entry` and `Close`.
 
 - `EntryForm` pre-fills once, when the service is injected
   (`defaultsToToday()`: today, current local time, 60 minutes, last-used
