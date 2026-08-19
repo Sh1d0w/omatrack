@@ -77,6 +77,9 @@ Item {
       top: parent.top
       left: parent.left
       right: parent.right
+      topMargin: Style.space(16)
+      leftMargin: Style.space(16)
+      rightMargin: Style.space(16)
     }
     spacing: Style.space(10)
 
@@ -210,6 +213,8 @@ Item {
     anchors {
       left: parent.left
       bottom: parent.bottom
+      leftMargin: Style.space(16)
+      bottomMargin: Style.space(16)
     }
     text: "Data: " + (root.service ? root.service.statePath : "")
     color: Color.muted

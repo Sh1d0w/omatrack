@@ -41,6 +41,10 @@ re-evaluates on its 1s tick (frozen while paused).
   no per-tab state caching. All persistent state lives in the service and on
   disk, so filters resetting on tab switch is expected behavior (documented
   here, not a bug).
+- **Content inset:** every tab insets its content 16px on all sides —
+  the same 16px the header row insets (Timer's column uses
+  `anchors.margins`, the other tabs add matching margins to their
+  anchored blocks) — so no tab's content runs edge-to-edge.
 
 ## Tabs
 

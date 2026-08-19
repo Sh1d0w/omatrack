@@ -157,6 +157,9 @@ Item {
       top: parent.top
       left: parent.left
       right: parent.right
+      topMargin: Style.space(16)
+      leftMargin: Style.space(16)
+      rightMargin: Style.space(16)
     }
     spacing: Style.space(10)
 
@@ -178,9 +181,13 @@ Item {
     }
 
     // ---- filter row + manual-entry action ----------------------------------
-    // "Add manual entry" pins to the row's far right, bottom-aligned with
-    // the dropdown input fields (shared bottom edge). Anchored, not a
-    // stretch spacer, so it holds its position at any window width.
+    // The labeled dropdowns run left to right; the labeled search field
+    // and "Add manual entry" pin to the row's far right, bottom-aligned
+    // with the dropdown fields (shared bottom edge). Anchored, not a
+    // stretch spacer, so they hold their position at any window width.
+    // The search label mirrors the dropdown label (caption/bold +
+    // labelGap) and the field box uses controlHeight, so the boxes line
+    // up.
     Item {
       id: filterBar
       width: parent.width
@@ -241,11 +248,26 @@ Item {
             root.applyFilters()
           }
         }
+      }
+
+      Column {
+        id: searchColumn
+        spacing: Style.spacing.labelGap
+        anchors { right: addEntryButton.left; rightMargin: Style.space(8); bottom: parent.bottom }
+
+        Text {
+          text: "Search"
+          color: Qt.darker(Color.popups.text, 1.4)
+          font.family: Style.font.family
+          font.pixelSize: Style.font.caption
+          font.bold: true
+        }
 
         TextField {
           id: searchField
           placeholderText: "Search…"
           width: Style.space(150)
+          height: Style.spacing.controlHeight
           onTextChanged: {
             root.search = text
             searchDebounce.restart()
@@ -273,6 +295,8 @@ Item {
       topMargin: Style.space(10)
       bottom: pagerBar.top
       bottomMargin: Style.space(10)
+      leftMargin: Style.space(16)
+      rightMargin: Style.space(16)
     }
     model: root.entries
     spacing: 2
@@ -297,6 +321,8 @@ Item {
       right: parent.right
       bottom: totalsBar.top
       bottomMargin: Style.space(10)
+      leftMargin: Style.space(16)
+      rightMargin: Style.space(16)
     }
     spacing: Style.space(8)
 
@@ -335,6 +361,9 @@ Item {
       left: parent.left
       right: parent.right
       bottom: parent.bottom
+      leftMargin: Style.space(16)
+      rightMargin: Style.space(16)
+      bottomMargin: Style.space(16)
     }
     height: Style.space(20)
 

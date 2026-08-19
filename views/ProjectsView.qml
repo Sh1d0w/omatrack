@@ -53,6 +53,9 @@ Item {
       top: parent.top
       bottom: pageBar.top
       bottomMargin: Style.space(10)
+      topMargin: Style.space(16)
+      leftMargin: Style.space(16)
+      rightMargin: Style.space(16)
     }
     model: root.service ? root.service.clients.slice(root.offset, root.offset + root.limit) : []
     spacing: Style.space(14)
@@ -147,6 +150,9 @@ Item {
       left: parent.left
       right: parent.right
       bottom: parent.bottom
+      leftMargin: Style.space(16)
+      rightMargin: Style.space(16)
+      bottomMargin: Style.space(16)
     }
     total: root.totalCount
     offset: root.offset

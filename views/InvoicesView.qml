@@ -40,6 +40,9 @@ Item {
       top: parent.top
       left: parent.left
       right: parent.right
+      topMargin: Style.space(16)
+      leftMargin: Style.space(16)
+      rightMargin: Style.space(16)
     }
     spacing: Style.space(10)
 
@@ -113,6 +116,8 @@ Item {
       topMargin: Style.space(12)
       left: parent.left
       right: parent.right
+      leftMargin: Style.space(16)
+      rightMargin: Style.space(16)
     }
     height: visible ? resultColumn.implicitHeight + Style.space(24) : 0
     visible: root.invoiceResult !== null

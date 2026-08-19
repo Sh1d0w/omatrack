@@ -85,6 +85,9 @@ Item {
       top: parent.top
       left: parent.left
       right: parent.right
+      topMargin: Style.space(16)
+      leftMargin: Style.space(16)
+      rightMargin: Style.space(16)
     }
     spacing: Style.space(10)
 
@@ -192,6 +195,8 @@ Item {
       topMargin: Style.space(10)
       bottom: pagerBar.top
       bottomMargin: Style.space(10)
+      leftMargin: Style.space(16)
+      rightMargin: Style.space(16)
     }
     model: root.rows
     spacing: 2
@@ -237,6 +242,8 @@ Item {
       right: parent.right
       bottom: totalsBar.top
       bottomMargin: Style.space(10)
+      leftMargin: Style.space(16)
+      rightMargin: Style.space(16)
     }
     spacing: Style.space(8)
 
@@ -274,6 +281,9 @@ Item {
       left: parent.left
       right: parent.right
       bottom: parent.bottom
+      leftMargin: Style.space(16)
+      rightMargin: Style.space(16)
+      bottomMargin: Style.space(16)
     }
     height: Style.space(20)
 
