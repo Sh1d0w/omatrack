@@ -12,7 +12,7 @@ The label is a single binding that re-evaluates only when its inputs change
 
 | State   | Label                                                          | Style          |
 |---------|----------------------------------------------------------------|----------------|
-| idle    | `◷` (U+25F7, clock face)                                       | muted          |
+| idle    | `` (U+F2F2, clock icon)                               | muted          |
 | running | the entry's description (required) or the client name (legacy, or `-`), then two spaces + `HH:MM:SS` | `Color.accent` |
 | paused  | same as running, plus `  (paused)` — the label is frozen       | `Color.accent` |
 
@@ -20,10 +20,11 @@ The running client name resolves through the service's `clientName()`; if it
 cannot resolve (data edited away out from under a running timer) the label
 falls back to `-`.
 
-The idle glyph is drawn at the bar icon size (`Style.bar.iconFont`,
-13px) to match the neighboring shell icons; the running and paused labels
-use the body font. Both come from the button's `fontSize`, which tracks
-`isRunning`.
+The idle glyph is drawn slightly smaller than the bar icon size
+(`Math.round(Style.bar.iconFont * 0.9)` — 12px at the default 13), since
+the Nerd Font clock renders larger than the old geometric glyph; the
+running and paused labels use the body font. Both come from the button's
+`fontSize`, which tracks `isRunning`.
 
 The tooltip (`tooltipText`) carries the detail the bar label can't:
 - running: `Acme — Hero section · 01:02:03 · billable` (or `non-billable`);
@@ -63,8 +64,8 @@ delegating to the loaded popup) and uses `popoutSwitchClosing` /
 
 ## Contingency: idle glyph
 
-The idle label uses the geometric glyph `◷` (U+25F7), which the shell font
-(Caskaydia Mono / Adwaita) covers — U+23F1/⏱ is **not** covered, so the
-stopwatch glyph would fall back mid-bar. If the bar font ever renders it as
-tofu, switch the idle label to the text `idle` (one-line change in the
-`label` binding) and re-verify with `omarchy capture screenshot`.
+The idle label uses the Nerd Font clock icon (U+F2F2), covered by the shell
+font (a Nerd Font build — Caskaydia Mono Nerd Font). If the bar font ever
+renders it as tofu, switch the idle label to the text `idle` (one-line
+change in the `label` binding) and re-verify with `omarchy capture
+screenshot`.

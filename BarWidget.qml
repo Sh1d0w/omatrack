@@ -7,7 +7,7 @@ import qs.Ui
 // Bar label for the current client/task + live elapsed time, and the host
 // for the quick-start popup.
 //
-// Idle shows a static clock glyph (U+25F7, covered by the shell font);
+// Idle shows a static clock icon (U+F2F2, Nerd Font);
 // running shows "task  H:MM:SS", re-evaluated every second via the
 // service's clock-driven `elapsedLabel`; paused freezes the label with a
 // "(paused)" suffix. Left click reveals the popup (start/pause/resume/stop
@@ -79,9 +79,10 @@ BarWidget {
     horizontalMargin: 8.5
     verticalPadding: 6
     active: isRunning
-    // The idle glyph draws at the bar icon size (13px) to match the
-    // neighboring shell icons; the running label uses the body font.
-    fontSize: isRunning ? Style.font.body : Style.bar.iconFont
+    // The idle glyph draws slightly smaller than the bar icon size: the
+    // Nerd Font clock renders larger than the old geometric glyph; the
+    // running label uses the body font.
+    fontSize: isRunning ? Style.font.body : Math.round(Style.bar.iconFont * 0.9)
 
     readonly property bool isRunning: root.service ? root.service.running : false
 
@@ -93,7 +94,7 @@ BarWidget {
         if (label === "") label = "-"
         return label + "  " + s.elapsedLabel + (s.paused ? "  (paused)" : "")
       }
-      return "\u25F7"
+      return ""
     }
 
     tooltipText: {
