@@ -3,7 +3,7 @@
 `views/ClientsView.qml` and `views/ProjectsView.qml` - CRUD for the two
 reference tables. Both are paginated at the bottom by the shared
 `PaginationBar` (`components/PaginationBar.qml`); pagination is **QML-side
-slicing** (`service.clients.slice(…)`), because the dropdowns need the full
+slicing** (`service.clients.slice(…)` / `service.projects.slice(…)`), because the dropdowns need the full
 arrays in the service anyway.
 
 ## Clients
@@ -39,23 +39,43 @@ arrays in the service anyway.
 
 ## Projects
 
-Grouped by client: one section per client (client name as header). Each
-section carries its own `New project for <client>…` add row **above** the
-project list. Pagination is over the **client sections** — one page of
-clients per page (their project lists render in full inside the section).
+One flat paginated table (no per-client grouping), narrowed by the top
+`Client` picker.
 
-- **Add** — per client section; the client is fixed by the section.
-- **Rename** — inline `TextField`, Enter commits →
-  `service.updateProject(id, name, clientId)`.
-- **Move between clients** — the update API takes a target `clientId`;
-  uniqueness is checked against the **target** client (so a project may
-  join a client where no same-named project exists). The UI's rename keeps
-  the section's client; moving is available from the CLI
-  (`project-update --id p_… --client-id c_…`).
+- **Table** — each row is a `ProjectRow` (`components/ProjectRow.qml`):
+  the project name (bold) with the owning client (muted) below it, and
+  **Edit** / **Del** on the right. Clicking anywhere on the row (or
+  **Edit**) opens the edit card; **Del** asks for confirmation.
+- **Filter** — the top row's labeled `Client` picker (default
+  **All clients**) narrows the table to one client's projects; picking
+  a client resets the pager to page one.
+- **Add** — same top row: a `Project name` field + **Add** (Enter
+  commits), pinned to the row's far right. The add is scoped to the
+  filter — with **All clients** selected, **Add** surfaces
+  `Pick a client first` in the status line (the helper demands an
+  existing client anyway). New projects append at the end, so a
+  successful add jumps the list to the last page.
+- **Edit / rename / move** — the edit card: a centered 420px
+  `CardOverlay` with a `Project name` field and a labeled `Client`
+  picker, both pre-filled. **Save** or **Enter** commits (only when
+  non-empty and actually changed) → `service.updateProject(id, name,
+  clientId)`. The picker doubles as **move between clients**: uniqueness
+  is checked against the **target** client (so a project may join a
+  client where no same-named project exists); the same move is still
+  available from the CLI (`project-update --id p_… --client-id c_…`).
+  Scrim click or **Esc** discards (Esc via the view's `handleKey`,
+  routed by the dashboard's key gate).
+- **Status line** — right of the bottom pager: an accent flash
+  ("Project added" / "Project saved", 2 s) and the red `lastError`
+  (duplicate-name refusal, delete block with counts).
 - **Delete** — **Del** → the window-level confirm dialog (see
   [dashboard.md](dashboard.md)) with "Delete this project? Entries that
   reference it must already be gone." → `service.deleteProject(id)`;
   refused by the helper while entries reference it.
+- While a picker popup, a name field, or the edit card is open, the view
+  reports `inputActive` so the window's Esc goes to the card (which
+  closes it) instead of the window. The delete dialog needs no
+  view-side plumbing: the dashboard owns it and knows when it is open.
 
 ## Data rules (helper side)
 

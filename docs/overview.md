@@ -33,7 +33,7 @@ BarWidget.qml        bar label + popup host          (bar-widget.md)
 Popup.qml            anchored quick-start popup      (popup.md)
 Dashboard.qml        toplevel window, 7 tabs         (dashboard.md)
 timetrack.py         state engine + CLI, single writer
-components/          TaskForm, EntryForm, DateRangeBar, EntryRow, ClientRow
+components/          TaskForm, EntryForm, DateRangeBar, EntryRow, ClientRow, ProjectRow
 views/               TimerView, EntriesView, ClientsView, ProjectsView,
                      ReportsView, InvoicesView, SettingsView
 ```
