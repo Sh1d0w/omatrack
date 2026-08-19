@@ -127,6 +127,13 @@ check "search without match is empty" '"total": 0,' "$L"
 L="$("${PY[@]}" report --group-by client 2>&1 || true)"
 ok "report by client" "$L"
 check "report row label is client name" '"label": "Acme"' "$L"
+L="$("${PY[@]}" report --group-by day --from 2020-01-01 --to 2020-12-31 2>&1 || true)"
+ok "report honors from/to range" "$L"
+check "report range without entries is empty" '"total": 0,' "$L"
+
+L="$("${PY[@]}" report --group-by day --from 2020-01-01 2>&1 || true)"
+ok "report open-ended from" "$L"
+
 
 # --- manual entry add / update / delete ---------------------------------------
 
@@ -186,6 +193,17 @@ must "html file exists" '[ -f "$HTML_FILE" ]'
 must "html totals row" 'grep -q "total (1 entries)" "$HTML_FILE"'
 must "html tfoot spans 6 columns" 'grep -q '\''<td colspan="6">total (1 entries)</td>'\'' "$HTML_FILE"'
 must "html numeric cells centered" '[ "$(grep -o '\''class="ctr"'\'' "$HTML_FILE" | wc -l)" -eq 8 ]'
+
+# The range filter the UI's From/To pickers send: a range that excludes
+# every entry exports zero rows.
+L="$("${PY[@]}" export --format csv --out "$CSV_FILE" --from 2020-01-01 --to 2020-12-31 2>&1 || true)"
+ok "export csv honors from/to range" "$L"
+check "export range excludes all entries" '"count": 0' "$L"
+must "csv range total row" 'sed -n 2p "$CSV_FILE" | grep -q "total (0 entries)"'
+
+L="$("${PY[@]}" export --format html --out "$HTML_FILE" --from 2020-01-01 --to 2020-12-31 2>&1 || true)"
+ok "export html honors from/to range" "$L"
+must "html range summary shows the bounds" 'grep -q "from 2020-01-01, to 2020-12-31" "$HTML_FILE"'
 
 # --- invoices -----------------------------------------------------------------------
 

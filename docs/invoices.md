@@ -29,11 +29,11 @@ to the dropdown's shared bottom edge) opens a `CardOverlay` card — the
 same modal language and dismissal contract as the Clients/Projects add
 cards (scrim click or Esc discards):
 
-- **Range** — `From` / `To` date fields (`YYYY-MM-DD`), defaulting to
-  **today → today** when the card opens. The helper demands both bounds,
-  and the card validates before calling it (empty bounds →
-  "Pick a billing range (from and to)"), so the "requires --from and
-  --to" error cannot fire from the UI.
+- **Range** — labeled `From` / `To` calendar pickers
+  (`components/DatePicker.qml`), defaulting to **today → today** when the
+  card opens. The helper demands both bounds, and the card validates before
+  calling it (empty bounds → "Pick a billing range (from and to)"), so the
+  "requires --from and --to" error cannot fire from the UI.
 - **Client** — dropdown over all clients (no "All" option: an invoice is
   always for exactly one client), defaulting to the table's filtered
   client when one is picked, else the first client.

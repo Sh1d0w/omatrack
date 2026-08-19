@@ -35,7 +35,7 @@ Item {
     root.projectId !== ""
 
   readonly property var keyActiveItem:
-    dateField.activeFocus ? dateField
+    datePicker.triggerItem.activeFocus || datePicker.popupOpen ? datePicker.triggerItem
       : (timeField.activeFocus ? timeField
         : (minutesField.field.activeFocus ? minutesField.field : task.keyActiveItem))
   // Hosts inject the service after construction; fill today's values and
@@ -52,19 +52,15 @@ Item {
       width: parent.width
       spacing: Style.space(6)
 
-      TextField {
-        id: dateField
-        width: parent.width - Style.space(6) - timeField.width
-        placeholderText: "YYYY-MM-DD"
-        text: root.dateStr
-        onTextChanged: {
-          if (text !== root.dateStr) root.dateStr = text
-        }
+      DatePicker {
+        id: datePicker
+        date: root.dateStr
+        onChanged: function(d) { root.dateStr = d }
       }
 
       TextField {
         id: timeField
-        width: Style.space(84)
+        width: parent.width - Style.space(6) - datePicker.implicitWidth
         placeholderText: "HH:MM"
         text: root.timeStr
         onTextChanged: {

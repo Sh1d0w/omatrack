@@ -2,27 +2,40 @@ import QtQuick
 import qs.Commons
 import qs.Ui
 
-// Date interval picker: six presets (Today, Yesterday, 7 days, This month,
-// Last month, All) plus manual from/to fields. Emits
-// `changed(from, to, preset)` with preset "" for manual entry. The presets
-// are computed in the local calendar; the service supplies date formatting
-// so there is one implementation of the date helpers.
-Item {
+// Date range control: six presets plus From/To calendar pickers
+// (DatePicker). Emits `changed(from, to, preset)` with preset "" when a
+// date is picked by hand. The presets are computed in the local calendar;
+// the service supplies date formatting so there is one implementation of
+// the date helpers.
+//
+// Row 1: the preset buttons. Row 2: the From/To pickers, each a labeled
+// read-only field that opens a month-grid popup (see DatePicker); hidden
+// with `showPickers: false` (Reports keeps its range preset-only). Picking
+// a date breaks the active preset (manual range).
+Column {
   id: root
-  width: parent ? parent.width : Style.space(460)
+  property int naturalWidth:
+    Math.max(presetsRow.implicitWidth, manualRow.implicitWidth)
+  width: naturalWidth
+  height: showPickers ? implicitHeight : presetsRow.implicitHeight
+  spacing: Style.space(8)
+  // Manual From/To pickers (default on). Reports hides them: its range is
+  // preset-only; manual dates are picked in Entries / invoices / entry form.
+  property bool showPickers: true
 
   required property var service
 
   property string from: ""
   property string to: ""
   property string currentPreset: "today"
-  // True while either manual date field owns keyboard focus.
-  readonly property bool fieldActive: _fromField.activeFocus || _toField.activeFocus
+  // True while a calendar picker owns the keyboard; the host view keeps the
+  // window's key catcher blocked then.
+  readonly property bool fieldActive: fromPicker.popupOpen || toPicker.popupOpen
 
   signal changed(string from, string to, string preset)
 
   Row {
-    anchors.fill: parent
+    id: presetsRow
     spacing: Style.space(6)
 
     Repeater {
@@ -42,39 +55,36 @@ Item {
         onClicked: root.applyPreset(modelData.id)
       }
     }
+  }
 
-    Item { width: Style.space(10) }
+  Row {
+    id: manualRow
+    width: parent.width
+    height: root.showPickers ? implicitHeight : 0
+    spacing: Style.space(8)
+    visible: root.showPickers
 
-    TextField {
-      id: _fromField
-      width: Style.space(96)
-      placeholderText: "YYYY-MM-DD"
-      text: root.from
-      onTextChanged: { if (text !== root.from) root.from = text }
-      onAccepted: {
-        root.currentPreset = ""
-        root.changed(root.from, root.to, "")
-      }
+    DatePicker {
+      id: fromPicker
+      label: "From"
+      date: root.from
+      onChanged: function(d) { root._pick(d, "from") }
     }
 
-    Text {
-      text: "→"
-      color: Color.muted
-      font.pixelSize: Style.font.body
-      anchors.verticalCenter: parent.verticalCenter
+    DatePicker {
+      id: toPicker
+      label: "To"
+      date: root.to
+      onChanged: function(d) { root._pick(d, "to") }
     }
+  }
 
-    TextField {
-      id: _toField
-      width: Style.space(96)
-      placeholderText: "YYYY-MM-DD"
-      text: root.to
-      onTextChanged: { if (text !== root.to) root.to = text }
-      onAccepted: {
-        root.currentPreset = ""
-        root.changed(root.from, root.to, "")
-      }
-    }
+  // A hand-picked date is a manual range, whatever the previous preset was.
+  function _pick(d, which) {
+    if (which === "from") root.from = d
+    else root.to = d
+    root.currentPreset = ""
+    root.changed(root.from, root.to, "")
   }
 
   // Returns [from, to] for a preset id; null for unknown ids.
@@ -110,10 +120,6 @@ Item {
     if (!r) return
     root.from = r[0]
     root.to = r[1]
-    // Typing into a field breaks its text binding; set the text explicitly so
-    // the controls always show the selected preset's range.
-    _fromField.text = r[0]
-    _toField.text = r[1]
     root.currentPreset = preset
     root.changed(r[0], r[1], preset)
   }

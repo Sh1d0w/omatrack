@@ -6,15 +6,16 @@ all through the filter row and centered card overlays.
 
 ## Filtering
 
-Two control rows above the list:
+Control rows above the list:
 
-**Date presets** — `DateRangeBar` (`components/DateRangeBar.qml`, shared
-with Reports): buttons `Today`, `Yesterday`, `7 days`, `This month`,
-`Last month`, `All`, plus manual `YYYY-MM-DD → YYYY-MM-DD` fields. Presets
-are computed on the **local calendar**; typing into a field switches the
-preset to manual (`preset ""`). Date-only ranges match entries whose
-**start** is in the inclusive local-day range (the helper resolves
-`from`/`to` to local `00:00:00` / `23:59:59`).
+**Date range** — the shared `DateRangeBar`
+(`components/DateRangeBar.qml`; Reports reuses it preset-only; see
+[date-picker.md](date-picker.md)): a preset row (`Today`, `Yesterday`,
+`7 days`, `This month`, `Last month`, `All`) and a `From`/`To` row of
+calendar pickers. Presets are computed on the **local calendar**; picking
+a date by hand switches the preset to manual (`preset ""`). Date-only
+ranges match entries whose **start** is in the inclusive local-day range
+(the helper resolves `from`/`to` to local `00:00:00` / `23:59:59`).
 
 **Field filters + add** — the labeled dropdowns (Client, Project,
 Billable) run left to right; the **labeled search field** and the
@@ -91,8 +92,8 @@ window-level confirm dialog: **scrim click or Esc discards** (Esc via the
 view's `handleKey`, routed by the dashboard's key gate). Contains an
 `EntryForm`:
 
-- **date** `YYYY-MM-DD`, **time** `HH:MM` (local), **minutes** 1–1440
-  (`NumberField`), then the shared `TaskForm` (client, project, description,
+- **date** calendar picker (`YYYY-MM-DD`), **time** `HH:MM` (local),
+  **minutes** 1–1440 (`NumberField`), then the shared `TaskForm` (client,
   billable).
 - `valid` requires all of: well-formed date + time, minutes ≥ 1, client and
   project set. Save with an invalid form sets `lastError = "Fill in a valid

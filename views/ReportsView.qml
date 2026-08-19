@@ -94,33 +94,36 @@ Item {
     }
     spacing: Style.space(10)
 
-    DateRangeBar {
-      id: rangeBar
-      service: root.service
-      from: root.from
-      to: root.to
-      currentPreset: root.currentPreset
-      width: parent.width
-
-      onChanged: function(f, t, preset) {
-        root.from = f
-        root.to = t
-        root.currentPreset = preset
-        root.offset = 0
-        root.load()
-      }
-    }
-
-    // Action row: group-by buttons on the left, the exports pinned to the
-    // far right (shared bottom edge); anchored, not a stretch spacer.
+    // Row 1: range presets (left) + group-by (right). Reports is
+    // preset-only: manual dates are picked in Entries / invoices, so the
+    // picker row is hidden (showPickers: false) and the bar keeps its
+    // natural width, leaving the right side free for the group-by.
     Item {
-      id: actionBar
+      id: filterRow
       width: parent.width
-      height: actionRow.implicitHeight
+      height: Math.max(rangeBar.height, groupRow.implicitHeight)
+
+      DateRangeBar {
+        id: rangeBar
+        anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+        service: root.service
+        from: root.from
+        to: root.to
+        currentPreset: root.currentPreset
+        showPickers: false
+
+        onChanged: function(f, t, preset) {
+          root.from = f
+          root.to = t
+          root.currentPreset = preset
+          root.offset = 0
+          root.load()
+        }
+      }
 
       Row {
-        id: actionRow
-        anchors { left: parent.left; top: parent.top }
+        id: groupRow
+        anchors { right: parent.right; verticalCenter: parent.verticalCenter }
         spacing: Style.space(8)
 
         Text {
@@ -166,6 +169,13 @@ Item {
           }
         }
       }
+    }
+
+    // Row 2: exports pinned to the far right of their own row.
+    Item {
+      id: actionBar
+      width: parent.width
+      height: exportRow.implicitHeight
 
       Row {
         id: exportRow

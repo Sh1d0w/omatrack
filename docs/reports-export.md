@@ -6,15 +6,21 @@ renders them, so heavy intervals stay fast.
 
 ## Controls
 
-- **Range** — the shared `DateRangeBar` (same six presets + manual fields as
-  Entries; see [entries.md](entries.md)). Date-only, local calendar,
-  inclusive; the filter matches an entry's **start**.
+- **Range** — the shared `DateRangeBar` in preset-only mode
+  (`showPickers: false`): the six presets `Today`, `Yesterday`, `7 days`,
+  `This month`, `Last month`, `All` (default **All**, no bounds). Manual
+  From/To pickers live in the Entries filter and the invoice generate
+  card, not here. Date-only, local calendar, inclusive; the filter
+  matches an entry's **start**.
 - **Group by** — three selected-buttons: **Day** (default), **Client**,
-  **Project**. Switching group-by resets to page 1.
-- **Export CSV** / **Export HTML** — pinned to the far right of the
-  group-by row (anchored to the shared bottom edge, not a stretch spacer);
-  write the current range's raw entries to `~/Downloads` (see below); a
-  flash reports `Exported N entries to <path>`.
+  **Project**; right-aligned on the same row as the presets. Switching
+  group-by resets to page 1.
+- **Export CSV** / **Export HTML** — pinned to the far right of their own
+  row under the presets; export **exactly the currently filtered range**
+  — the preset's `from`/`to` are passed straight to the helper with no
+  other filters, so the file always matches what the report is showing;
+  write to `~/Downloads` (see below); a flash reports `Exported N entries
+  to <path>`.
 
 Note: the report deliberately shows **all** entries in the range (no
 client/project/billable/search filter is offered — `billable: null`,

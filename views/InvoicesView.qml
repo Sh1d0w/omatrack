@@ -55,10 +55,11 @@ Item {
   property string genTo: ""
   property string genClientId: ""
 
-  // The window keyCatcher blocks while a picker popup, a range field, or
-  // the open generate card owns the keyboard.
+  // The window keyCatcher blocks while a dropdown or the open generate card
+  // owns the keyboard (the card's range pickers are covered by
+  // generateOpen).
   readonly property bool inputActive: clientDrop.popupOpen || genClientDrop.popupOpen
-    || genFromField.activeFocus || genToField.activeFocus || root.generateOpen
+    || root.generateOpen
 
   property string flash: ""
 
@@ -81,9 +82,6 @@ Item {
     var today = s.localDateStr(new Date())
     root.genFrom = today
     root.genTo = today
-    // Explicit set: a previous in-card edit replaces the value binding.
-    genFromField.text = today
-    genToField.text = today
     // Default client: the table's filtered client when one is picked,
     // else the first client.
     root.genClientId = (root.clientFilter !== "" && s.clientName(root.clientFilter) !== "")
@@ -91,7 +89,7 @@ Item {
       : (s.clients.length > 0 ? s.clients[0].id : "")
     genClientDrop.value = root.genClientId
     root.generateOpen = true
-    Qt.callLater(function() { genFromField.forceActiveFocus() })
+    Qt.callLater(function() { genFromPicker.triggerItem.forceActiveFocus() })
   }
 
   function closeGenerate() { root.generateOpen = false }
@@ -298,45 +296,22 @@ Item {
       font.bold: true
     }
 
-    Column {
+    Row {
       width: parent.width
-      spacing: Style.spacing.labelGap
+      spacing: Style.space(12)
 
-      Text {
-        text: "Range"
-        color: Qt.darker(Color.popups.text, 1.4)
-        font.family: Style.font.family
-        font.pixelSize: Style.font.caption
-        font.bold: true
+      DatePicker {
+        id: genFromPicker
+        label: "From"
+        date: root.genFrom
+        onChanged: function(d) { root.genFrom = d }
       }
 
-      Row {
-        width: parent.width
-        spacing: Style.space(6)
-
-        TextField {
-          id: genFromField
-          width: parent.width - Style.space(6) - arrowText.implicitWidth - genToField.width
-          placeholderText: "From YYYY-MM-DD"
-          text: root.genFrom
-          onTextChanged: { if (text !== root.genFrom) root.genFrom = text }
-        }
-
-        Text {
-          id: arrowText
-          text: "→"
-          color: Color.muted
-          font.pixelSize: Style.font.body
-          anchors.verticalCenter: parent.verticalCenter
-        }
-
-        TextField {
-          id: genToField
-          width: Style.space(110)
-          placeholderText: "To YYYY-MM-DD"
-          text: root.genTo
-          onTextChanged: { if (text !== root.genTo) root.genTo = text }
-        }
+      DatePicker {
+        id: genToPicker
+        label: "To"
+        date: root.genTo
+        onChanged: function(d) { root.genTo = d }
       }
     }
 

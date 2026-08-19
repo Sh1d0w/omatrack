@@ -160,10 +160,10 @@ Panel {
           id: pauseResumeButton
           width: parent.width - stopButton.implicitWidth - parent.spacing
           fontSize: Style.font.subtitle
-          text: root.service.paused ? "Resume" : "Pause"
+          text: root.service && root.service.paused ? "Resume" : "Pause"
           focusable: true
           active: true
-          onClicked: root.service.paused ? root.service.resumeTask() : root.service.pauseTask()
+          onClicked: root.service && root.service.paused ? root.service.resumeTask() : root.service.pauseTask()
         }
 
         Button {
