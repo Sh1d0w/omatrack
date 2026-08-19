@@ -22,7 +22,7 @@ import "components"
 Panel {
   id: root
   moduleName: "io.github.sh1d0w.omatrack"
-  manageIpc: false  // the service owns the single "timetrack" IPC target
+  manageIpc: false  // the service owns the single "omatrack" IPC target
 
   // Injected by the BarWidget via injectPopup().
   property var anchorItem: null

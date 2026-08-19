@@ -66,7 +66,7 @@ used by TimerView. The popup does not mirror its values:
 
 `service` is injected by the `BarWidget` loader (alongside `anchorItem` and
 `hostWidget`). `manageIpc: false`: the popup declares no IPC — the plugin's
-single `IpcHandler { target: "timetrack" }` lives in `Service.qml`, so a
+single `IpcHandler { target: "omatrack" }` lives in `Service.qml`, so a
 panel-side IpcHandler would collide with it.
 
 ## Dashboard button

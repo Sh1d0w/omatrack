@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# End-to-end tests for timetrack.py against a throwaway state dir.
+# End-to-end tests for omatrack.py against a throwaway state dir.
 # Usage: bash tests/helper_test.sh
 set -euo pipefail
 
@@ -10,7 +10,7 @@ export XDG_STATE_HOME="$(mktemp -d)"
 export HOME="$XDG_STATE_HOME"
 trap 'rm -rf "$XDG_STATE_HOME"' EXIT
 
-PY=(python3 "$ROOT/timetrack.py")
+PY=(python3 "$ROOT/omatrack.py")
 CSV_FILE="$XDG_STATE_HOME/exports/timesheet.csv"
 HTML_FILE="$XDG_STATE_HOME/exports/timesheet.html"
 

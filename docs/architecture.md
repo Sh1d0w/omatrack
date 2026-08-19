@@ -3,7 +3,7 @@
 ## Channels
 
 The shell is one long-running Quickshell process. The plugin runs in-process
-(unsandboxed); `timetrack.py` is the only out-of-process piece, spawned per
+(unsandboxed); `omatrack.py` is the only out-of-process piece, spawned per
 action and never kept alive.
 
 ```mermaid
@@ -14,15 +14,15 @@ flowchart LR
     D[Dashboard window] --> S
     S -->|serviceFor| B
   end
-  S -->|Process, serialized queue| H["timetrack.py (python3 stdlib)"]
-  H -->|fcntl.flock + atomic replace| F[("~/.local/state/omarchy/timetrack/state.json")]
-  CLI[("user CLI: python3 timetrack.py …")] --> H
+  S -->|Process, serialized queue| H["omatrack.py (python3 stdlib)"]
+  H -->|fcntl.flock + atomic replace| F[("~/.local/state/omarchy/omatrack/state.json")]
+  CLI[("user CLI: python3 omatrack.py …")] --> H
   FV[FileView on state.json] -->|external edit → reload| S
 ```
 
 ## The single-writer rule
 
-Every mutation — UI or CLI — goes through `timetrack.py`. QML never writes the
+Every mutation — UI or CLI — goes through `omatrack.py`. QML never writes the
 state file. The helper:
 
 - takes an exclusive `fcntl.flock` on `state.json`'s sibling `.lock` for
@@ -39,8 +39,8 @@ UI without any polling.
 
 ## State file
 
-Location: `$XDG_STATE_HOME/omarchy/timetrack/` (default
-`~/.local/state/omarchy/timetrack/`):
+Location: `$XDG_STATE_HOME/omarchy/omatrack/` (default
+`~/.local/state/omarchy/omatrack/`):
 
 ```
 state.json    the state (below)
@@ -160,7 +160,7 @@ is frozen). The bar, popup and dashboard chip all bind to `elapsedLabel`.
 |-------------------|-----------------|--------------------------|
 | QML polling       | none (no `Timer` loops anywhere) | none |
 | `SystemClock`     | disabled        | one 1s C++ tick → relabel (no-op while paused) |
-| `timetrack.py`    | not running     | not running (elapsed is computed in QML) |
+| `omatrack.py`    | not running     | not running (elapsed is computed in QML) |
 | disk I/O          | none            | none |
 | `FileView` watch  | kernel inotify, no work | same |
 

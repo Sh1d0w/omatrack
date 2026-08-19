@@ -21,7 +21,7 @@ OmaTrack is a time tracking plugin for the [Omarchy](https://omarchyplugins.com/
   | **Invoices** | Billable entries for one client and range → numbered HTML invoice at your hourly rate |
   | **Settings** | Currency, hourly rate, invoice identity and numbering |
 
-- **CLI-driven** — `omarchy-shell timetrack start|stop|pause|resume|toggle|status` drives the timer from anywhere, and `python3 timetrack.py -h` exposes the full command set.
+- **CLI-driven** — `omarchy-shell omatrack start|stop|pause|resume|toggle|status` drives the timer from anywhere, and `python3 omatrack.py -h` exposes the full command set.
 - **Lightweight** — no database, no polling, no extra processes: one JSON state file, written atomically by a stdlib-only `python3` helper.
 
 ## Requirements
@@ -49,18 +49,18 @@ omarchy plugin remove io.github.sh1d0w.omatrack
 To also remove your data:
 
 ```sh
-rm ~/.local/state/omarchy/timetrack/state.json
+rm ~/.local/state/omarchy/omatrack/state.json
 ```
 
 ## Usage
 
 - **Bar** — click the timer icon for the popup: start/stop the current task or set up the next one (client, project, description, billable).
 - **Dashboard** — `omarchy-shell shell toggle io.github.sh1d0w.omatrack`, optionally with `'{"tab":"entries"}'` (tab ids: `timer`, `entries`, `clients`, `projects`, `reports`, `invoices`, `settings`).
-- **CLI** — `omarchy-shell timetrack start|stop|pause|resume|toggle|status|ping` for the timer; `python3 timetrack.py -h` for entries, reports, clients, projects, invoices, and settings.
+- **CLI** — `omarchy-shell omatrack start|stop|pause|resume|toggle|status|ping` for the timer; `python3 omatrack.py -h` for entries, reports, clients, projects, invoices, and settings.
 
 ## Data & privacy
 
-Everything is local: `~/.local/state/omarchy/timetrack/state.json` (`XDG_STATE_HOME` honored), written atomically under an exclusive file lock. No network, no telemetry. Delete the state file to start over.
+Everything is local: `~/.local/state/omarchy/omatrack/state.json` (`XDG_STATE_HOME` honored), written atomically under an exclusive file lock. No network, no telemetry. Delete the state file to start over.
 
 ## Development
 

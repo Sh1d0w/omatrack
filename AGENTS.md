@@ -19,12 +19,12 @@ Service.qml          headless in-process engine (state, helper channel, IPC)
 BarWidget.qml        right-section bar label + popup host
 Popup.qml            anchored quick-start popup
 Dashboard.qml        toplevel dashboard window (FloatingWindow)
-timetrack.py         state engine + CLI (python3 stdlib only; single writer)
+omatrack.py         state engine + CLI (python3 stdlib only; single writer)
 components/          shared UI: TaskForm, EntryForm, DateRangeBar, EntryRow,
                      ClientRow, ProjectRow, CardOverlay, PaginationBar
 views/               dashboard tabs: Timer, Entries, Clients, Projects,
                      Reports, Invoices, Settings
-tests/helper_test.sh shell tests for timetrack.py (throwaway XDG_STATE_HOME)
+tests/helper_test.sh shell tests for omatrack.py (throwaway XDG_STATE_HOME)
 docs/                one file per feature (see rule below)
 scripts/install.sh   copies runtime files into the plugin dir
 ```
@@ -36,8 +36,8 @@ scripts/install.sh   copies runtime files into the plugin dir
 - `Service.qml` is a `service` kind: a headless singleton, accessed from the
   bar widget via `bar.shell.serviceFor("io.github.sh1d0w.omatrack")` and
   injected into the dashboard (the root declares `property var service`).
-- All state mutations go through `timetrack.py` — the **single writer** of
-  `~/.local/state/omarchy/timetrack/state.json` (atomic tmp + `os.replace`,
+- All state mutations go through `omatrack.py` — the **single writer** of
+  `~/.local/state/omarchy/omatrack/state.json` (atomic tmp + `os.replace`,
   `fcntl.flock`). QML never writes the file directly.
 - The dashboard is a `panel` kind rendered by the shell's panel loader as a
   `FloatingWindow`. Summon: `omarchy-shell shell toggle io.github.sh1d0w.omatrack '{"tab":"entries"}'`.
@@ -70,7 +70,7 @@ feature, add or update its doc in the same change.**
   `EntryRow`, `ClientRow`, `ProjectRow`, `CardOverlay`, `PaginationBar`) and
   the shell's `qs.Ui` kit are the shared pieces; views compose them instead
   of re-implementing.
-- `timetrack.py`: python3 **stdlib only**, one JSON line per run
+- `omatrack.py`: python3 **stdlib only**, one JSON line per run
   (`{"ok": true, ...}` / `{"ok": false, "error": "..."}`), timestamps as UTC
   ISO-8601 seconds.
 - No polling in QML. One 1s C++ tick (`SystemClock`) and only while a timer

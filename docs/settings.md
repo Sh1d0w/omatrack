@@ -1,7 +1,7 @@
 # Settings & CLI
 
 `views/SettingsView.qml` — the dashboard's **Settings** tab — plus the full
-`timetrack.py` command reference.
+`omatrack.py` command reference.
 
 ## The tab
 
@@ -41,7 +41,7 @@ The data file path is printed at the bottom of the tab
 
 ## CLI reference
 
-`python3 timetrack.py <command> [options]` — one JSON line on stdout,
+`python3 omatrack.py <command> [options]` — one JSON line on stdout,
 `{"ok": true, ...}` (exit 0) or `{"ok": false, "error": "..."}` (exit 1).
 Every command takes the flock (shared for reads, exclusive for writes);
 mutation commands return the compact view (state minus entries +
@@ -72,7 +72,7 @@ mutation commands return the compact view (state minus entries +
 
 ## IPC (bar-side control)
 
-The service declares the plugin's single `IpcHandler { target: "timetrack" }`
+The service declares the plugin's single `IpcHandler { target: "omatrack" }`
 (the popup runs `manageIpc: false` so it never collides):
 
 | Call | Returns |

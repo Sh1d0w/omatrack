@@ -5,10 +5,10 @@ import qs.Commons
 
 // Headless engine of the OmaTrack plugin.
 //
-// Owns the single serialized channel to `timetrack.py` (the only writer of
+// Owns the single serialized channel to `omatrack.py` (the only writer of
 // the state file), the in-memory state view (clients/projects/settings/
 // active — never the full entries list), the 1s tick that drives the
-// running-timer display, and the `timetrack` IPC target. No UI here.
+// running-timer display, and the `omatrack` IPC target. No UI here.
 Item {
   id: root
 
@@ -21,10 +21,10 @@ Item {
 
   // ---- paths ----------------------------------------------------------------
   readonly property string home: Quickshell.env("HOME")
-  readonly property string helperPath: Qt.resolvedUrl("timetrack.py").toString().replace("file://", "")
+  readonly property string helperPath: Qt.resolvedUrl("omatrack.py").toString().replace("file://", "")
   readonly property string stateDir:
     (Quickshell.env("XDG_STATE_HOME") || (home + "/.local/state"))
-    + "/omarchy/timetrack"
+    + "/omarchy/omatrack"
   readonly property string statePath: stateDir + "/state.json"
 
   // ---- state view (set by applyView) ----------------------------------------
@@ -344,7 +344,7 @@ Item {
   property string _ipcResult: ""
 
   IpcHandler {
-    target: "timetrack"
+    target: "omatrack"
 
     function ping(): string { return "ok" }
 

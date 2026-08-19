@@ -32,7 +32,7 @@ Service.qml          headless engine (see architecture.md)
 BarWidget.qml        bar label + popup host          (bar-widget.md)
 Popup.qml            anchored quick-start popup      (popup.md)
 Dashboard.qml        toplevel window, 7 tabs         (dashboard.md)
-timetrack.py         state engine + CLI, single writer
+omatrack.py         state engine + CLI, single writer
 components/          TaskForm, EntryForm, DateRangeBar, DatePicker, EntryRow, ClientRow,
                      ProjectRow, InvoiceRow, PaginationBar, CardOverlay, LabeledField,
                      EmptyMessage
@@ -56,9 +56,9 @@ Then:
   **and a description**:
 
   ```sh
-  python3 timetrack.py client-add --name "Acme"
-  python3 timetrack.py project-add --client-id c_XXXXXXXXXXXX --name "Landing page"
-  python3 timetrack.py start --client-id c_… --project-id p_… --description "Landing hero"
+  python3 omatrack.py client-add --name "Acme"
+  python3 omatrack.py project-add --client-id c_XXXXXXXXXXXX --name "Landing page"
+  python3 omatrack.py start --client-id c_… --project-id p_… --description "Landing hero"
   ```
 
 - Open the dashboard: `omarchy-shell shell toggle io.github.sh1d0w.omatrack`

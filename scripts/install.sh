@@ -18,12 +18,12 @@ echo "  to:   $DEST"
 rm -rf "$DEST"
 mkdir -p "$DEST/components" "$DEST/views"
 
-for f in manifest.json Service.qml BarWidget.qml Popup.qml Dashboard.qml timetrack.py; do
+for f in manifest.json Service.qml BarWidget.qml Popup.qml Dashboard.qml omatrack.py; do
   cp -f "$SRC/$f" "$DEST/$f"
 done
 cp -f "$SRC"/components/*.qml "$DEST/components/"
 cp -f "$SRC"/views/*.qml "$DEST/views/"
-chmod +x "$DEST/timetrack.py"
+chmod +x "$DEST/omatrack.py"
 
 # Best-effort rescan so a first-time install shows up in the registry.
 omarchy-shell shell rescanPlugins >/dev/null 2>&1 || true

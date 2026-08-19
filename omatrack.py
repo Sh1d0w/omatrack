@@ -29,7 +29,7 @@ STATE_DIR = os.path.join(
     os.environ.get("XDG_STATE_HOME")
     or os.path.join(os.path.expanduser("~"), ".local", "state"),
     "omarchy",
-    "timetrack",
+    "omatrack",
 )
 STATE_FILE = os.path.join(STATE_DIR, "state.json")
 LOCK_FILE = os.path.join(STATE_DIR, ".lock")
@@ -1064,7 +1064,7 @@ def cmd_invoice(args):
 # ---------------------------------------------------------------------------
 
 def build_parser():
-    p = argparse.ArgumentParser(prog="timetrack.py", description=__doc__.splitlines()[0])
+    p = argparse.ArgumentParser(prog="omatrack.py", description=__doc__.splitlines()[0])
     sub = p.add_subparsers(dest="command", required=True)
 
     def add(name, fn, help_text):

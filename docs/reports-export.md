@@ -99,8 +99,8 @@ values align. No external assets.
 ## CLI
 
 ```sh
-python3 timetrack.py report --from 2026-08-01 --to 2026-08-31 --group-by client
-python3 timetrack.py export --format csv --from 2026-08-01 --out /tmp/timesheet.csv
+python3 omatrack.py report --from 2026-08-01 --to 2026-08-31 --group-by client
+python3 omatrack.py export --format csv --from 2026-08-01 --out /tmp/timesheet.csv
 # --out is always required for the CLI; the UI passes its own path
 # (~/Downloads/…).
 ```

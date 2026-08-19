@@ -86,7 +86,7 @@ never reused; to redo, delete the file — the state entry stays).
 ## CLI
 
 ```sh
-python3 timetrack.py invoice --client-id c_ab12cd34ef56 --from 2026-08-01 --to 2026-08-31
+python3 omatrack.py invoice --client-id c_ab12cd34ef56 --from 2026-08-01 --to 2026-08-31
 # response: { ok, path, number, client, period, lines: [{project, hours, amount}],
 #             subtotal, tax, total, state }
 ```
