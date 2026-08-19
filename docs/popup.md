@@ -69,9 +69,12 @@ panel-side IpcHandler would collide with it.
 
 ## Dashboard button
 
-`Dashboard…` calls `root.bar.shell.summon("io.github.sh1d0w.timetrack",
+`Dashboard…` closes the popup, then calls `root.bar.shell.summon("io.github.sh1d0w.timetrack",
 JSON.stringify({}))` — in-process, no process spawn — and opens the
-dashboard on its default tab (timer).
+dashboard on its default tab (timer). The close is explicit: the summon
+goes through the shell's panel-loader path (the plugin has a `panel` kind),
+which never touches the bar's popout, so without it the popup stays open
+over the dashboard window.
 
 ## Bar shape contract
 

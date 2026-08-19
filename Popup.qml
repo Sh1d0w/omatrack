@@ -237,6 +237,10 @@ Panel {
 
   function openDashboard() {
     var sh = root.bar ? root.bar.shell : null
+    // The summon goes through the shell's panel-loader path, which never
+    // touches the bar's popout, so the popup must hide itself or it stays
+    // open over the dashboard window.
+    root.close()
     if (sh && typeof sh.summon === "function") {
       sh.summon("io.github.sh1d0w.timetrack", JSON.stringify({}))
     }
