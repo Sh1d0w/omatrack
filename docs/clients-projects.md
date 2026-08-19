@@ -8,6 +8,8 @@ arrays in the service anyway.
 
 ## Clients
 
+- **Heading** — the "Clients" title + the muted one-liner, like the
+  other tabs.
 - **Table** — each row is a `ClientRow` (`components/ClientRow.qml`): the
   client name (bold) with `N projects · added YYYY-MM-DD` (muted) below
   it, and **Edit** / **Del** on the right. Clicking anywhere on the row
@@ -45,6 +47,8 @@ arrays in the service anyway.
 One flat paginated table (no per-client grouping), narrowed by the top
 `Client` picker.
 
+- **Heading** — the "Projects" title + the muted one-liner, like the
+  other tabs.
 - **Table** — each row is a `ProjectRow` (`components/ProjectRow.qml`):
   the project name (bold) with the owning client (muted) below it, and
   **Edit** / **Del** on the right. Clicking anywhere on the row (or

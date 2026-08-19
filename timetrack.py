@@ -498,8 +498,12 @@ def cmd_report(args):
             label = f"{client_label} — {pnames.get(key, 'Unknown')}"
         row = rows.get(key)
         if row is None:
-            row = rows[key] = {"key": key, "label": label, "seconds": 0, "billableSeconds": 0}
+            row = rows[key] = {
+                "key": key, "label": label, "seconds": 0, "billableSeconds": 0,
+                "count": 0,
+            }
         row["seconds"] += e["seconds"]
+        row["count"] += 1
         if e["billable"]:
             row["billableSeconds"] += e["seconds"]
     out_rows = list(rows.values())
@@ -519,6 +523,7 @@ def cmd_report(args):
         "limit": limit,
         "totalSeconds": sum(r["seconds"] for r in out_rows),
         "billableSeconds": sum(r["billableSeconds"] for r in out_rows),
+        "entryCount": sum(r["count"] for r in out_rows),
     }
 
 

@@ -6,7 +6,8 @@ all through the filter row and centered card overlays.
 
 ## Filtering
 
-Control rows above the list:
+The tab opens with the shared heading ("Entries" title + muted
+one-liner), then the control rows above the list:
 
 **Date range** — the shared `DateRangeBar`
 (`components/DateRangeBar.qml`; Reports reuses it preset-only; see

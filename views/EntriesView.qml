@@ -163,6 +163,21 @@ Item {
     }
     spacing: Style.space(10)
 
+    Text {
+      text: "Entries"
+      color: Color.foreground
+      font.pixelSize: Style.font.title
+      font.bold: true
+    }
+
+    Text {
+      text: "Every tracked time entry, newest first — filter by date, client, project, or billable status, and add, edit, or delete from the rows."
+      color: Color.muted
+      font.pixelSize: Style.font.caption
+      width: parent.width
+      wrapMode: Text.Wrap
+    }
+
     // ---- date presets --------------------------------------------------------
     DateRangeBar {
       id: rangeBar

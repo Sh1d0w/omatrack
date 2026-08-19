@@ -23,6 +23,7 @@ Item {
   property int total: 0
   property int totalSeconds: 0
   property int billableSeconds: 0
+  property int entryCount: 0
   property int offset: 0
   readonly property int limit: root.service ? root.service.pageSize : 15
 
@@ -40,6 +41,7 @@ Item {
           root.total = resp.total
           root.totalSeconds = resp.totalSeconds
           root.billableSeconds = resp.billableSeconds
+          root.entryCount = resp.entryCount
         } else {
           root.service.lastError = resp.error || "Report failed"
         }
@@ -93,6 +95,21 @@ Item {
       rightMargin: Style.space(16)
     }
     spacing: Style.space(10)
+
+    Text {
+      text: "Reports"
+      color: Color.foreground
+      font.pixelSize: Style.font.title
+      font.bold: true
+    }
+
+    Text {
+      text: "Time grouped by day, client, or project for the selected range — the hairline shows each group's share of the total; export the rows as CSV or HTML."
+      color: Color.muted
+      font.pixelSize: Style.font.caption
+      width: parent.width
+      wrapMode: Text.Wrap
+    }
 
     // Row 1: range presets (left) + group-by (right). Reports is
     // preset-only: manual dates are picked in Entries / invoices, so the
@@ -215,33 +232,10 @@ Item {
     spacing: 2
     clip: true
 
-    delegate: Row {
-      width: ListView.view.width
-      spacing: Style.space(8)
-
-      Text {
-        text: modelData.label
-        color: Color.foreground
-        font.pixelSize: Style.font.body
-        width: parent.width - Style.space(220)
-        elide: Text.ElideRight
-        anchors.verticalCenter: parent.verticalCenter
-      }
-
-      Text {
-        text: root.service.fmtHM(modelData.seconds)
-        color: Color.foreground
-        font.bold: true
-        font.pixelSize: Style.font.body
-        anchors.verticalCenter: parent.verticalCenter
-      }
-
-      Text {
-        text: "billable " + root.service.fmtHM(modelData.billableSeconds)
-        color: Color.muted
-        font.pixelSize: Style.font.caption
-        anchors.verticalCenter: parent.verticalCenter
-      }
+    delegate: ReportRow {
+      width: listView.width
+      service: root.service
+      totalSeconds: root.totalSeconds
     }
 
     EmptyMessage {
@@ -307,8 +301,9 @@ Item {
 
     Text {
       anchors.verticalCenter: parent.verticalCenter
-      text: "Total " + (root.service ? root.service.fmtHM(root.totalSeconds) : "—")
-        + " · billable " + (root.service ? root.service.fmtHM(root.billableSeconds) : "—")
+      text: "Total " + (root.service ? root.service.fmtDur(root.totalSeconds) : "—")
+        + " · billable " + (root.service ? root.service.fmtDur(root.billableSeconds) : "—")
+        + " · " + root.entryCount + (root.entryCount === 1 ? " entry" : " entries")
       color: Color.muted
       font.pixelSize: Style.font.caption
     }

@@ -139,6 +139,14 @@ Item {
       font.bold: true
     }
 
+    Text {
+      text: "The companies your time is billed to — each row shows its projects and creation date; a client with projects or entries cannot be deleted."
+      color: Color.muted
+      font.pixelSize: Style.font.caption
+      width: parent.width
+      wrapMode: Text.Wrap
+    }
+
     // Add action: pinned to the far right; opens the add card (CardOverlay)
     // below — the same modal language as the edit card.
     Item {

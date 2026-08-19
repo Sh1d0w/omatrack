@@ -82,6 +82,15 @@ Item {
     sec = Math.max(0, Math.floor(Number(sec) || 0))
     return Math.floor(sec / 3600) + ":" + pad2(Math.floor((sec % 3600) / 60))
   }
+  // "1h 32m" / "45m" / "0m" — the suffixed sibling of fmtHM for places
+  // where the H:MM shape reads as minutes:seconds (the reports table).
+  function fmtDur(sec) {
+    sec = Math.max(0, Math.floor(Number(sec) || 0))
+    var h = Math.floor(sec / 3600)
+    var m = Math.floor((sec % 3600) / 60)
+    if (h > 0) return m > 0 ? h + "h " + m + "m" : h + "h"
+    return m + "m"
+  }
 
   // Local-calendar date parts, for manual-entry defaults and range presets.
   function localDateStr(d) {

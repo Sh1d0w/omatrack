@@ -197,6 +197,14 @@ Item {
       font.bold: true
     }
 
+    Text {
+      text: "Where each client's time is assigned — every project belongs to exactly one client, and the top filter narrows the table to that client's projects."
+      color: Color.muted
+      font.pixelSize: Style.font.caption
+      width: parent.width
+      wrapMode: Text.Wrap
+    }
+
     // Top row: the Client picker is the table filter (default "All
     // clients"); the Add button pins to the far right and opens the add
     // card (CardOverlay) with its own Client picker, which defaults to

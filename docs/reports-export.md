@@ -29,7 +29,10 @@ breakdown is the *Client* group-by.
 
 ## Output
 
-A list of rows, each:
+The page opens with the shared heading ("Reports" title + muted
+one-liner) like the other dashboard tabs, then the filter/export rows.
+
+A list of rows (one per group, rendered by `components/ReportRow.qml`):
 
 | Group-by | Label | Ordering |
 |----------|-------|----------|
@@ -37,15 +40,24 @@ A list of rows, each:
 | client   | client name | seconds, descending |
 | project  | `Client — Project` | seconds, descending |
 
-with `HH:MM` total and a muted `billable HH:MM` per row.
+Each row: the label (bold), a muted line `N entries · billable 1h 32m`
+(plus ` · non-billable 1h 32m` when that part is > 0), a share hairline
+(the row's share of the whole report's `totalSeconds`, so bars stay
+comparable across pages — track + accent fill like the shell's OSD bar),
+and the row's total on the right as `1h 32m` — the suffixed `fmtDur`
+shape, since plain `H:MM` reads as minutes:seconds.
 
 Rows are paginated **server-side** at the fixed page size (15 —
 `service.pageSize`). A shared `PaginationBar`
 (`components/PaginationBar.qml`) is pinned to the bottom of the list with
 the flash/error status texts to its right.
 
-Row shape from the helper: `{ key, label, seconds, billableSeconds }` +
-response `total`, `totalSeconds`, `billableSeconds`, `offset`, `limit`.
+Below the pager, a totals line: `Total 1h 32m · billable 1h 32m ·
+N entries` — always the whole matched set, not just the current page.
+
+Row shape from the helper: `{ key, label, seconds, billableSeconds,
+count }` + response `total` (row count), `totalSeconds`,
+`billableSeconds`, `entryCount` (matched entries), `offset`, `limit`.
 
 ## Export files
 
