@@ -32,6 +32,7 @@ Item {
       anchors.verticalCenter: parent.verticalCenter
 
       Text {
+        textFormat: Text.PlainText
         width: parent.width
         elide: Text.ElideRight
         text: r.label
@@ -41,6 +42,7 @@ Item {
       }
 
       Text {
+        textFormat: Text.PlainText
         width: parent.width
         elide: Text.ElideRight
         text: r.count + (r.count === 1 ? " entry" : " entries")
@@ -68,6 +70,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       id: rightRow
       text: root.service.fmtDur(r.seconds)
       color: Color.foreground

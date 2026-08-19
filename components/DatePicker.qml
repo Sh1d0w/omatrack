@@ -154,6 +154,7 @@ Item {
     spacing: Style.spacing.labelGap
 
     Text {
+      textFormat: Text.PlainText
       id: labelText
       visible: root.label !== ""
       text: root.label
@@ -178,6 +179,7 @@ Item {
       HoverHandler { id: triggerHover }
 
       Text {
+        textFormat: Text.PlainText
         anchors.left: parent.left
         anchors.right: chevron.left
         anchors.verticalCenter: parent.verticalCenter
@@ -190,6 +192,7 @@ Item {
       }
 
       Text {
+        textFormat: Text.PlainText
         id: chevron
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
@@ -289,6 +292,7 @@ Item {
             }
 
             Text {
+              textFormat: Text.PlainText
               width: 7 * root.cell - 2 * root.cell
               height: parent.height
               text: root.monthNames[root.viewMonth - 1] + " " + root.viewYear
@@ -318,6 +322,7 @@ Item {
             Repeater {
               model: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
               Text {
+                textFormat: Text.PlainText
                 required property string modelData
                 width: root.cell
                 text: modelData
@@ -354,6 +359,7 @@ Item {
                 border.width: modelData.isToday && !_isSelected ? 1 : 0
 
                 Text {
+                  textFormat: Text.PlainText
                   anchors.centerIn: parent
                   text: modelData.day
                   color: !modelData.inMonth ? Qt.darker(Color.foreground, 2.6)

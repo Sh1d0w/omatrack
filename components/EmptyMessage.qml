@@ -8,6 +8,7 @@ import qs.Ui
 // stays centered and never scrolls with content. The host shows it only
 // while the (filtered) row count is zero.
 Text {
+  textFormat: Text.PlainText
   id: root
 
   property string message: "No rows"

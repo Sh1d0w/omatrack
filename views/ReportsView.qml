@@ -97,6 +97,7 @@ Item {
     spacing: Style.space(10)
 
     Text {
+      textFormat: Text.PlainText
       text: "Reports"
       color: Color.foreground
       font.pixelSize: Style.font.title
@@ -104,6 +105,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: "Time grouped by day, client, or project for the selected range — the hairline shows each group's share of the total; export the rows as CSV or HTML."
       color: Color.muted
       font.pixelSize: Style.font.caption
@@ -144,6 +146,7 @@ Item {
         spacing: Style.space(8)
 
         Text {
+          textFormat: Text.PlainText
           text: "Group by"
           color: Color.muted
           font.pixelSize: Style.font.caption
@@ -270,6 +273,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: root.flash
       color: Color.accent
       font.pixelSize: Style.font.caption
@@ -278,6 +282,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: root.service ? root.service.lastError : ""
       color: Color.urgent
       font.pixelSize: Style.font.caption
@@ -300,6 +305,7 @@ Item {
     height: Style.space(20)
 
     Text {
+      textFormat: Text.PlainText
       anchors.verticalCenter: parent.verticalCenter
       text: "Total " + (root.service ? root.service.fmtDur(root.totalSeconds) : "—")
         + " · billable " + (root.service ? root.service.fmtDur(root.billableSeconds) : "—")

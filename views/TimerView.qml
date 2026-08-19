@@ -44,6 +44,7 @@ Item {
         spacing: Style.space(4)
 
         Text {
+          textFormat: Text.PlainText
           text: root.service && root.service.running ? root.service.elapsedLabel : "—"
           color: {
             var s = root.service
@@ -56,6 +57,7 @@ Item {
         }
 
         Text {
+          textFormat: Text.PlainText
           text: {
             var s = root.service
             if (!s || !s.running) return "No active timer"
@@ -69,6 +71,7 @@ Item {
         }
 
         Text {
+          textFormat: Text.PlainText
           text: {
             var s = root.service
             if (!s) return ""
@@ -165,6 +168,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: root.service ? root.service.lastError : ""
       color: Color.urgent
       font.pixelSize: Style.font.caption

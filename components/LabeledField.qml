@@ -21,6 +21,7 @@ Column {
   spacing: Style.space(3)
 
   Text {
+    textFormat: Text.PlainText
     text: root.label
     color: Color.foreground
     font.pixelSize: Style.font.body
@@ -32,6 +33,7 @@ Column {
   }
 
   Text {
+    textFormat: Text.PlainText
     visible: root.helper !== ""
     text: root.helper
     color: Color.muted

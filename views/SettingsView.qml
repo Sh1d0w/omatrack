@@ -106,6 +106,7 @@ Item {
     spacing: Style.space(10)
 
     Text {
+      textFormat: Text.PlainText
       text: "Settings"
       color: Color.foreground
       font.pixelSize: Style.font.title
@@ -113,6 +114,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       width: parent.width
       wrapMode: Text.Wrap
       text: "Billing defaults and the identity printed on invoices. Changes apply from the next generated invoice."
@@ -295,6 +297,7 @@ Item {
       }
 
       Text {
+        textFormat: Text.PlainText
         text: root.dirty ? "unsaved changes" : ""
         color: Color.accent
         font.pixelSize: Style.font.caption
@@ -303,6 +306,7 @@ Item {
       }
 
       Text {
+        textFormat: Text.PlainText
         text: root.flash
         color: Color.accent
         font.pixelSize: Style.font.caption
@@ -311,6 +315,7 @@ Item {
       }
 
       Text {
+        textFormat: Text.PlainText
         text: root.service ? root.service.lastError : ""
         color: Color.urgent
         font.pixelSize: Style.font.caption
@@ -320,6 +325,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       text: "Data: " + (root.service ? root.service.statePath : "")
       color: Color.muted
       font.pixelSize: Style.font.caption
