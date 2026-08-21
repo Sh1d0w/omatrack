@@ -2,7 +2,7 @@
 
 > Freelance and project time tracking for Omarchy
 
-![OmaTrack — bar timer and quick-start popup](docs/images/preview.png)
+![OmaTrack — bar timer and quick-start popup](preview.png)
 
 OmaTrack is a time tracking plugin for the [Omarchy](https://omarchyplugins.com/) Quattro shell. It puts a live timer in your bar, a quick-start popup one click away, and a full dashboard for managing your entries, clients, projects, reports, and invoices. All data stays local in a single JSON file — no database, no cloud, no telemetry.
 
