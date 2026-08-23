@@ -189,18 +189,7 @@ Panel {
         }
       }
 
-      PanelSeparator {}
-
-      // 4. Footer -----------------------------------------------------------
-      Text {
-        textFormat: Text.PlainText
-        width: parent.width
-        text: root.service ? "Today " + root.service.fmtHM(root.service.daySeconds) : ""
-        color: Color.muted
-        font.pixelSize: Style.font.caption
-      }
-
-      // 5. Errors -----------------------------------------------------------
+      // 4. Errors -----------------------------------------------------------
       Text {
         textFormat: Text.PlainText
         visible: !!root.service && root.service.lastError !== ""

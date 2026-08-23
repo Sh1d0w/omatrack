@@ -23,8 +23,7 @@ start/pause/resume/stop, the new-task form, and a dashboard shortcut.
    a bordered `Stop` (→ `service.stopTask()`). Paused: `Resume` (→
    `service.resumeTask()`) + `Stop`. Nothing here when idle (Start lives
    below the form, item 2).
-4. **Footer** — `Today HH:MM` on the left.
-5. **Error line** — the service's `lastError`, red, word-wrapped (e.g. a
+4. **Error line** — the service's `lastError`, red, word-wrapped (e.g. a
    failed start).
 
 ## The new-task form
