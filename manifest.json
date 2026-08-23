@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.sh1d0w.omatrack",
   "name": "OmaTrack",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "author": "sh1d0w",
   "license": "MIT",
   "description": "Freelance and Project time tracking plugin for Omarchy",
