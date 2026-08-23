@@ -15,6 +15,15 @@ renders them, so heavy intervals stay fast.
 - **Group by** — three selected-buttons: **Day** (default), **Client**,
   **Project**; right-aligned on the same row as the presets. Switching
   group-by resets to page 1.
+- **Responsive mode** — while the window is wide enough, the presets
+  sit left and the group-by right on one row. Below the width where
+  those two button rows would overlap, both are swapped for labeled
+  `Dropdown` controls in the same left/right placement: the six
+  presets become a **Range** dropdown and the three options a
+  **Group by** dropdown, so the filters never overlap at narrow
+  window sizes. The range dropdown drives the same
+  `DateRangeBar.applyPreset()` path as the buttons, so the
+  preset→dates conversion has a single implementation.
 - **Export CSV** / **Export HTML** — pinned to the far right of their own
   row under the presets; export **exactly the currently filtered range**
   — the preset's `from`/`to` are passed straight to the helper with no

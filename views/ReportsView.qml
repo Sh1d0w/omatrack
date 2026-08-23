@@ -117,13 +117,28 @@ Item {
     // preset-only: manual dates are picked in Entries / invoices, so the
     // picker row is hidden (showPickers: false) and the bar keeps its
     // natural width, leaving the right side free for the group-by.
+    //
+    // Responsive: below the width where the two button rows still fit
+    // side by side they are swapped for two labeled dropdowns in the
+    // same left/right placement, so the filters never overlap at narrow
+    // window sizes. The range dropdown reuses the DateRangeBar's preset
+    // math (applyPreset), so the preset->dates conversion stays
+    // single-implemented.
     Item {
       id: filterRow
       width: parent.width
-      height: Math.max(rangeBar.height, groupRow.implicitHeight)
 
+      // True while the preset and group-by button rows would overlap.
+      readonly property bool compact:
+        width < rangeBar.width + Style.space(12) + groupRow.implicitWidth
+      height: compact
+        ? Math.max(rangeDrop.implicitHeight, groupDrop.implicitHeight)
+        : Math.max(rangeBar.height, groupRow.implicitHeight)
+
+      // ---- wide: the button rows ---------------------------------------------
       DateRangeBar {
         id: rangeBar
+        visible: !filterRow.compact
         anchors { left: parent.left; verticalCenter: parent.verticalCenter }
         service: root.service
         from: root.from
@@ -142,6 +157,7 @@ Item {
 
       Row {
         id: groupRow
+        visible: !filterRow.compact
         anchors { right: parent.right; verticalCenter: parent.verticalCenter }
         spacing: Style.space(8)
 
@@ -187,6 +203,45 @@ Item {
             root.offset = 0
             root.load()
           }
+        }
+      }
+      // ---- compact: the same filters as two dropdowns ------------------------
+      Dropdown {
+        id: rangeDrop
+        visible: filterRow.compact
+        anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+        label: "Range"
+        showLabel: true
+        width: Style.space(170)
+        value: root.currentPreset
+        options: [
+          { value: "today", label: "Today" },
+          { value: "yesterday", label: "Yesterday" },
+          { value: "7d", label: "7 days" },
+          { value: "month", label: "This month" },
+          { value: "lastmonth", label: "Last month" },
+          { value: "all", label: "All" }
+        ]
+        onChanged: function(preset) { rangeBar.applyPreset(preset) }
+      }
+
+      Dropdown {
+        id: groupDrop
+        visible: filterRow.compact
+        anchors { right: parent.right; verticalCenter: parent.verticalCenter }
+        label: "Group by"
+        showLabel: true
+        width: Style.space(150)
+        value: root.groupBy
+        options: [
+          { value: "day", label: "Day" },
+          { value: "client", label: "Client" },
+          { value: "project", label: "Project" }
+        ]
+        onChanged: function(value) {
+          root.groupBy = value
+          root.offset = 0
+          root.load()
         }
       }
     }
