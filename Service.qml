@@ -46,6 +46,7 @@ Item {
   property var lastUsed: null
   property int daySeconds: 0
   property int dayBillableSeconds: 0
+  property var dayByClient: ({})
   property int entryCount: 0
   property string lastError: ""
   readonly property bool running: active !== null
@@ -131,6 +132,33 @@ Item {
     return out
   }
 
+  // ---- today by client (live) ----------------------------------------------
+  // Today's logged seconds per client (the state view's dayByClient), with
+  // the running timer's live elapsed folded into the active client — the
+  // list grows with the 1s tick while a task runs, freezes while paused
+  // (elapsedSeconds is constant), and shows the active client even before
+  // its first stop. Sorted by seconds, descending.
+  readonly property var clientDay: {
+    var out = []
+    var seen = {}
+    var db = root.dayByClient || {}
+    var keys = Object.keys(db)
+    for (var i = 0; i < keys.length; i++) {
+      seen[keys[i]] = true
+      out.push({ clientId: keys[i], seconds: db[keys[i]] })
+    }
+    if (root.running && root.active && !seen[root.active.clientId])
+      out.push({ clientId: root.active.clientId, seconds: 0 })
+    for (var j = 0; j < out.length; j++) {
+      var o = out[j]
+      o.running = root.running && root.active && o.clientId === root.active.clientId
+      if (o.running) o.seconds += root.elapsedSeconds
+      o.name = root.clientName(o.clientId)
+    }
+    out.sort(function(a, b) { return b.seconds - a.seconds })
+    return out
+  }
+
   // ---- process channel (single serialized helper) ---------------------------------
   property var _queue: []
   property var _pending: null
@@ -196,6 +224,7 @@ Item {
     if ("lastUsed" in s) root.lastUsed = s.lastUsed
     if (s.daySeconds !== undefined) root.daySeconds = s.daySeconds
     if (s.dayBillableSeconds !== undefined) root.dayBillableSeconds = s.dayBillableSeconds
+    if (s.dayByClient !== undefined) root.dayByClient = s.dayByClient
     if (s.entryCount !== undefined) root.entryCount = s.entryCount
     root.lastError = ""
   }

@@ -284,7 +284,7 @@ def filter_entries(state, from_s, to_s, client_id, project_id, billable, search)
 
 
 def build_view(state):
-    """State minus entries + lastUsed + day totals + entryCount.
+    """State minus entries + lastUsed + day totals + dayByClient + entryCount.
     `invoices` (metadata records of generated invoices) is included."""
     view = {k: state[k] for k in ("version", "settings", "clients", "projects", "invoices")}
     a = state["active"]
@@ -318,13 +318,16 @@ def build_view(state):
     today = datetime.datetime.now().astimezone().date()
     day = 0
     dayb = 0
+    day_by_client = {}
     for e in entries:
         if local_dt(e["start"]).date() == today:
             day += e["seconds"]
             if e["billable"]:
                 dayb += e["seconds"]
+            day_by_client[e["clientId"]] = day_by_client.get(e["clientId"], 0) + e["seconds"]
     view["daySeconds"] = day
     view["dayBillableSeconds"] = dayb
+    view["dayByClient"] = day_by_client
     view["entryCount"] = len(entries)
     return view
 

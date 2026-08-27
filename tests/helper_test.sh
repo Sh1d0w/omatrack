@@ -73,6 +73,7 @@ check "missing client error" '"client not found: c_missing"' "$L"
 L="$("${PY[@]}" start --client-id "$CID" --project-id "$PID" --description "Landing hero" --billable 1 2>&1 || true)"
 ok "start" "$L"
 check "start sets active" '"active": {' "$L"
+must "dayByClient excludes the running task" '[ "$(jget "$L" "len(d[\"state\"][\"dayByClient\"])")" = "0" ]'
 
 L="$("${PY[@]}" start --client-id "$CID" --project-id "$PID" --description x --billable 1 2>&1 || true)"
 err "second start rejected" "$L"
@@ -117,6 +118,10 @@ check "entries totalSeconds > 0" '"totalSeconds": [1-9][0-9]*' "$L"
 EID1="$(jget "$L" 'd["entries"][0]["id"]')"
 ES="$(jget "$L" 'd["entries"][0]["seconds"]')"
 must "stopped duration excludes the paused segment" "[ "$ES" -ge 2 ] && [ "$ES" -le $((T1 - T0 - 1)) ]"
+L="$("${PY[@]}" state 2>&1 || true)"
+ok "state re-read after stop" "$L"
+must "dayByClient counts the stopped entry" '[ "$(jget "$L" "d[\"state\"][\"dayByClient\"].get(\"$CID\", 0) == int(\"$ES\")")" = "True" ]'
+must "dayByClient has exactly the one client with time" '[ "$(jget "$L" "len(d[\"state\"][\"dayByClient\"])")" = "1" ]'
 L="$("${PY[@]}" entries --search "HERO" 2>&1 || true)"
 ok "entries search" "$L"
 check "search matches description (case-insensitive)" '"total": 1,' "$L"
@@ -141,6 +146,8 @@ ok "report open-ended from" "$L"
 
 L="$("${PY[@]}" entry-add --start 2026-08-01 --time 09:00 --minutes 120 --client-id "$CID" --project-id "$PID" --description "Manual task" --billable 0 2>&1 || true)"
 ok "entry-add" "$L"
+L="$("${PY[@]}" state 2>&1 || true)"
+must "dayByClient ignores entries from other days" '[ "$(jget "$L" "d[\"state\"][\"dayByClient\"].get(\"$CID\", 0) == int(\"$ES\")")" = "True" ]'
 
 L="$("${PY[@]}" entries --search "Manual task" 2>&1 || true)"
 EID2="$(jget "$L" 'd["entries"][0]["id"]')"

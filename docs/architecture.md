@@ -107,6 +107,9 @@ minus the entries array, plus:
 - `lastUsed` — the most recently ended entry (or the active task): the
   popup's pre-selected defaults,
 - `daySeconds` / `dayBillableSeconds` — local-today totals,
+- `dayByClient` — local-today logged seconds per client
+  (`clientId → seconds`); the Timer tab's "Today by client" overview
+  folds the running client's live elapsed on the QML side,
 - `entryCount` — total number of entries (never the entries themselves),
 - `invoices` — the full invoice metadata array (compact; unlike entries,
   it enters the process in whole).
@@ -127,7 +130,10 @@ It is a C++ clock (no JS `Timer`, no process, no disk) and is **disabled
 while idle**, so the idle state has zero churn. `elapsedSeconds` is the
 working time: `floor(now − active.start) − pausedSeconds − the in-flight
 pause segment` (that last term is 0 unless paused, in which case the value
-is frozen). The bar, popup and dashboard chip all bind to `elapsedLabel`.
+is frozen). The bar, popup and dashboard chip all bind to `elapsedLabel`;
+the Timer tab's Today-by-client overview additionally folds the live
+elapsed into the running client's row (its `clientDay` binding re-runs
+on every tick while a task runs).
 
 ## Timer semantics
 

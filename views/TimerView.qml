@@ -121,6 +121,63 @@ Item {
     }
 
     PanelSeparator {}
+    // ---- today by client ------------------------------------------------------
+    // Quick daily overview: one row per client with its time today, from
+    // service.clientDay (logged seconds; the running client's live elapsed
+    // is folded in and ticked by the service's 1s clock). Hidden until the
+    // day has time, so an untouched day shows nothing.
+    Column {
+      width: parent.width
+      spacing: Style.space(4)
+      visible: root.service && root.service.clientDay.length > 0
+
+      PanelSectionHeader { text: "Today by client" }
+
+      Repeater {
+        model: root.service ? root.service.clientDay : []
+
+        delegate: Row {
+          width: parent.width
+          spacing: Style.space(8)
+
+          Rectangle {
+            id: dayDot
+            width: Style.space(6)
+            height: Style.space(6)
+            radius: width / 2
+            anchors.verticalCenter: parent.verticalCenter
+            color: modelData.running ? Color.accent : Util.alpha(Color.foreground, 0.25)
+          }
+
+          Text {
+            textFormat: Text.PlainText
+            width: parent.width - dayDot.width - dayTime.implicitWidth - 2 * parent.spacing
+            elide: Text.ElideRight
+            text: modelData.name
+            color: modelData.running ? Color.foreground : Color.muted
+            font.pixelSize: Style.font.body
+            anchors.verticalCenter: parent.verticalCenter
+          }
+
+          Text {
+            id: dayTime
+            textFormat: Text.PlainText
+            text: root.service.fmtDur(modelData.seconds)
+            color: modelData.running ? Color.accent : Color.muted
+            font.pixelSize: Style.font.body
+            font.bold: modelData.running
+            anchors.verticalCenter: parent.verticalCenter
+          }
+        }
+      }
+    }
+
+    // Divider between the overview and the idle-only next-task section.
+    PanelSeparator {
+      visible: root.service && root.service.clientDay.length > 0
+        && !root.service.running
+    }
+
 
     // ---- next task ----------------------------------------------------------
     // Header shares the form's visibility rule: hidden while a task runs
