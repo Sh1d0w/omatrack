@@ -783,20 +783,28 @@ def _entry_local_str(iso):
     return local_dt(iso).strftime("%Y-%m-%d %H:%M")
 
 
-def _duration_hours(seconds):
-    return round(seconds / 3600, 2)
+def _duration_str(seconds):
+    """'1h 32m' / '45m' / '0m' — mirrors the service's fmtDur; a bare
+    decimal-hours number (e.g. 0.89) reads as opaque in the file."""
+    total_min = int(seconds) // 60
+    h, m = divmod(total_min, 60)
+    if h and m:
+        return f"{h}h {m}m"
+    if h:
+        return f"{h}h"
+    return f"{m}m"
 
 
-def _filter_summary(from_s, to_s, client_id, project_id, billable):
+def _filter_summary(from_s, to_s, client_id, project_id, billable, cnames, pnames):
     parts = []
     if from_s:
         parts.append(f"from {from_s}")
     if to_s:
         parts.append(f"to {to_s}")
     if client_id:
-        parts.append(f"client {client_id}")
+        parts.append(f"client {cnames.get(client_id, client_id)}")
     if project_id:
-        parts.append(f"project {project_id}")
+        parts.append(f"project {pnames.get(project_id, project_id)}")
     if billable is not None:
         parts.append("billable only" if billable else "non-billable only")
     return ", ".join(parts) if parts else "all entries"
@@ -826,9 +834,9 @@ def _page(title, body, mono=True):
 
 
 CSV_COLUMNS = [
-    "Start", "End", "Client", "Project", "Description", "Billable", "Duration (hours)", "Price",
+    "Start", "End", "Client", "Project", "Description", "Billable", "Duration", "Price",
 ]
-CENTERED_COLUMNS = frozenset(("Billable", "Duration (hours)", "Price"))
+CENTERED_COLUMNS = frozenset(("Billable", "Duration", "Price"))
 
 
 def cmd_export(args):
@@ -844,7 +852,7 @@ def cmd_export(args):
     cnames = client_names(state)
     pnames = project_names(state)
     summary = _filter_summary(
-        args.from_date, args.to, args.client_id, args.project_id, args.billable
+        args.from_date, args.to, args.client_id, args.project_id, args.billable, cnames, pnames
     )
     total_seconds = sum(e["seconds"] for e in matched)
     currency = state["settings"].get("currency", "")
@@ -864,7 +872,7 @@ def cmd_export(args):
                     pnames.get(e["projectId"], ""),
                     e["description"],
                     1 if e["billable"] else 0,
-                    f"{_duration_hours(e['seconds']):.2f}",
+                    _duration_str(e["seconds"]),
                     money(currency, price),
                 ]
             )
@@ -876,7 +884,7 @@ def cmd_export(args):
                 "",
                 "",
                 "",
-                f"{_duration_hours(total_seconds):.2f}",
+                _duration_str(total_seconds),
                 money(currency, total_price),
             ]
         )
@@ -892,7 +900,7 @@ def cmd_export(args):
                 f"<td>{html.escape(pnames.get(e['projectId'], ''))}</td>"
                 f"<td>{html.escape(e['description'])}</td>"
                 f"<td class=\"ctr\">{1 if e['billable'] else 0}</td>"
-                f"<td class=\"ctr\">{_duration_hours(e['seconds']):.2f}</td>"
+                f"<td class=\"ctr\">{html.escape(_duration_str(e['seconds']))}</td>"
                 f"<td class=\"ctr\">{money(currency, price)}</td>"
                 "</tr>"
             )
@@ -911,7 +919,7 @@ def cmd_export(args):
                 + "\n</tbody>\n"
                 "<tfoot>\n<tr>"
                 f"<td colspan=\"6\">total ({len(priced)} entries)</td>"
-                f"<td class=\"ctr\">{_duration_hours(total_seconds):.2f}</td>"
+                f"<td class=\"ctr\">{html.escape(_duration_str(total_seconds))}</td>"
                 f"<td class=\"ctr\">{money(currency, total_price)}</td>"
                 "</tr>\n</tfoot>\n</table>",
             )

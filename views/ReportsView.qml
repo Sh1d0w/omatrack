@@ -18,6 +18,9 @@ Item {
   property string to: ""
   property string currentPreset: "all"
   property string groupBy: "day"
+  // "" = all clients; a client id narrows both the report rows and the
+  // export to that client's entries.
+  property string clientFilter: ""
 
   property var rows: []
   property int total: 0
@@ -32,7 +35,7 @@ Item {
   function load() {
     if (!root.service) return
     root.service.queryReport(
-      { from: root.from, to: root.to, clientId: "", projectId: "", billable: null, search: "" },
+      { from: root.from, to: root.to, clientId: root.clientFilter, projectId: "", billable: null, search: "" },
       root.groupBy,
       root.offset,
       function(resp) {
@@ -68,7 +71,7 @@ Item {
   function doExport(kind) {
     if (!root.service) return
     root.service.exportRange(
-      { from: root.from, to: root.to, clientId: "", projectId: "", billable: null, search: "" },
+      { from: root.from, to: root.to, clientId: root.clientFilter, projectId: "", billable: null, search: "" },
       kind,
       function(resp) {
         if (resp.ok) {
@@ -106,7 +109,7 @@ Item {
 
     Text {
       textFormat: Text.PlainText
-      text: "Time grouped by day, client, or project for the selected range — the hairline shows each group's share of the total; export the rows as CSV or HTML."
+      text: "Time grouped by day, client, or project for the selected range — optionally narrowed to one client; the hairline shows each group's share of the total; export the rows as CSV or HTML."
       color: Color.muted
       font.pixelSize: Style.font.caption
       width: parent.width
@@ -246,15 +249,36 @@ Item {
       }
     }
 
-    // Row 2: exports pinned to the far right of their own row.
+    // Row 2: the client filter on the left, exports pinned to the far
+    // right. The filter scopes both the report rows and the export, so
+    // the file always matches what the table shows.
     Item {
       id: actionBar
       width: parent.width
-      height: exportRow.implicitHeight
+      height: Math.max(clientDrop.implicitHeight, exportRow.implicitHeight)
+
+      Dropdown {
+        id: clientDrop
+        anchors { left: parent.left; verticalCenter: parent.verticalCenter }
+        label: "Client"
+        showLabel: true
+        width: Style.space(170)
+        value: root.clientFilter
+        options: {
+          var opts = [{ value: "", label: "All clients" }]
+          if (root.service) opts = opts.concat(root.service.clientOptions())
+          return opts
+        }
+        onChanged: function(value) {
+          root.clientFilter = value
+          root.offset = 0
+          root.load()
+        }
+      }
 
       Row {
         id: exportRow
-        anchors { right: parent.right; bottom: parent.bottom }
+        anchors { right: parent.right; verticalCenter: parent.verticalCenter }
         spacing: Style.space(8)
 
         Button {

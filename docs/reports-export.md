@@ -24,17 +24,26 @@ renders them, so heavy intervals stay fast.
   window sizes. The range dropdown drives the same
   `DateRangeBar.applyPreset()` path as the buttons, so the
   preset→dates conversion has a single implementation.
-- **Export CSV** / **Export HTML** — pinned to the far right of their own
-  row under the presets; export **exactly the currently filtered range**
-  — the preset's `from`/`to` are passed straight to the helper with no
-  other filters, so the file always matches what the report is showing;
-  write to `~/Downloads` (see below); a flash reports `Exported N entries
-  to <path>`.
+- **Client** — labeled dropdown on the action row (left of the export
+  buttons), so it is unaffected by the responsive swap above. Default
+  **All clients**; a concrete client narrows both the report rows and
+  the export to that client's entries. Changing it resets to page 1.
+  It is the only non-range filter the report offers (see the note
+  below).
+- **Export CSV** / **Export HTML** — pinned to the far right of the
+  action row; export **exactly what the report is showing** — the
+  preset's `from`/`to` plus the active client filter are passed
+  straight to the helper with no other filters, so the file always
+  matches what the table is showing; write to `~/Downloads` (see
+  below); a flash reports `Exported N entries to <path>`.
 
-Note: the report deliberately shows **all** entries in the range (no
-client/project/billable/search filter is offered — `billable: null`,
-`search: ""`), because its purpose is the overall breakdown; per-client
-breakdown is the *Client* group-by.
+Note: the report deliberately shows **all** entries in the range except
+the client filter (no project/billable/search filter is offered —
+`projectId: ""`, `billable: null`, `search: ""`), because its purpose is
+the overall breakdown; per-client breakdown is the *Client* group-by.
+The client filter narrows that breakdown to one client — useful for a
+per-client timesheet; with the *Client* group-by it yields exactly one
+row.
 
 ## Output
 
@@ -81,35 +90,43 @@ no QtWebEngine), opened by the user from the file manager/CLI:
 Exact header:
 
 ```
-Start,End,Client,Project,Description,Billable,Duration (hours),Price
+Start,End,Client,Project,Description,Billable,Duration,Price
 ```
 
 - one row per matching entry, sorted by start **ascending**;
 - times as local `YYYY-MM-DD HH:MM`;
 - `Billable` as `1`/`0`;
-- `Duration (hours)` with 2 decimals;
-- `Price` = entry hours × `hourlyRate` (settings), rounded to 2 decimals,
-  prefixed with the configured `currency` (e.g. `EUR 123.45`; bare number
-  when the currency is empty);
-- a final total row: `total (N entries)` followed by the total hours and
-  the total price (sum of the rounded row prices);
+- `Duration` in the same human-readable shape the report rows use —
+  `1h 32m` / `45m` / `0m` (the helper's `_duration_str`, mirroring the
+  service's `fmtDur`); decimal hours (e.g. `0.89`) read as an opaque
+  number, so they are not shown;
+- `Price` = entry seconds × `hourlyRate` / 3600 (settings), rounded to
+  2 decimals, prefixed with the configured `currency` (e.g. `EUR
+  123.45`; bare number when the currency is empty) — money is computed
+  from the exact seconds, not from the displayed duration;
+- a final total row: `total (N entries)` followed by the total
+  duration (same `1h 32m` shape) and the total price (sum of the
+  rounded row prices);
 - proper CSV quoting via the stdlib `csv` module.
 
 ### HTML
 
-A self-contained monospace timesheet page: title, a meta line (range
-summary + generated timestamp), a table with the same columns as the CSV
-(times shown as `YYYY-MM-DD HH:MM`, billable as `1`/`0`, prices with the
-settings currency), and a `tfoot` total row (entry count, total hours,
-total price). The numeric columns (Billable, Duration, Price) are
-centered in both the header cells and the data cells, so headers and
-values align. No external assets.
+A self-contained monospace timesheet page: title, a meta line (filter
+summary — the range and, when filtered, the client's **name** — plus a
+generated timestamp), a table with the same columns as the CSV (times
+shown as `YYYY-MM-DD HH:MM`, billable as `1`/`0`, durations in the
+`1h 32m` shape, prices with the settings currency), and a `tfoot` total
+row (entry count, total duration, total price). The numeric columns
+(Billable, Duration, Price) are centered in both the header cells and
+the data cells, so headers and values align. No external assets.
 
 ## CLI
 
 ```sh
 python3 omatrack.py report --from 2026-08-01 --to 2026-08-31 --group-by client
+python3 omatrack.py report --group-by day --client-id <client-id>
 python3 omatrack.py export --format csv --from 2026-08-01 --out /tmp/timesheet.csv
+python3 omatrack.py export --format html --client-id <client-id> --out /tmp/timesheet.html
 # --out is always required for the CLI; the UI passes its own path
 # (~/Downloads/…).
 ```

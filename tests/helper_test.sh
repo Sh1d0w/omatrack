@@ -191,9 +191,9 @@ check "settings persisted: companyName" '"companyName": "Me UG"' "$L"
 L="$("${PY[@]}" export --format csv --out "$CSV_FILE" 2>&1 || true)"
 ok "export csv" "$L"
 must "csv file exists" '[ -f "$CSV_FILE" ]'
-must "csv header exact" '[ "$(sed -n 1p "$CSV_FILE")" = "Start,End,Client,Project,Description,Billable,Duration (hours),Price" ]'
+must "csv header exact" '[ "$(sed -n 1p "$CSV_FILE")" = "Start,End,Client,Project,Description,Billable,Duration,Price" ]'
 must "csv has data row plus total row" '[ "$(wc -l < "$CSV_FILE")" -eq 3 ]'
-must "csv total row" '[ "$(sed -n 3p "$CSV_FILE")" = "total (1 entries),,,,,,$(python3 -c "print(f\"{$ES/3600:.2f}\")"),USD $(python3 -c "print(f\"{round($ES/3600*90, 2):,.2f}\")")" ]'
+must "csv total row" '[ "$(sed -n 3p "$CSV_FILE")" = "total (1 entries),,,,,,$(python3 -c "s=$ES; h, m = divmod(s // 60, 60); print(f\"{h}h {m}m\" if h and m else (f\"{h}h\" if h else f\"{m}m\"))"),USD $(python3 -c "print(f\"{round($ES/3600*90, 2):,.2f}\")")" ]'
 must "csv price uses currency symbol" 'grep -q "USD " "$CSV_FILE"'
 
 L="$("${PY[@]}" export --format html --out "$HTML_FILE" 2>&1 || true)"
@@ -213,6 +213,40 @@ must "csv range total row" 'sed -n 2p "$CSV_FILE" | grep -q "total (0 entries)"'
 L="$("${PY[@]}" export --format html --out "$HTML_FILE" --from 2020-01-01 --to 2020-12-31 2>&1 || true)"
 ok "export html honors from/to range" "$L"
 must "html range summary shows the bounds" 'grep -q "from 2020-01-01, to 2020-12-31" "$HTML_FILE"'
+
+# Client filter (the Reports tab's Client dropdown): report and export
+# narrow to one client, the HTML summary names it, and durations are
+# human-readable (125 min -> "2h 5m").
+L="$("${PY[@]}" client-add --name Gamma 2>&1 || true)"
+ok "client-add Gamma" "$L"
+GID="$(jget "$L" 'd["state"]["clients"][-1]["id"]')"
+
+L="$("${PY[@]}" project-add --client-id "$GID" --name Web 2>&1 || true)"
+ok "project-add Gamma Web" "$L"
+GPID="$(jget "$L" 'd["state"]["projects"][-1]["id"]')"
+
+L="$("${PY[@]}" entry-add --start 2026-08-05 --time 09:00 --minutes 125 --client-id "$GID" --project-id "$GPID" --description "Gamma work" --billable 1 2>&1 || true)"
+ok "entry-add Gamma 125m" "$L"
+
+L="$("${PY[@]}" report --group-by day --client-id "$GID" 2>&1 || true)"
+ok "report client filter" "$L"
+check "report client filter counts only that client" '"entryCount": 1' "$L"
+
+L="$("${PY[@]}" report --group-by client --client-id "$GID" 2>&1 || true)"
+check "report client filter single named row" '"label": "Gamma"' "$L"
+
+L="$("${PY[@]}" report --group-by day --client-id c_missing 2>&1 || true)"
+check "report unknown client is empty" '"total": 0,' "$L"
+
+L="$("${PY[@]}" export --format csv --out "$CSV_FILE" --client-id "$GID" 2>&1 || true)"
+ok "export client filter" "$L"
+check "export client filter count" '"count": 1' "$L"
+must "csv client-filtered data row" 'sed -n 2p "$CSV_FILE" | grep -q "Gamma,Web,Gamma work,1,2h 5m,USD 187.50"'
+
+L="$("${PY[@]}" export --format html --out "$HTML_FILE" --client-id "$GID" 2>&1 || true)"
+ok "export html client filter" "$L"
+must "html summary names the filtered client" 'grep -q "client Gamma" "$HTML_FILE"'
+must "html human-readable duration" 'grep -q "2h 5m" "$HTML_FILE"'
 
 # --- invoices -----------------------------------------------------------------------
 
